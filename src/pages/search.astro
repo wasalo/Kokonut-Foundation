@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+---
+<BaseLayout title="Search — Kokonut Foundation" description="Search the Foundation.">
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Search</h1>
+    <input id="q" placeholder="Search projects, metrics, resources..." class="mt-6 w-full rounded-md border border-border px-3 py-2" />
+    <div id="results" class="mt-6 space-y-3"></div>
+  </section>
+  <script>
+    const input = document.getElementById("q") as HTMLInputElement;
+    const results = document.getElementById("results")!;
+    let timer: any;
+    input?.addEventListener("input", () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const q = input.value.trim();
+        if (q.length < 2) { results.innerHTML = ""; return; }
+        const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}`);
+        const json = await res.json();
+        const items = json?.data ?? [];
+        results.innerHTML = items.map((i: any) => `<a href="#" class="block"><div class="rounded border border-border p-3"><p class="text-xs text-muted">${i.type}</p><p class="font-semibold text-strong">${i.title}</p></div></a>`).join("");
+      }, 300);
+    });
+  </script>
+</BaseLayout>
