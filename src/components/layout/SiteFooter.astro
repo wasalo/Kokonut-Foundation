@@ -22,8 +22,14 @@ const cols = [
       </div>
     ))}
   </div>
-  <div class="max-w-7xl mx-auto px-4 py-4 border-t border-border text-xs text-muted flex justify-between">
+  <div class="max-w-7xl mx-auto px-4 py-4 border-t border-border text-xs text-muted flex flex-wrap justify-between gap-2">
     <span>© {new Date().getFullYear()} Kokonut Foundation. Open by default.</span>
-    <span><a href="/transparency" class="hover:text-primary">Transparency</a></span>
+    <span class="flex gap-3">
+      <a href="https://x.com/KokonutFDN" class="hover:text-primary" target="_blank" rel="noopener">X</a>
+      <a href="https://www.instagram.com/kokonut.foundation/" class="hover:text-primary" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://link.kokonut.network/discord" class="hover:text-primary" target="_blank" rel="noopener">Discord</a>
+      <a href="mailto:info@kokonut.foundation" class="hover:text-primary">Email</a>
+      <a href="/transparency" class="hover:text-primary">Transparency</a>
+    </span>
   </div>
 </footer>
