@@ -20,9 +20,10 @@ try { if (db) list = await db.select().from(reports); } catch {}
           <select data-entity="report" data-id={r.id} class="status-sel text-xs border border-border rounded px-1">
             <option value="">change…</option>
             <option value="draft">draft</option>
-            <option value="review">review</option>
-            <option value="approved">approved</option>
+            <option value="submitted">submitted</option>
+            <option value="verified">verified</option>
             <option value="published">published</option>
+            <option value="rejected">rejected</option>
             <option value="archived">archived</option>
           </select>
         </li>

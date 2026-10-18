@@ -11,6 +11,7 @@ try { if (db) list = await db.select().from(milestones); } catch {}
 <BaseLayout title="Milestones — Admin" description="Admin milestones.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Milestones (Admin)</h1>
+    <a href="/admin/milestones/new" class="mt-2 inline-block text-sm text-primary">+ New Milestone</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
       {list.map((m: any) => <li class="text-sm">{m.title} — {m.status}</li>)}

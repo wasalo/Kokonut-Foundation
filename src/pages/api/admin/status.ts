@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { ok, err } from "@lib/api";
 import { id, nowIso } from "@lib/utils";
 
-const ALLOWED = ["draft", "review", "approved", "published", "archived"];
+const ALLOWED = ["draft", "submitted", "verified", "published", "rejected", "archived"];
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const env = (locals as any).runtime?.env ?? {};
