@@ -1,0 +1,31 @@
+---
+import "../styles/global.css";
+import SeoHead from "@components/seo/SeoHead.astro";
+import SiteNav from "@components/layout/SiteNav.astro";
+import SiteFooter from "@components/layout/SiteFooter.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  jsonLd?: Record<string, unknown>;
+}
+const { title, description = "Kokonut Foundation — Growing Regenerative Farms Through Community Governance", canonical, jsonLd } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <SeoHead title={title} description={description} canonical={canonical} jsonLd={jsonLd} />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <SiteNav />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

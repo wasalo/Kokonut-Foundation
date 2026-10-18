@@ -1,0 +1,26 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { resources } from "@lib/schema";
+import { eq } from "drizzle-orm";
+import { formatDate } from "@lib/utils";
+
+const slug = Astro.params.slug as string;
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let r: any = null;
+try { if (db) r = await db.select().from(resources).where(eq(resources.slug, slug)).get(); } catch {}
+if (!r) r = { slug, title: slug, summary: "", resourceType: "Resource", publishedAt: new Date().toISOString() };
+---
+<BaseLayout title={`${r.title} — Kokonut Foundation`} description={r.summary ?? ""}>
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <a href="/resources" class="text-sm text-primary">← Resources</a>
+    <h1 class="mt-4 text-3xl font-bold text-strong">{r.title}</h1>
+    <p class="mt-2 text-xs text-muted">{r.resourceType} · {formatDate(r.publishedAt)}</p>
+    <Card class="mt-6">
+      <p class="text-muted">{r.summary}</p>
+      {r.externalUrl && <a href={r.externalUrl} class="mt-3 inline-block text-primary text-sm" target="_blank" rel="noopener">Open →</a>}
+    </Card>
+  </section>
+</BaseLayout>

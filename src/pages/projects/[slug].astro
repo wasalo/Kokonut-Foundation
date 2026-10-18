@@ -1,0 +1,123 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import Badge from "@components/primitives/Badge.astro";
+import { getDb } from "@lib/db";
+import { projects, metrics, milestones, partners, projectPartners } from "@lib/schema";
+import { eq } from "drizzle-orm";
+import { parseJson, formatDate } from "@lib/utils";
+
+const slug = Astro.params.slug as string;
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+
+let project: any = null;
+let projectMetrics: any[] = [];
+let projectMilestones: any[] = [];
+let projectPartnersList: any[] = [];
+
+try {
+  if (db) {
+    project = await db.select().from(projects).where(eq(projects.slug, slug)).get();
+    if (project) {
+      const ids = parseJson<string[]>(project.metrics, []);
+      if (ids.length) {
+        const all = await db.select().from(metrics);
+        projectMetrics = all.filter((m: any) => ids.includes(m.id) || m.projectId === project.id);
+      } else {
+        projectMetrics = await db.select().from(metrics).where(eq(metrics.projectId, project.id));
+      }
+      projectMilestones = await db.select().from(milestones).where(eq(milestones.projectId, project.id));
+    }
+  }
+} catch {}
+
+if (!project) {
+  project = {
+    slug,
+    name: "Adelphi Regenerative Farm",
+    summary: "Live regenerative farm in the Dominican Republic.",
+    description: "Adelphi is a live regenerative farm implementing the Kokonut Framework in the Dominican Republic. It demonstrates Fund → Grow → Verify → Repeat.",
+    status: "active",
+    projectType: "Regenerative Farm",
+    country: "Dominican Republic",
+    region: "Adelphi",
+    impactAreas: '["Ecology","Agriculture","Community"]',
+    sdgs: "[2,13,15]",
+    metrics: "[]",
+  };
+}
+
+const impactAreas = parseJson<string[]>(project.impactAreas, []);
+const sdgs = parseJson<number[]>(project.sdgs, []);
+---
+<BaseLayout title={`${project.name} — Kokonut Foundation`} description={project.summary}>
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <a href="/projects" class="text-sm text-primary">← Projects</a>
+    <div class="mt-4 flex items-start justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-3xl md:text-5xl font-bold text-strong">{project.name}</h1>
+        <p class="mt-2 text-muted">{project.summary}</p>
+      </div>
+      <Badge tone="success">{project.status}</Badge>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <Card>
+          <h2 class="font-semibold text-strong">Overview</h2>
+          <p class="mt-2 text-muted">{project.description}</p>
+        </Card>
+        <Card>
+          <h2 class="font-semibold text-strong">Purpose</h2>
+          <p class="mt-2 text-muted">Demonstrate regenerative agriculture combined with community governance and public verification.</p>
+        </Card>
+        {projectMetrics.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Impact</h2>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+              {projectMetrics.map((m: any) => (
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-primary">{m.value} {m.unit}</div>
+                  <div class="text-xs text-muted">{m.name}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+        {projectMilestones.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Timeline</h2>
+            <ul class="mt-3 space-y-2">
+              {projectMilestones.map((m: any) => (
+                <li class="flex gap-2 text-sm">
+                  <span class="text-primary">●</span>
+                  <span><strong>{m.title}</strong> — {m.status}{m.dueDate ? ` (${formatDate(m.dueDate)})` : ""}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
+      </div>
+      <div class="space-y-6">
+        <Card>
+          <h3 class="font-semibold text-strong">Location</h3>
+          <p class="mt-2 text-sm text-muted">{project.region ? `${project.region}, ` : ""}{project.country}</p>
+          {project.latitude && <p class="text-xs text-muted mt-1">{project.latitude}, {project.longitude}</p>}
+        </Card>
+        <Card>
+          <h3 class="font-semibold text-strong">Type</h3>
+          <p class="mt-2 text-sm text-muted">{project.projectType}</p>
+        </Card>
+        <Card>
+          <h3 class="font-semibold text-strong">SDGs</h3>
+          <p class="mt-2 text-sm text-muted">{sdgs.join(", ") || "—"}</p>
+        </Card>
+        <Card>
+          <h3 class="font-semibold text-strong">Impact Areas</h3>
+          <p class="mt-2 text-sm text-muted">{impactAreas.join(", ") || "—"}</p>
+        </Card>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

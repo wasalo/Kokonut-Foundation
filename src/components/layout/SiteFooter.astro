@@ -1,0 +1,29 @@
+---
+const cols = [
+  { title: "Platform", links: [{ href: "/projects", label: "Projects" }, { href: "/impact", label: "Impact" }, { href: "/transparency", label: "Transparency" }, { href: "/resources", label: "Resources" }] },
+  { title: "Organization", links: [{ href: "/about", label: "About" }, { href: "/about/foundation", label: "Foundation" }, { href: "/about/team", label: "Team" }, { href: "/partners", label: "Partners" }] },
+  { title: "Participate", links: [{ href: "/support", label: "Support" }, { href: "/contact", label: "Contact" }, { href: "/how-it-works", label: "How It Works" }] },
+];
+---
+<footer class="border-t border-border bg-surface-muted mt-16">
+  <div class="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div>
+      <p class="font-bold text-strong">Kokonut Foundation</p>
+      <p class="text-sm text-muted mt-2">Growing Regenerative Farms Through Community Governance.</p>
+    </div>
+    {cols.map((c) => (
+      <div>
+        <p class="font-semibold text-strong text-sm">{c.title}</p>
+        <ul class="mt-3 space-y-2">
+          {c.links.map((l) => (
+            <li><a href={l.href} class="text-sm text-muted hover:text-primary">{l.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+  <div class="max-w-7xl mx-auto px-4 py-4 border-t border-border text-xs text-muted flex justify-between">
+    <span>© {new Date().getFullYear()} Kokonut Foundation. Open by default.</span>
+    <span><a href="/transparency" class="hover:text-primary">Transparency</a></span>
+  </div>
+</footer>

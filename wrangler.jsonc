@@ -1,0 +1,37 @@
+{
+  "name": "kokonut-foundation",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2024-12-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kokonut-foundation-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "kokonut-foundation-media" }
+  ],
+  "kv_namespaces": [
+    { "binding": "CONFIG", "id": "00000000000000000000000000000000" }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "ADMIN_DEV_BYPASS": "false"
+  },
+  "env": {
+    "preview": {
+      "vars": { "ENVIRONMENT": "preview", "ADMIN_DEV_BYPASS": "true" },
+      "d1_databases": [
+        { "binding": "DB", "database_name": "kokonut-foundation-db-preview", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }
+      ]
+    }
+  }
+}

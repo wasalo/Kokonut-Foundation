@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+.astro/
+
+# env
+.env
+.env.*
+.dev.vars
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# wrangler
+.wrangler/
+
+# editor
+.vscode/
+.idea/
+
+# test
+coverage/
+
+# keep PRD
+# (PRD.md is tracked)

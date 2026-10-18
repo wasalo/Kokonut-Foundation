@@ -1,0 +1,32 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { reports } from "@lib/schema";
+import { parseJson, formatDate } from "@lib/utils";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(reports); } catch {}
+if (!list.length) {
+  list = [
+    { id: "r1", slug: "adelphi-annual-2025", title: "Adelphi Annual Report 2025", summary: "Annual report for the Adelphi regenerative farm.", reportType: "Annual", publishedAt: "2025-12-31", documentKey: "reports/adelphi-annual-2025.pdf" },
+  ];
+}
+---
+<BaseLayout title="Reports — Kokonut Foundation" description="Published reports.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Reports</h1>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {list.map((r: any) => (
+        <Card>
+          <h3 class="font-semibold text-strong">{r.title}</h3>
+          <p class="mt-1 text-xs text-muted">{r.reportType} · {formatDate(r.publishedAt)}</p>
+          <p class="mt-2 text-sm text-muted">{r.summary}</p>
+          <a href={`/api/v1/reports/${r.slug}`} class="mt-3 inline-block text-sm text-primary">View →</a>
+        </Card>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

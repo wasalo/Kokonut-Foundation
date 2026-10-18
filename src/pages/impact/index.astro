@@ -1,0 +1,45 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import ImpactMetric from "@components/domain/ImpactMetric.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { metrics } from "@lib/schema";
+import { parseJson } from "@lib/utils";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(metrics); } catch {}
+if (!list.length) {
+  list = [
+    { id: "m1", name: "Regenerative Farm Area", value: 15725, unit: "m²", category: "Ecology", verificationStatus: "verified", source: "Kokonut Intelligence", description: "Total regenerative farm area." },
+    { id: "m2", name: "Coconut Trees", value: 96, unit: "trees", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m3", name: "Free-Range Hens", value: 110, unit: "hens", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m4", name: "SDGs Addressed", value: 5, unit: "", category: "Public Goods", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m5", name: "Community Members", value: 3000, unit: "+", category: "Community", verificationStatus: "reported", source: "Kokonut Network" },
+  ];
+}
+
+const categories = [...new Set(list.map((m: any) => m.category))];
+---
+<BaseLayout title="Impact — Kokonut Foundation" description="Measured impact.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">Impact</h1>
+    <p class="mt-4 text-muted">From "here is what we say happened" to "here is the measurement, methodology, source and evidence."</p>
+    <div class="mt-10 space-y-10">
+      {categories.map((cat) => (
+        <div>
+          <h2 class="text-xl font-semibold text-strong">{cat}</h2>
+          <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {list.filter((m: any) => m.category === cat).map((m: any) => (
+              <ImpactMetric value={m.value} unit={m.unit} label={m.name} description={m.description} verificationStatus={m.verificationStatus} source={m.source} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="mt-12">
+      <a href="/impact/methodology" class="text-primary">Read methodology →</a>
+    </div>
+  </section>
+</BaseLayout>

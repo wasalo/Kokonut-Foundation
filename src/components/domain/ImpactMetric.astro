@@ -1,0 +1,22 @@
+---
+interface Props {
+  value: string | number;
+  unit?: string;
+  label: string;
+  description?: string;
+  verificationStatus?: string;
+  source?: string;
+}
+const { value, unit, label, description, verificationStatus, source } = Astro.props;
+---
+<div class="text-center">
+  <div class="text-3xl md:text-4xl font-bold text-primary">{value}{unit ? <span class="text-xl ml-1">{unit}</span> : null}</div>
+  <div class="mt-1 text-sm font-semibold text-strong">{label}</div>
+  {description && <div class="mt-1 text-xs text-muted">{description}</div>}
+  {verificationStatus && (
+    <div class="mt-2">
+      <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-surface-muted text-muted">{verificationStatus}</span>
+    </div>
+  )}
+  {source && <div class="mt-1 text-[10px] text-muted">Source: {source}</div>}
+</div>

@@ -1,0 +1,20 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import Button from "@components/primitives/Button.astro";
+const options = ["Donate", "Fund a Project", "Fund Public Infrastructure", "Partner", "Contribute Technology", "Contribute Research", "Join the Community"];
+---
+<BaseLayout title="Support — Kokonut Foundation" description="Support the Foundation.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">Support</h1>
+    <p class="mt-4 text-muted">Multiple ways to contribute.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      {options.map((o) => (
+        <Card><p class="font-semibold text-strong">{o}</p></Card>
+      ))}
+    </div>
+    <div class="mt-10">
+      <Button href="/contact" variant="primary">Get in Touch</Button>
+    </div>
+  </section>
+</BaseLayout>

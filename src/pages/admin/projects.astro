@@ -1,0 +1,19 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getDb } from "@lib/db";
+import { projects } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(projects); } catch {}
+---
+<BaseLayout title="Projects — Admin" description="Admin projects.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Projects (Admin)</h1>
+    <p class="mt-2 text-muted text-sm">Manage via D1. {list.length} records.</p>
+    <ul class="mt-6 space-y-2">
+      {list.map((p: any) => <li class="text-sm">{p.name} — {p.status}</li>)}
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Button from "@components/primitives/Button.astro";
+---
+<BaseLayout title="How It Works — Kokonut Foundation" description="Fund, Grow, Verify, Repeat.">
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">How It Works</h1>
+    <p class="mt-6 text-lg text-muted">Kokonut Foundation directs resources toward regenerative productive capacity.</p>
+    <div class="mt-10 space-y-8">
+      {[
+        { t: "Fund", d: "Resources are directed toward regenerative productive capacity." },
+        { t: "Grow", d: "Approved farms implement regenerative agriculture, infrastructure, training and management." },
+        { t: "Verify", d: "Farm activity generates measurable evidence — field observations, satellite data, harvest records, soil readings, photographs, attestations." },
+        { t: "Repeat", d: "Regenerative productive systems continue generating ecological, economic and social value." },
+      ].map((s, i) => (
+        <div class="flex gap-4">
+          <div class="shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">{i + 1}</div>
+          <div>
+            <h2 class="text-xl font-semibold text-strong">{s.t}</h2>
+            <p class="mt-1 text-muted">{s.d}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="mt-12">
+      <Button href="/projects" variant="primary">Explore Projects</Button>
+    </div>
+  </section>
+</BaseLayout>

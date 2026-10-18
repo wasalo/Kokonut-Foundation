@@ -1,0 +1,36 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { partners } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(partners); } catch {}
+if (!list.length) {
+  list = [
+    { slug: "kokonut-network", name: "Kokonut Network", type: "Community", description: "Community governance network.", country: "Global" },
+  ];
+}
+---
+<BaseLayout title="Partners — Kokonut Foundation" description="Foundation partners.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">Partners</h1>
+    <p class="mt-4 text-muted">Organizations collaborating with the Foundation.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {list.map((p: any) => (
+        <a href={`/partners/${p.slug}`} class="block">
+          <Card>
+            <h3 class="font-semibold text-strong">{p.name}</h3>
+            <p class="mt-1 text-xs text-muted">{p.type}{p.country ? ` · ${p.country}` : ""}</p>
+            <p class="mt-2 text-sm text-muted">{p.description}</p>
+          </Card>
+        </a>
+      ))}
+    </div>
+    <div class="mt-12">
+      <a href="/contact" class="text-primary">Explore a partnership →</a>
+    </div>
+  </section>
+</BaseLayout>

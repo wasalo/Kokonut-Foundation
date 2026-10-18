@@ -1,0 +1,28 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { teamMembers } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(teamMembers); } catch {}
+if (!list.length) {
+  list = [{ id: "t1", name: "Foundation Team", role: "Stewards", bio: "The people growing regenerative farms." }];
+}
+---
+<BaseLayout title="Team — Kokonut Foundation" description="Foundation team.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Team</h1>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {list.map((t: any) => (
+        <Card>
+          <h3 class="font-semibold text-strong">{t.name}</h3>
+          <p class="text-xs text-muted">{t.role}</p>
+          {t.bio && <p class="mt-2 text-sm text-muted">{t.bio}</p>}
+        </Card>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
