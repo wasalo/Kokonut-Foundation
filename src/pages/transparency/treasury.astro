@@ -19,7 +19,7 @@ const summary = entries.reduce((a: any, e: any) => a + (e.valueUsd ?? 0), 0);
 <BaseLayout title="Treasury — Kokonut Foundation" description="Treasury transparency.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Treasury</h1>
-    <p class="mt-4 text-muted">Wallets, balances, transactions, expenditures. Raw on-chain data is distinguished from Foundation interpretation.</p>
+    <p class="mt-4 text-muted">Wallets, balances, transactions, expenditures. Raw on-chain data is distinguished from Foundation interpretation. Treasury/governance live on Gnosis; attestations on Celo.</p>
     <div class="mt-6">
       <Card><p class="text-sm text-muted">Total tracked (USD): <strong class="text-strong">{summary.toLocaleString()}</strong></p></Card>
     </div>

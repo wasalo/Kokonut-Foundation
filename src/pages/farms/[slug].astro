@@ -28,6 +28,9 @@ if (!farm) farm = { slug, name: slug, country: "", region: "", areaM2: 0, latitu
         <Card>
           <h2 class="font-semibold text-strong">Overview</h2>
           <p class="mt-2 text-muted">{farm.description || "No description."}</p>
+          {farm.founders && <p class="mt-2 text-sm text-muted"><strong>Founders:</strong> {farm.founders}</p>}
+          {farm.frameworkPhase && <p class="mt-1 text-sm text-muted"><strong>Framework phase:</strong> {farm.frameworkPhase}</p>}
+          {farm.fundingRef && <p class="mt-1 text-sm text-muted"><strong>Funding:</strong> {farm.fundingRef}</p>}
         </Card>
         {farmMetrics.length > 0 && (
           <Card>
@@ -46,12 +49,16 @@ if (!farm) farm = { slug, name: slug, country: "", region: "", areaM2: 0, latitu
       <div class="space-y-6">
         <Card>
           <h3 class="font-semibold text-strong">Location</h3>
-          {farm.latitude && <p class="mt-2 text-sm text-muted">{farm.latitude}, {farm.longitude}</p>}
-          {farm.areaM2 && <p class="mt-1 text-sm text-muted">{farm.areaM2.toLocaleString()} m²</p>}
+          {farm.region && <p class="mt-2 text-sm text-muted">{farm.region}</p>}
+          {farm.latitude && <p class="mt-1 text-sm text-muted">{farm.latitude}, {farm.longitude}</p>}
+          {farm.areaM2 && <p class="mt-1 text-sm text-muted">Total: {farm.areaM2.toLocaleString()} m²</p>}
+          {farm.agriculturalAreaM2 && <p class="mt-1 text-sm text-muted">Agricultural: {farm.agriculturalAreaM2.toLocaleString()} m²</p>}
+          {farm.jobs && <p class="mt-1 text-sm text-muted">Jobs: {farm.jobs}</p>}
+          {farm.publicGoodsAllocation != null && <p class="mt-1 text-sm text-muted">Public goods allocation: {farm.publicGoodsAllocation}%</p>}
         </Card>
         <Card>
           <h3 class="font-semibold text-strong">Status</h3>
-          <p class="mt-2 text-sm text-muted">{farm.status}</p>
+          <p class="mt-2 text-sm text-muted">{farm.status} · {farm.lifecycleState ?? "draft"}</p>
         </Card>
       </div>
     </div>

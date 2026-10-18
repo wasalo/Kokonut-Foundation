@@ -2,10 +2,31 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 ---
-<BaseLayout title="Governance — Kokonut Foundation" description="Foundation governance.">
-  <section class="max-w-3xl mx-auto px-4 py-16">
+<BaseLayout title="Governance — Kokonut Foundation" description="Foundation governance." jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation" }}>
+  <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Governance</h1>
-    <p class="mt-4 text-muted">Kokonut Foundation is a nonprofit deploying the Kokonut Framework. Governance combines Foundation stewardship with community participation via Kokonut Network.</p>
+    <p class="mt-4 text-muted">Kokonut coordinates multiple forms of authority. Authorization follows the domain of the decision — no single layer owns everything.</p>
+    <div class="mt-8 overflow-x-auto">
+      <table class="w-full text-sm border border-border">
+        <thead class="bg-surface-muted">
+          <tr>
+            <th class="text-left p-3 border-b border-border">Domain</th>
+            <th class="text-left p-3 border-b border-border">Authority</th>
+            <th class="text-left p-3 border-b border-border">Does not control</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="p-3 border-b border-border">Farm operations</td><td class="p-3 border-b border-border">Local operators / farm team</td><td class="p-3 border-b border-border">DAO treasury, methodology, scientific review</td></tr>
+          <tr><td class="p-3 border-b border-border">Legal structure</td><td class="p-3 border-b border-border">Legal owner / cooperative / company</td><td class="p-3 border-b border-border">Every shared-capital decision</td></tr>
+          <tr><td class="p-3 border-b border-border">Shared capital</td><td class="p-3 border-b border-border">Gnosis Moloch DAO</td><td class="p-3 border-b border-border">Day-to-day farm operations</td></tr>
+          <tr><td class="p-3 border-b border-border">Contributions</td><td class="p-3 border-b border-border">Guilds / contributor systems</td><td class="p-3 border-b border-border">Land ownership, scientific authority</td></tr>
+          <tr><td class="p-3 border-b border-border">Treasury execution</td><td class="p-3 border-b border-border">SAFE / multisig</td><td class="p-3 border-b border-border">Methodology, agronomy</td></tr>
+          <tr><td class="p-3 border-b border-border">Data review</td><td class="p-3 border-b border-border">Authorized governed workflow</td><td class="p-3 border-b border-border">Farm ownership, DAO voting</td></tr>
+          <tr><td class="p-3 border-b border-border">Methodology</td><td class="p-3 border-b border-border">Framework maintainers + review</td><td class="p-3 border-b border-border">Local farm management</td></tr>
+          <tr><td class="p-3 border-b border-border">Technical</td><td class="p-3 border-b border-border">Maintainers / deployment</td><td class="p-3 border-b border-border">Scientific truth from software rules</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div class="mt-8 space-y-6">
       <Card>
         <h2 class="font-semibold text-strong">Foundation Stewardship</h2>
@@ -16,14 +37,10 @@ import Card from "@components/primitives/Card.astro";
         <p class="mt-2 text-sm text-muted">Community members participate through Kokonut Network governance. Relevant community governance resources and decision-making processes are published here.</p>
       </Card>
       <Card>
-        <h2 class="font-semibold text-strong">Decision-Making Processes</h2>
-        <p class="mt-2 text-sm text-muted">Project proposals are reviewed, approved, and tracked through milestones. Impact metrics require verification before publication. Treasury movements are categorized and disclosed.</p>
-      </Card>
-      <Card>
         <h2 class="font-semibold text-strong">Governance Resources</h2>
         <ul class="mt-2 text-sm text-muted space-y-1">
-          <li><a href="/transparency/treasury" class="text-primary">Treasury</a></li>
-          <li><a href="/transparency/attestations" class="text-primary">Attestations</a></li>
+          <li><a href="/transparency/treasury" class="text-primary">Treasury</a> — Gnosis chain, shared capital</li>
+          <li><a href="/transparency/attestations" class="text-primary">Attestations</a> — Celo chain via EAS</li>
           <li><a href="/transparency/reports" class="text-primary">Reports</a></li>
         </ul>
       </Card>

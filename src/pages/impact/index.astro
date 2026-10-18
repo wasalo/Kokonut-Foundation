@@ -13,10 +13,14 @@ try { if (db) list = await db.select().from(metrics); } catch {}
 if (!list.length) {
   list = [
     { id: "m1", name: "Regenerative Farm Area", value: 15725, unit: "m²", category: "Ecology", verificationStatus: "verified", source: "Kokonut Intelligence", description: "Total regenerative farm area." },
-    { id: "m2", name: "Coconut Trees", value: 96, unit: "trees", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
-    { id: "m3", name: "Free-Range Hens", value: 110, unit: "hens", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
-    { id: "m4", name: "SDGs Addressed", value: 5, unit: "", category: "Public Goods", verificationStatus: "verified", source: "Kokonut Intelligence" },
-    { id: "m5", name: "Community Members", value: 3000, unit: "+", category: "Community", verificationStatus: "reported", source: "Kokonut Network" },
+    { id: "m2", name: "Agricultural Area", value: 13838, unit: "m²", category: "Ecology", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m3", name: "Coconut Trees", value: 96, unit: "trees", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m4", name: "Free-Range Hens", value: 110, unit: "hens", category: "Agriculture", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m5", name: "Jobs Supported", value: 7, unit: "", category: "Community", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m6", name: "SDGs Addressed", value: 5, unit: "", category: "Public Goods", verificationStatus: "verified", source: "Kokonut Intelligence" },
+    { id: "m7", name: "Community Members", value: 3000, unit: "+", category: "Community", verificationStatus: "reported", source: "Kokonut Network" },
+    { id: "m8", name: "Forecast Gross Revenue", value: 149110, unit: "USD", category: "Economic", verificationStatus: "reported", source: "Kokonut Intelligence", description: "Forecast only — not realized." },
+    { id: "m9", name: "Public Goods Allocation", value: 10, unit: "%", category: "Economic", verificationStatus: "reported", source: "Kokonut Intelligence", description: "Modeling assumption." },
   ];
 }
 

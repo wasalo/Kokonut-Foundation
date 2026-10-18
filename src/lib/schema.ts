@@ -144,6 +144,8 @@ export const evidence = sqliteTable("evidence", {
   hash: text("hash"),
   visibility: text("visibility").notNull().default("public"),
   status: text("status").notNull().default("published"),
+  evidenceClass: text("evidence_class").notNull().default("measurement"),
+  maturity: text("maturity").notNull().default("structured"),
 });
 
 export const attestations = sqliteTable("attestations", {
@@ -226,8 +228,18 @@ export const farms = sqliteTable("farms", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   areaM2: real("area_m2"),
+  agriculturalAreaM2: real("agricultural_area_m2"),
   description: text("description"),
   status: text("status").notNull().default("active"),
+  lifecycleState: text("lifecycle_state").notNull().default("draft"),
+  privacyClass: text("privacy_class").notNull().default("public"),
+  baseline: text("baseline"), // JSON: 13-field Common Data Schema
+  schemaVersion: text("schema_version").notNull().default("1.0"),
+  jobs: integer("jobs"),
+  founders: text("founders"),
+  frameworkPhase: text("framework_phase"),
+  fundingRef: text("funding_ref"),
+  publicGoodsAllocation: real("public_goods_allocation"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
