@@ -1,0 +1,12 @@
+---
+interface Props { layers: { name: string; desc?: string }[]; }
+const { layers = [] } = Astro.props;
+---
+<div class="space-y-2">
+  {layers.map((l) => (
+    <div class="rounded border border-border p-3">
+      <p class="font-semibold text-strong text-sm">{l.name}</p>
+      {l.desc && <p class="text-xs text-muted mt-1">{l.desc}</p>}
+    </div>
+  ))}
+</div>

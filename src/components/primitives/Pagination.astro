@@ -1,0 +1,9 @@
+---
+interface Props { page: number; totalPages: number; baseUrl: string; }
+const { page, totalPages, baseUrl } = Astro.props;
+---
+<nav class="flex gap-2 justify-center mt-6">
+  {page > 1 && <a href={`${baseUrl}?page=${page - 1}`} class="px-3 py-1 rounded border border-border text-sm">Prev</a>}
+  <span class="px-3 py-1 text-sm text-muted">Page {page} of {totalPages}</span>
+  {page < totalPages && <a href={`${baseUrl}?page=${page + 1}`} class="px-3 py-1 rounded border border-border text-sm">Next</a>}
+</nav>

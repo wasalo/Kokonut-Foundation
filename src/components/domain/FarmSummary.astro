@@ -1,0 +1,9 @@
+---
+interface Props { name: string; country?: string; area?: number; status?: string; href?: string; }
+const { name, country, area, status = "active", href } = Astro.props;
+---
+<a href={href ?? "#"} class="block rounded-lg border border-border bg-surface p-4 hover:shadow-md">
+  <h3 class="font-semibold text-strong text-sm">{name}</h3>
+  <p class="mt-1 text-xs text-muted">{country}{area ? ` · ${area.toLocaleString()} m²` : ""}</p>
+  <span class="mt-2 inline-block text-xs px-2 py-0.5 rounded bg-primary/10 text-primary">{status}</span>
+</a>

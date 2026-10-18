@@ -1,0 +1,8 @@
+---
+interface Props { name: string; type?: string; country?: string; href?: string; }
+const { name, type, country, href } = Astro.props;
+---
+<a href={href ?? "#"} class="block rounded-lg border border-border bg-surface p-4 hover:shadow-md">
+  <h3 class="font-semibold text-strong text-sm">{name}</h3>
+  <p class="mt-1 text-xs text-muted">{type}{country ? ` · ${country}` : ""}</p>
+</a>

@@ -1,0 +1,8 @@
+---
+interface Props { title: string; reportType?: string; publishedAt?: string; href?: string; }
+const { title, reportType, publishedAt, href } = Astro.props;
+---
+<a href={href ?? "#"} class="block rounded-lg border border-border bg-surface p-4 hover:shadow-md">
+  <h3 class="font-semibold text-strong text-sm">{title}</h3>
+  <p class="mt-1 text-xs text-muted">{reportType}{publishedAt ? ` · ${publishedAt.slice(0, 10)}` : ""}</p>
+</a>

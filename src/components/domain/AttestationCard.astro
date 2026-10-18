@@ -1,0 +1,10 @@
+---
+interface Props { title: string; source?: string; status?: string; uid?: string; href?: string; }
+const { title, source = "EAS", status = "reported", uid, href } = Astro.props;
+---
+<div class="rounded-lg border border-border bg-surface p-4">
+  <h3 class="font-semibold text-strong text-sm">{title}</h3>
+  <p class="mt-1 text-xs text-muted">{source} · {status}</p>
+  {uid && <p class="mt-1 text-xs font-mono text-muted break-all">{uid}</p>}
+  {href && <a href={href} class="mt-2 inline-block text-xs text-primary">View →</a>}
+</div>

@@ -1,0 +1,7 @@
+---
+interface Props { name: string; options: { value: string; label: string }[]; value?: string; class?: string; }
+const { name, options, value, class: cls = "" } = Astro.props;
+---
+<select name={name} class={`w-full rounded-md border border-border px-3 py-2 text-sm ${cls}`}>
+  {options.map((o) => <option value={o.value} selected={o.value === value}>{o.label}</option>)}
+</select>

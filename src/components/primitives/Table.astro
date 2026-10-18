@@ -1,0 +1,14 @@
+---
+interface Props { headers: string[]; }
+const { headers } = Astro.props;
+---
+<div class="overflow-x-auto">
+  <table class="w-full text-sm border border-border">
+    <thead class="bg-surface-muted">
+      <tr>{headers.map((h) => <th class="text-left p-3 border-b border-border">{h}</th>)}</tr>
+    </thead>
+    <tbody>
+      <slot />
+    </tbody>
+  </table>
+</div>

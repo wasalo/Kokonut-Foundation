@@ -1,0 +1,12 @@
+---
+interface Props { items: { label: string; amount?: number; currency?: string }[]; }
+const { items = [] } = Astro.props;
+---
+<div class="flex flex-wrap gap-2">
+  {items.map((i) => (
+    <div class="rounded border border-border px-3 py-2 text-sm">
+      <span class="font-semibold text-strong">{i.label}</span>
+      {i.amount != null && <span class="ml-2 text-muted">{i.amount} {i.currency ?? ""}</span>}
+    </div>
+  ))}
+</div>

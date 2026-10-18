@@ -1,0 +1,12 @@
+---
+interface Props { milestones: { title: string; status?: string; dueDate?: string }[]; }
+const { milestones = [] } = Astro.props;
+---
+<ul class="space-y-2">
+  {milestones.map((m) => (
+    <li class="flex gap-2 text-sm">
+      <span class="text-primary">●</span>
+      <span><strong>{m.title}</strong> — {m.status ?? "planned"}{m.dueDate ? ` (${m.dueDate.slice(0, 10)})` : ""}</span>
+    </li>
+  ))}
+</ul>

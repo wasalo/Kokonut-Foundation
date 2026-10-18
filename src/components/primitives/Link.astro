@@ -1,0 +1,7 @@
+---
+interface Props { href: string; external?: boolean; class?: string; }
+const { href, external = false, class: cls = "text-primary hover:underline" } = Astro.props;
+---
+<a href={href} class={cls} target={external ? "_blank" : undefined} rel={external ? "noopener" : undefined}>
+  <slot />
+</a>

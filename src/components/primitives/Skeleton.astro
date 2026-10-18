@@ -1,0 +1,5 @@
+---
+interface Props { class?: string; }
+const { class: cls = "h-4 w-full" } = Astro.props;
+---
+<div class={`animate-pulse bg-surface-muted rounded ${cls}`}></div>
