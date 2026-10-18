@@ -1,0 +1,30 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+<BaseLayout title="New Resource — Admin" description="Create resource.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">New Resource</h1>
+    <form id="f" class="mt-6 space-y-4">
+      <input name="title" placeholder="Title" required class="w-full rounded border border-border px-3 py-2" />
+      <input name="summary" placeholder="Summary" class="w-full rounded border border-border px-3 py-2" />
+      <select name="resourceType" class="w-full rounded border border-border px-3 py-2">
+        <option>Report</option><option>Research</option><option>Framework</option><option>Article</option><option>Guide</option><option>Policy</option><option>Methodology</option>
+      </select>
+      <input name="topic" placeholder="Topic" class="w-full rounded border border-border px-3 py-2" />
+      <input name="year" type="number" placeholder="Year" class="w-full rounded border border-border px-3 py-2" />
+      <input name="externalUrl" placeholder="External URL (optional)" class="w-full rounded border border-border px-3 py-2" />
+      <button type="submit" class="px-4 py-2 rounded bg-primary text-white text-sm">Create</button>
+    </form>
+    <p id="r" class="mt-4 text-sm"></p>
+  </section>
+  <script>
+    document.getElementById("f")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const res = await fetch("/api/admin/resources", { method: "POST", body: fd });
+      const j = await res.json();
+      const el = document.getElementById("r");
+      if (el) el.textContent = res.ok ? `Created: ${j.data.slug}` : (j.error ?? "Error");
+    });
+  </script>
+</BaseLayout>

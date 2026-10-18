@@ -11,6 +11,7 @@ try { if (db) list = await db.select().from(teamMembers); } catch {}
 <BaseLayout title="Team — Admin" description="Admin team.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Team (Admin)</h1>
+    <a href="/admin/team/new" class="mt-2 inline-block text-sm text-primary">+ New Team Member</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
       {list.map((t: any) => <li class="text-sm">{t.name} — {t.role}</li>)}
