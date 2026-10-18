@@ -11,5 +11,5 @@
     "types": ["@cloudflare/workers-types", "astro/client"]
   },
   "include": ["src", "tests", "astro.config.mjs"],
-  "exclude": ["dist", ".astro", "node_modules"]
+  "exclude": ["dist", ".astro", "node_modules", "tests/e2e"]
 }
