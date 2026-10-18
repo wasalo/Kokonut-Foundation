@@ -1,0 +1,79 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { metrics, measurements, evidence } from "@lib/schema";
+import { eq } from "drizzle-orm";
+import { parseJson } from "@lib/utils";
+
+const slug = Astro.params.metric as string;
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let metric: any = null;
+let history: any[] = [];
+let ev: any[] = [];
+try {
+  if (db) {
+    metric = await db.select().from(metrics).where(eq(metrics.slug, slug)).get();
+    if (metric) {
+      history = await db.select().from(measurements).where(eq(measurements.metricId, metric.id));
+      ev = await db.select().from(evidence).where(eq(evidence.metricId, metric.id));
+    }
+  }
+} catch {}
+if (!metric) metric = { slug, name: slug, description: "", category: "", value: 0, unit: "", verificationStatus: "reported", source: "" };
+const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, value: h.value })));
+---
+<BaseLayout title={`${metric.name} — Impact`} description={metric.description}>
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <a href="/impact" class="text-sm text-primary">← Impact</a>
+    <h1 class="mt-4 text-3xl font-bold text-strong">{metric.name}</h1>
+    <p class="mt-2 text-muted">{metric.description}</p>
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <Card>
+          <h2 class="font-semibold text-strong">Current Value</h2>
+          <div class="mt-2 text-3xl font-bold text-primary">{metric.value} {metric.unit}</div>
+          <p class="mt-2 text-sm text-muted">Status: {metric.verificationStatus} · Source: {metric.source}</p>
+          {metric.methodology && <p class="mt-2 text-sm text-muted">Methodology: {metric.methodology}</p>}
+        </Card>
+        <Card>
+          <h2 class="font-semibold text-strong">History</h2>
+          <canvas id="chart" height="200"></canvas>
+        </Card>
+        {ev.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Evidence</h2>
+            <ul class="mt-3 space-y-2">
+              {ev.map((e: any) => (
+                <li class="text-sm"><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type})</span></li>
+              ))}
+            </ul>
+          </Card>
+        )}
+      </div>
+      <div>
+        <Card>
+          <h3 class="font-semibold text-strong">Category</h3>
+          <p class="mt-2 text-sm text-muted">{metric.category}</p>
+        </Card>
+      </div>
+    </div>
+  </section>
+  <script type="module" define:vars={{ histJson }}>
+    const data = JSON.parse(histJson);
+    (async () => {
+      const { Chart, registerables } = await import("https://cdn.jsdelivr.net/npm/chart.js@4/+esm");
+      Chart.register(...registerables);
+      const ctx = document.getElementById("chart");
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: data.map((d) => d.date),
+          datasets: [{ label: "Value", data: data.map((d) => d.value), borderColor: "#009F4D" }],
+        },
+      });
+    })();
+  </script>
+</BaseLayout>

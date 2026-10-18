@@ -1,0 +1,17 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+<BaseLayout title="API Docs — Kokonut Foundation" description="Public API documentation.">
+  <section class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-strong mb-4">API Documentation</h1>
+    <div id="swagger-ui"></div>
+  </section>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" client:load></script>
+  <script>
+    window.addEventListener("load", () => {
+      // @ts-ignore
+      SwaggerUIBundle({ url: "/openapi.json", dom_id: "#swagger-ui" });
+    });
+  </script>
+</BaseLayout>

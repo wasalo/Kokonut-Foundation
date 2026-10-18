@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { farms, projects } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(farms); } catch {}
+if (!list.length) {
+  list = [{ id: "farm_adelphi", slug: "adelphi", name: "Adelphi Regenerative Farm", country: "Dominican Republic", region: "Adelphi", areaM2: 15725, latitude: 18.4861, longitude: -69.9312, status: "active" }];
+}
+---
+<BaseLayout title="Farms — Kokonut Foundation" description="Regenerative farms.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">Farms</h1>
+    <p class="mt-4 text-muted">Regenerative farms implementing the Kokonut Framework.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {list.map((f: any) => (
+        <a href={`/farms/${f.slug}`} class="block">
+          <Card>
+            <h3 class="font-semibold text-strong">{f.name}</h3>
+            <p class="mt-1 text-xs text-muted">{f.region ? `${f.region}, ` : ""}{f.country}</p>
+            {f.areaM2 && <p class="mt-2 text-sm text-muted">{f.areaM2.toLocaleString()} m²</p>}
+            <p class="mt-2 text-xs text-muted">{f.status}</p>
+          </Card>
+        </a>
+      ))}
+    </div>
+    <div class="mt-8" id="map" style="height:320px" data-farms={JSON.stringify(list)}></div>
+  </section>
+  <script>
+    async function initMap() {
+      const L = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      const el = document.getElementById("map");
+      if (!el) return;
+      const farms = JSON.parse(el.dataset.farms || "[]");
+      const map = L.map(el).setView([18.5, -70], 6);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+      for (const f of farms) {
+        if (f.latitude && f.longitude) L.marker([f.latitude, f.longitude]).addTo(map).bindPopup(f.name);
+      }
+    }
+    initMap();
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</BaseLayout>

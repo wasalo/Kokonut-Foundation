@@ -211,3 +211,52 @@ export const syncJobs = sqliteTable("sync_jobs", {
   finishedAt: text("finished_at"),
   details: text("details"),
 });
+
+export const farms = sqliteTable("farms", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  projectId: text("project_id"),
+  country: text("country").notNull(),
+  region: text("region"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
+  areaM2: real("area_m2"),
+  description: text("description"),
+  status: text("status").notNull().default("active"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const wallets = sqliteTable("wallets", {
+  id: text("id").primaryKey(),
+  address: text("address").notNull(),
+  chain: text("chain").notNull(),
+  label: text("label").notNull(),
+  walletType: text("wallet_type").notNull().default("foundation"),
+  visibility: text("visibility").notNull().default("public"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const treasuryEntries = sqliteTable("treasury_entries", {
+  id: text("id").primaryKey(),
+  walletId: text("wallet_id").notNull(),
+  asset: text("asset").notNull(),
+  amount: real("amount").notNull(),
+  valueUsd: real("value_usd"),
+  occurredAt: text("occurred_at").notNull(),
+  txHash: text("tx_hash"),
+  category: text("category"),
+  interpretationLabel: text("interpretation_label"),
+  source: text("source").notNull().default("foundation"),
+  projectId: text("project_id"),
+});
+
+export const apiKeys = sqliteTable("api_keys", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull(),
+  scopes: text("scopes").notNull().default("[]"),
+  createdAt: text("created_at").notNull(),
+  lastUsedAt: text("last_used_at"),
+});

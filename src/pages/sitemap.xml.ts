@@ -5,7 +5,8 @@ const routes = [
   "/transparency", "/transparency/governance", "/transparency/treasury",
   "/transparency/attestations", "/transparency/reports",
   "/partners", "/resources", "/about", "/about/team", "/about/foundation",
-  "/support", "/contact",
+  "/support", "/contact", "/explorer", "/explorer/evidence", "/farms",
+  "/api-docs",
 ];
 
 export const GET: APIRoute = async () => {

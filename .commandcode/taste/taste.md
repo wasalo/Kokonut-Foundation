@@ -1,0 +1,1 @@
+- Prefers the agent to work non-stop and autonomously until the requested task is fully implemented. Confidence: 0.9

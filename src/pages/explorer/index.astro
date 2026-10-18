@@ -1,0 +1,27 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+const items = [
+  { href: "/projects", title: "Projects", desc: "Browse and filter projects." },
+  { href: "/farms", title: "Farms", desc: "Regenerative farms and geospatial view." },
+  { href: "/impact", title: "Impact", desc: "Metrics with history and evidence." },
+  { href: "/explorer/evidence", title: "Evidence", desc: "Supporting evidence browser." },
+  { href: "/transparency/treasury", title: "Treasury", desc: "Wallets, balances, expenditures." },
+  { href: "/transparency/attestations", title: "Attestations", desc: "Public attestations." },
+  { href: "/transparency/reports", title: "Reports", desc: "Published reports." },
+  { href: "/api-docs", title: "API Docs", desc: "Public API documentation." },
+];
+---
+<BaseLayout title="Explorer — Kokonut Foundation" description="Data explorer.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">Explorer</h1>
+    <p class="mt-4 text-muted">Explore Foundation data, impact, evidence, and transparency.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {items.map((i) => (
+        <a href={i.href} class="block">
+          <Card><h3 class="font-semibold text-strong">{i.title}</h3><p class="mt-2 text-sm text-muted">{i.desc}</p></Card>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

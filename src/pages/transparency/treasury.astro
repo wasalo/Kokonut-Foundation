@@ -1,10 +1,52 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { wallets, treasuryEntries } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let walletsList: any[] = [];
+let entries: any[] = [];
+try {
+  if (db) {
+    walletsList = await db.select().from(wallets);
+    entries = await db.select().from(treasuryEntries);
+  }
+} catch {}
+const summary = entries.reduce((a: any, e: any) => a + (e.valueUsd ?? 0), 0);
 ---
 <BaseLayout title="Treasury — Kokonut Foundation" description="Treasury transparency.">
-  <section class="max-w-3xl mx-auto px-4 py-16">
+  <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Treasury</h1>
-    <p class="mt-4 text-muted">Verified wallet addresses, balances, assets, transaction history, categorized expenditures, project funding and explorer links will be published here.</p>
-    <p class="mt-4 text-muted text-sm">Blockchain data displayed here distinguishes raw on-chain information from Foundation interpretation/category labels.</p>
+    <p class="mt-4 text-muted">Wallets, balances, transactions, expenditures. Raw on-chain data is distinguished from Foundation interpretation.</p>
+    <div class="mt-6">
+      <Card><p class="text-sm text-muted">Total tracked (USD): <strong class="text-strong">{summary.toLocaleString()}</strong></p></Card>
+    </div>
+    <h2 class="mt-8 text-xl font-semibold text-strong">Wallets</h2>
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {walletsList.map((w: any) => (
+        <Card>
+          <p class="font-semibold text-strong">{w.label}</p>
+          <p class="text-xs text-muted">{w.chain} · {w.walletType}</p>
+          <p class="mt-2 text-sm font-mono break-all">{w.address}</p>
+        </Card>
+      ))}
+    </div>
+    <h2 class="mt-8 text-xl font-semibold text-strong">Entries</h2>
+    <div class="mt-4 space-y-3">
+      {entries.length === 0 && <p class="text-muted">No treasury entries yet.</p>}
+      {entries.map((e: any) => (
+        <Card>
+          <div class="flex justify-between text-sm">
+            <span class="font-semibold">{e.asset} {e.amount}</span>
+            <span class="text-muted">{e.occurredAt?.slice(0, 10)}</span>
+          </div>
+          <p class="mt-1 text-xs text-muted">{e.category} · {e.source}</p>
+          {e.interpretationLabel && <p class="mt-1 text-xs text-muted">Interpretation: {e.interpretationLabel}</p>}
+          {e.txHash && <p class="mt-1 text-xs font-mono break-all text-muted">tx: {e.txHash}</p>}
+        </Card>
+      ))}
+    </div>
   </section>
 </BaseLayout>

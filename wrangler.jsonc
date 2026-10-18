@@ -21,6 +21,13 @@
   "kv_namespaces": [
     { "binding": "CONFIG", "id": "00000000000000000000000000000000" }
   ],
+  "queues": {
+    "producers": [{ "binding": "SYNC_QUEUE", "queue": "kokonut-sync-queue" }],
+    "consumers": [{ "queue": "kokonut-sync-queue", "max_batch_size": 10, "max_batch_timeout": 30 }]
+  },
+  "triggers": {
+    "crons": ["0 2 * * *"]
+  },
   "vars": {
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
