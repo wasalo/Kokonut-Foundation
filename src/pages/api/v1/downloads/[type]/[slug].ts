@@ -4,7 +4,7 @@ import { reports, evidence } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { err } from "@lib/api";
 
-export const GET: APIRoute = async ({ params, locals }) => {
+export const GET: APIRoute = async ({ params, locals, url }) => {
   const env = (locals as any).runtime?.env ?? {};
   const type = params.type as string;
   const slug = params.slug as string;
@@ -38,7 +38,12 @@ export const GET: APIRoute = async ({ params, locals }) => {
     return err(String(e), 500);
   }
 
-  if (visibility !== "public") return err("Restricted", 403);
+  if (visibility === "private") return err("Private", 403);
+  if (visibility === "restricted") {
+    const token = url.searchParams.get("access");
+    const expected = (env as any).RESTRICTED_ACCESS_TOKEN;
+    if (!expected || token !== expected) return err("Restricted", 403);
+  }
   if (!objectKey) return err("No file", 404);
   if (!env.MEDIA) return err("Storage not configured", 503);
 

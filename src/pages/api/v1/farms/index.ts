@@ -10,6 +10,13 @@ export const GET: APIRoute = async ({ locals, url }) => {
   try {
     const db = getDb(env);
     const sp = url.searchParams;
+    const kv = (env as any).CONFIG as KVNamespace | undefined;
+    const cacheKey = "farms:list";
+    const noFilter = !sp.has("projectId") && !sp.has("country") && !sp.has("q") && !sp.has("bbox");
+    if (kv && noFilter) {
+      const cached = await kv.get(cacheKey);
+      if (cached) return new Response(cached, { headers: { "Content-Type": "application/json", "X-Cache": "HIT" } });
+    }
     const projectId = sp.get("projectId");
     const country = sp.get("country");
     const q = sp.get("q");
@@ -27,7 +34,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
         r.longitude >= minLng && r.longitude <= maxLng && r.latitude >= minLat && r.latitude <= maxLat,
       );
     }
-    return ok(rows, { count: rows.length });
+    const resp = ok(rows, { count: rows.length });
+    if (kv && noFilter) {
+      const body = await resp.clone().text();
+      await kv.put(cacheKey, body, { expirationTtl: 300 });
+    }
+    return resp;
   } catch (e) {
     return err(String(e), 500);
   }

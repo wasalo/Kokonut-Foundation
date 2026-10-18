@@ -59,7 +59,7 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
             <h2 class="font-semibold text-strong">Evidence</h2>
             <ul class="mt-3 space-y-2">
               {ev.map((e: any) => (
-                <li class="text-sm"><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type})</span></li>
+                <li class="text-sm"><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type} · {e.evidenceClass ?? "measurement"} · {e.maturity ?? "structured"})</span></li>
               ))}
             </ul>
           </Card>

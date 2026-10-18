@@ -10,6 +10,13 @@ export const GET: APIRoute = async ({ locals, url }) => {
   try {
     const db = getDb(env);
     const sp = url.searchParams;
+    const kv = (env as any).CONFIG as KVNamespace | undefined;
+    const cacheKey = "projects:list";
+    const noFilter = !sp.has("status") && !sp.has("country") && !sp.has("sdg") && !sp.has("q") && !sp.has("sort") && !sp.has("page") && !sp.has("pageSize");
+    if (kv && noFilter) {
+      const cached = await kv.get(cacheKey);
+      if (cached) return new Response(cached, { headers: { "Content-Type": "application/json", "X-Cache": "HIT" } });
+    }
     const page = Math.max(1, Number(sp.get("page") ?? 1));
     const pageSize = Math.min(100, Math.max(1, Number(sp.get("pageSize") ?? 20)));
     const status = sp.get("status");
@@ -47,7 +54,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
       resources: parseJson(p.resources, []),
     }));
 
-    return ok(paged, { page, pageSize, total, totalPages: Math.ceil(total / pageSize) });
+    const resp = ok(paged, { page, pageSize, total, totalPages: Math.ceil(total / pageSize) });
+    if (kv && noFilter) {
+      const body = await resp.clone().text();
+      await kv.put(cacheKey, body, { expirationTtl: 300 });
+    }
+    return resp;
   } catch (e) {
     return err(String(e), 500);
   }

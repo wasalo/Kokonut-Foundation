@@ -53,6 +53,9 @@ if (!farm) farm = { slug, name: slug, country: "", region: "", areaM2: 0, latitu
           <h3 class="font-semibold text-strong">Location</h3>
           {farm.region && <p class="mt-2 text-sm text-muted">{farm.region}</p>}
           {farm.latitude && <p class="mt-1 text-sm text-muted">{farm.latitude}, {farm.longitude}</p>}
+          {farm.latitude && (
+            <div id="fmap" style="height:200px" class="mt-3 rounded" data-lat={farm.latitude} data-lng={farm.longitude}></div>
+          )}
           {farm.areaM2 && <p class="mt-1 text-sm text-muted">Total: {farm.areaM2.toLocaleString()} m²</p>}
           {farm.agriculturalAreaM2 && <p class="mt-1 text-sm text-muted">Agricultural: {farm.agriculturalAreaM2.toLocaleString()} m²</p>}
           {farm.jobs && <p class="mt-1 text-sm text-muted">Jobs: {farm.jobs}</p>}
@@ -65,4 +68,16 @@ if (!farm) farm = { slug, name: slug, country: "", region: "", areaM2: 0, latitu
       </div>
     </div>
   </section>
+  <script type="module">
+    const el = document.getElementById("fmap");
+    if (el) {
+      const lat = Number(el.dataset.lat);
+      const lng = Number(el.dataset.lng);
+      const L = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      const map = L.map(el).setView([lat, lng], 12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+      L.marker([lat, lng]).addTo(map);
+    }
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </BaseLayout>
