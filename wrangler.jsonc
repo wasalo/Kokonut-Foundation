@@ -7,6 +7,10 @@
     "directory": "./dist",
     "binding": "ASSETS"
   },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
   "d1_databases": [
     {
       "binding": "DB",
@@ -28,10 +32,6 @@
   "triggers": {
     "crons": ["0 2 * * *"]
   },
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1
-  },
   "vars": {
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
@@ -42,7 +42,17 @@
       "vars": { "ENVIRONMENT": "preview", "ADMIN_DEV_BYPASS": "true" },
       "d1_databases": [
         { "binding": "DB", "database_name": "kokonut-foundation-db-preview", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }
-      ]
+      ],
+      "r2_buckets": [
+        { "binding": "MEDIA", "bucket_name": "kokonut-foundation-media-preview" }
+      ],
+      "kv_namespaces": [
+        { "binding": "CONFIG", "id": "00000000000000000000000000000001" }
+      ],
+      "queues": {
+        "producers": [{ "binding": "SYNC_QUEUE", "queue": "kokonut-sync-queue-preview" }],
+        "consumers": [{ "queue": "kokonut-sync-queue-preview", "max_batch_size": 10, "max_batch_timeout": 30 }]
+      }
     }
   }
 }

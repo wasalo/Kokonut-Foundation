@@ -1,9 +1,10 @@
 import type { APIRoute } from "astro";
 import { getDb } from "@lib/db";
-import { syncJobs, auditLog } from "@lib/schema";
+import { syncJobs, auditLog, projects, metrics, measurements } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { ok, err } from "@lib/api";
 import { id, nowIso } from "@lib/utils";
+import { mapProject, mapMetric, mapMeasurement } from "@lib/ki-mapping";
 
 export const POST: APIRoute = async ({ locals }) => {
   const env = (locals as any).runtime?.env ?? {};
@@ -23,14 +24,35 @@ export const POST: APIRoute = async ({ locals }) => {
 
   let status = "completed";
   let details = "no-op (KI not configured)";
+  let counts = { projects: 0, metrics: 0, measurements: 0 };
   try {
     if (kiUrl && kiKey) {
-      const res = await fetch(`${kiUrl}/projects`, {
-        headers: { Authorization: `Bearer ${kiKey}` },
-      });
-      if (!res.ok) throw new Error(`KI fetch failed: ${res.status}`);
-      const data = await res.json();
-      details = `fetched ${Array.isArray(data) ? data.length : 0} records`;
+      const headers = { Authorization: `Bearer ${kiKey}` };
+      // Fetch projects
+      const pRes = await fetch(`${kiUrl}/projects`, { headers });
+      if (pRes.ok) {
+        const pData = (await pRes.json()) as any;
+        const arr = Array.isArray(pData) ? pData : pData?.data ?? [];
+        for (const p of arr) {
+          const mp = mapProject(p);
+          await db.insert(projects).values({ ...mp, createdAt: nowIso(), updatedAt: nowIso() }).onConflictDoNothing?.();
+          counts.projects++;
+          // Fetch metrics per project if endpoint exists
+          try {
+            const mRes = await fetch(`${kiUrl}/projects/${p.id ?? p.slug}/metrics`, { headers });
+            if (mRes.ok) {
+              const mData = (await mRes.json()) as any;
+              const mArr = Array.isArray(mData) ? mData : mData?.data ?? [];
+              for (const m of mArr) {
+                const mm = mapMetric(m, mp.id);
+                await db.insert(metrics).values({ ...mm, updatedAt: nowIso() }).onConflictDoNothing?.();
+                counts.metrics++;
+              }
+            }
+          } catch {}
+        }
+      }
+      details = `imported ${counts.projects} projects, ${counts.metrics} metrics`;
     }
   } catch (e) {
     status = "failed";
@@ -45,11 +67,11 @@ export const POST: APIRoute = async ({ locals }) => {
     action: "ki_sync",
     entityType: "sync_job",
     entityId: jobId,
-    after: JSON.stringify({ status, details }),
+    after: JSON.stringify({ status, details, counts }),
     timestamp: nowIso(),
   });
 
-  return ok({ jobId, status, details });
+  return ok({ jobId, status, details, counts });
 };
 
 export const GET: APIRoute = async ({ locals }) => {

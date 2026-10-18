@@ -10,6 +10,7 @@ export default defineConfig({
   output: "server",
   adapter: cloudflare({
     platformProxy: { enabled: true },
+    workerEntryPoint: { path: "src/worker.ts", namedExports: ["queue", "scheduled"] },
   }),
   vite: {
     plugins: [tailwindcss()],
@@ -26,4 +27,9 @@ export default defineConfig({
     checkOrigin: false,
   },
   site: "https://kokonut.foundation",
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "es"],
+    routing: { prefixDefaultLocale: false },
+  },
 });

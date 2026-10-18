@@ -30,5 +30,29 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // ignore
   }
 
+  // Rate limiting (KV-based, best-effort)
+  try {
+    const env = (locals as any).runtime?.env;
+    const kv = env?.CONFIG as KVNamespace | undefined;
+    if (kv && pathname.startsWith("/api/")) {
+      const ip = context.request.headers.get("cf-connecting-ip") ?? "unknown";
+      const bucket = pathname.startsWith("/api/admin") ? "admin" : pathname.startsWith("/api/v1/downloads") ? "download" : pathname.startsWith("/api/v1/inquiries") ? "inquiry" : "api";
+      const limits: Record<string, number> = { admin: 30, download: 20, inquiry: 10, api: 120 };
+      const limit = limits[bucket];
+      const windowSec = 60;
+      const key = `rl:${bucket}:${ip}:${Math.floor(Date.now() / (windowSec * 1000))}`;
+      const current = Number((await kv.get(key)) ?? "0");
+      if (current >= limit) {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+          status: 429,
+          headers: { "Content-Type": "application/json", "Retry-After": String(windowSec) },
+        });
+      }
+      await kv.put(key, String(current + 1), { expirationTtl: windowSec });
+    }
+  } catch {
+    // ignore rate limit errors
+  }
+
   return next();
 });

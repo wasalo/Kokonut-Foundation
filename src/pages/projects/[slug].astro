@@ -2,6 +2,7 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import Badge from "@components/primitives/Badge.astro";
+import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
 import { projects, metrics, milestones, partners, projectPartners } from "@lib/schema";
 import { eq } from "drizzle-orm";
@@ -53,7 +54,8 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
 ---
 <BaseLayout title={`${project.name} — Kokonut Foundation`} description={project.summary}>
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <a href="/projects" class="text-sm text-primary">← Projects</a>
+    <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/projects", label: "Projects" }, { label: project.name }]} />
+    <a href="/projects" class="text-sm text-primary mt-2 inline-block">← Projects</a>
     <div class="mt-4 flex items-start justify-between flex-wrap gap-4">
       <div>
         <h1 class="text-3xl md:text-5xl font-bold text-strong">{project.name}</h1>
