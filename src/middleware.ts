@@ -18,11 +18,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   try {
     const env = (locals as any).runtime?.env;
     if (env?.DB) {
-      const row = await env.DB.prepare("SELECT to_path, status_code FROM redirects WHERE from_path = ?")
+      const row = (await env.DB.prepare("SELECT to_path, status_code FROM redirects WHERE from_path = ?")
         .bind(pathname)
-        .first<{ to_path: string; status_code: number }>();
+        .first()) as { to_path: string; status_code: number } | null;
       if (row) {
-        return context.redirect(row.to_path, row.status_code || 301);
+        const code = (row.status_code === 302 ? 302 : 301) as 301 | 302;
+        return context.redirect(row.to_path, code);
       }
     }
   } catch {

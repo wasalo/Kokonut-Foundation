@@ -10,6 +10,6 @@
     },
     "types": ["@cloudflare/workers-types", "astro/client"]
   },
-  "include": ["src", "tests", "astro.config.mjs", "drizzle.config.ts"],
+  "include": ["src", "tests", "astro.config.mjs"],
   "exclude": ["dist", ".astro", "node_modules"]
 }
