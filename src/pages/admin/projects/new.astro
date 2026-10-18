@@ -1,0 +1,31 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+<BaseLayout title="New Project — Admin" description="Create project.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">New Project</h1>
+    <form id="f" class="mt-6 space-y-4">
+      <input name="name" placeholder="Name" required class="w-full rounded border border-border px-3 py-2" />
+      <input name="summary" placeholder="Summary" class="w-full rounded border border-border px-3 py-2" />
+      <textarea name="description" placeholder="Description" rows="4" class="w-full rounded border border-border px-3 py-2"></textarea>
+      <input name="country" placeholder="Country" class="w-full rounded border border-border px-3 py-2" />
+      <select name="status" class="w-full rounded border border-border px-3 py-2">
+        <option value="planned">Planned</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button type="submit" class="px-4 py-2 rounded bg-primary text-white text-sm">Create</button>
+    </form>
+    <p id="r" class="mt-4 text-sm"></p>
+  </section>
+  <script>
+    document.getElementById("f")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const res = await fetch("/api/admin/projects", { method: "POST", body: fd });
+      const j = await res.json();
+      const el = document.getElementById("r");
+      if (el) el.textContent = res.ok ? `Created: ${j.data.slug}` : (j.error ?? "Error");
+    });
+  </script>
+</BaseLayout>

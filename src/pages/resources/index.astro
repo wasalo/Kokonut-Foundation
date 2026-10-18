@@ -7,17 +7,39 @@ import { formatDate } from "@lib/utils";
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
+const sp = Astro.url.searchParams;
+const resourceType = sp.get("resourceType");
+const topic = sp.get("topic");
+const year = sp.get("year");
+const q = sp.get("q");
+
 let list: any[] = [];
 try { if (db) list = await db.select().from(resources); } catch {}
 if (!list.length) {
   list = [
-    { slug: "kokonut-framework", title: "Kokonut Framework", summary: "Framework overview.", resourceType: "Framework", publishedAt: "2025-01-01" },
+    { slug: "kokonut-framework", title: "Kokonut Framework", summary: "Framework overview.", resourceType: "Framework", publishedAt: "2025-01-01", topic: "framework", year: 2025 },
   ];
 }
+if (resourceType) list = list.filter((r: any) => r.resourceType === resourceType);
+if (topic) list = list.filter((r: any) => r.topic === topic);
+if (year) list = list.filter((r: any) => String(r.year) === year);
+if (q) {
+  const ql = q.toLowerCase();
+  list = list.filter((r: any) => r.title?.toLowerCase().includes(ql));
+}
+const types = [...new Set(list.map((r: any) => r.resourceType).filter(Boolean))];
 ---
 <BaseLayout title="Resources — Kokonut Foundation" description="Foundation resources.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl md:text-5xl font-bold text-strong">Resources</h1>
+    <form method="GET" class="mt-6 flex flex-wrap gap-3">
+      <input name="q" value={q ?? ""} placeholder="Search..." class="rounded-md border border-border px-3 py-2 text-sm" />
+      <select name="resourceType" class="rounded-md border border-border px-3 py-2 text-sm">
+        <option value="">All types</option>
+        {types.map((t) => <option value={t} selected={resourceType === t}>{t}</option>)}
+      </select>
+      <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white text-sm">Filter</button>
+    </form>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.map((r: any) => (
         <a href={`/resources/${r.slug}`} class="block">

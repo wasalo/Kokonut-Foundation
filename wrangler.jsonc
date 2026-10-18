@@ -32,6 +32,9 @@
   "triggers": {
     "crons": ["0 2 * * *"]
   },
+  "workflows": [
+    { "binding": "PUBLISH_REPORT", "name": "publish-report", "class_name": "PublishReportWorkflow" }
+  ],
   "vars": {
     "ENVIRONMENT": "production",
     "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",

@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { methodologies } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(methodologies); } catch {}
+---
+<BaseLayout title="Methodologies — Kokonut Foundation" description="Impact methodologies.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Methodologies</h1>
+    <p class="mt-4 text-muted">Impact measurement methodologies.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {list.length === 0 && <p class="text-muted">No methodologies yet.</p>}
+      {list.map((m: any) => (
+        <a href={`/impact/methodology/${m.slug}`} class="block">
+          <Card>
+            <h3 class="font-semibold text-strong">{m.name}</h3>
+            {m.version && <p class="mt-1 text-xs text-muted">v{m.version}</p>}
+            {m.description && <p class="mt-2 text-sm text-muted">{m.description}</p>}
+          </Card>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

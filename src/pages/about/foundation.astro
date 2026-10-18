@@ -2,7 +2,7 @@
 export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
 ---
-<BaseLayout title="The Foundation — Kokonut Foundation" description="Foundation details.">
+<BaseLayout title="The Foundation — Kokonut Foundation" description="Foundation details." jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation", "url": "https://kokonut.foundation" }}>
   <section class="max-w-3xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Kokonut Foundation vs Kokonut Network</h1>
     <p class="mt-4 text-muted">Kokonut Foundation is a nonprofit organization. Kokonut Network is the community governance network. The Foundation deploys the Kokonut Framework; the Network provides community participation and governance.</p>

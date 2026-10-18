@@ -22,6 +22,11 @@ const { title, description = "Kokonut Foundation — Growing Regenerative Farms 
     <SeoHead title={title} description={description} canonical={canonical} jsonLd={jsonLd} />
     <!-- Cloudflare Web Analytics -->
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "PLACEHOLDER"}'></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
+      }
+    </script>
   </head>
   <body class="min-h-screen flex flex-col">
     <a href="#main" class="skip-link">Skip to content</a>

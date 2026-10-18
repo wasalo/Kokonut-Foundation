@@ -10,7 +10,7 @@ export default defineConfig({
   output: "server",
   adapter: cloudflare({
     platformProxy: { enabled: true },
-    workerEntryPoint: { path: "src/worker.ts", namedExports: ["queue", "scheduled"] },
+    workerEntryPoint: { path: "src/worker.ts", namedExports: ["queue", "scheduled", "PublishReportWorkflow"] },
   }),
   vite: {
     plugins: [tailwindcss()],

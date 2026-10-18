@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
 import { resources } from "@lib/schema";
 import { eq } from "drizzle-orm";
@@ -15,7 +16,8 @@ if (!r) r = { slug, title: slug, summary: "", resourceType: "Resource", publishe
 ---
 <BaseLayout title={`${r.title} — Kokonut Foundation`} description={r.summary ?? ""}>
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/resources" class="text-sm text-primary">← Resources</a>
+    <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/resources", label: "Resources" }, { label: r.title }]} />
+    <a href="/resources" class="text-sm text-primary mt-2 inline-block">← Resources</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{r.title}</h1>
     <p class="mt-2 text-xs text-muted">{r.resourceType} · {formatDate(r.publishedAt)}</p>
     <Card class="mt-6">

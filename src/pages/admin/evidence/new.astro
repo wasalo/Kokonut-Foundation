@@ -1,0 +1,32 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+<BaseLayout title="New Evidence — Admin" description="Create evidence.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">New Evidence</h1>
+    <form id="f" class="mt-6 space-y-4" enctype="multipart/form-data">
+      <input name="title" placeholder="Title" required class="w-full rounded border border-border px-3 py-2" />
+      <select name="type" class="w-full rounded border border-border px-3 py-2">
+        <option>Photograph</option><option>Document</option><option>Report</option><option>Dataset</option>
+      </select>
+      <input name="projectId" placeholder="Project ID (optional)" class="w-full rounded border border-border px-3 py-2" />
+      <input name="metricId" placeholder="Metric ID (optional)" class="w-full rounded border border-border px-3 py-2" />
+      <select name="visibility" class="w-full rounded border border-border px-3 py-2">
+        <option value="public">Public</option><option value="restricted">Restricted</option><option value="private">Private</option>
+      </select>
+      <input type="file" name="file" required class="w-full" />
+      <button type="submit" class="px-4 py-2 rounded bg-primary text-white text-sm">Upload</button>
+    </form>
+    <p id="r" class="mt-4 text-sm"></p>
+  </section>
+  <script>
+    document.getElementById("f")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const res = await fetch("/api/admin/evidence/upload", { method: "POST", body: fd });
+      const j = await res.json();
+      const el = document.getElementById("r");
+      if (el) el.textContent = res.ok ? `Uploaded: ${j.data.id}` : (j.error ?? "Error");
+    });
+  </script>
+</BaseLayout>

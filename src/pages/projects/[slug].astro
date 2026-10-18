@@ -4,7 +4,7 @@ import Card from "@components/primitives/Card.astro";
 import Badge from "@components/primitives/Badge.astro";
 import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
-import { projects, metrics, milestones, partners, projectPartners } from "@lib/schema";
+import { projects, metrics, milestones, partners, projectPartners, farms, evidence, resources, naturalAssets, activities } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { parseJson, formatDate } from "@lib/utils";
 
@@ -15,7 +15,11 @@ const db = env.DB ? getDb(env) : null;
 let project: any = null;
 let projectMetrics: any[] = [];
 let projectMilestones: any[] = [];
-let projectPartnersList: any[] = [];
+let projectFarms: any[] = [];
+let projectEvidence: any[] = [];
+let projectResources: any[] = [];
+let projectNaturalAssets: any[] = [];
+let projectActivities: any[] = [];
 
 try {
   if (db) {
@@ -29,6 +33,11 @@ try {
         projectMetrics = await db.select().from(metrics).where(eq(metrics.projectId, project.id));
       }
       projectMilestones = await db.select().from(milestones).where(eq(milestones.projectId, project.id));
+      projectFarms = await db.select().from(farms).where(eq(farms.projectId, project.id));
+      projectEvidence = await db.select().from(evidence).where(eq(evidence.projectId, project.id));
+      projectResources = await db.select().from(resources).where(eq(resources.projectId, project.id));
+      projectNaturalAssets = await db.select().from(naturalAssets).where(eq(naturalAssets.projectId, project.id));
+      projectActivities = await db.select().from(activities).where(eq(activities.projectId, project.id));
     }
   }
 } catch {}
@@ -87,6 +96,40 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
             </div>
           </Card>
         )}
+        {projectNaturalAssets.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Natural Assets</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+              {projectNaturalAssets.map((a: any) => <li>{a.name} ({a.assetType})</li>)}
+            </ul>
+          </Card>
+        )}
+        {projectActivities.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Activities</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+              {projectActivities.map((a: any) => <li>{a.name}{a.occurredAt ? ` — ${formatDate(a.occurredAt)}` : ""}</li>)}
+            </ul>
+          </Card>
+        )}
+        {projectEvidence.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Evidence</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+              {projectEvidence.map((e: any) => (
+                <li><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type})</span></li>
+              ))}
+            </ul>
+          </Card>
+        )}
+        {projectResources.length > 0 && (
+          <Card>
+            <h2 class="font-semibold text-strong">Resources</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+              {projectResources.map((r: any) => <li><a href={`/resources/${r.slug}`} class="text-primary">{r.title}</a></li>)}
+            </ul>
+          </Card>
+        )}
         {projectMilestones.length > 0 && (
           <Card>
             <h2 class="font-semibold text-strong">Timeline</h2>
@@ -115,6 +158,14 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
           <h3 class="font-semibold text-strong">SDGs</h3>
           <p class="mt-2 text-sm text-muted">{sdgs.join(", ") || "—"}</p>
         </Card>
+        {projectFarms.length > 0 && (
+          <Card>
+            <h3 class="font-semibold text-strong">Farms</h3>
+            <ul class="mt-2 text-sm text-muted space-y-1">
+              {projectFarms.map((f: any) => <li><a href={`/farms/${f.slug}`} class="text-primary">{f.name}</a></li>)}
+            </ul>
+          </Card>
+        )}
         <Card>
           <h3 class="font-semibold text-strong">Impact Areas</h3>
           <p class="mt-2 text-sm text-muted">{impactAreas.join(", ") || "—"}</p>

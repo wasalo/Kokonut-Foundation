@@ -6,6 +6,7 @@ interface RuntimeEnv {
   MEDIA: R2Bucket;
   CONFIG: KVNamespace;
   SYNC_QUEUE?: Queue;
+  PUBLISH_REPORT?: Workflow;
   ENVIRONMENT: string;
   TURNSTILE_SITE_KEY: string;
   TURNSTILE_SECRET_KEY?: string;

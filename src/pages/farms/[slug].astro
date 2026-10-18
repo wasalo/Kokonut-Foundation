@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
 import { farms, metrics } from "@lib/schema";
 import { eq } from "drizzle-orm";
@@ -20,7 +21,8 @@ if (!farm) farm = { slug, name: slug, country: "", region: "", areaM2: 0, latitu
 ---
 <BaseLayout title={`${farm.name} — Kokonut Foundation`} description={farm.description ?? ""}>
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <a href="/farms" class="text-sm text-primary">← Farms</a>
+    <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/farms", label: "Farms" }, { label: farm.name }]} />
+    <a href="/farms" class="text-sm text-primary mt-2 inline-block">← Farms</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{farm.name}</h1>
     <p class="mt-2 text-muted">{farm.region ? `${farm.region}, ` : ""}{farm.country}</p>
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
