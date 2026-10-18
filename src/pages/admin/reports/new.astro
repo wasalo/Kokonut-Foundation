@@ -1,0 +1,31 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+---
+<BaseLayout title="New Report — Admin" description="Create report.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">New Report</h1>
+    <form id="f" class="mt-6 space-y-4">
+      <input name="title" placeholder="Title" required class="w-full rounded border border-border px-3 py-2" />
+      <input name="slug" placeholder="Slug (optional)" class="w-full rounded border border-border px-3 py-2" />
+      <textarea name="summary" placeholder="Summary" rows="3" class="w-full rounded border border-border px-3 py-2"></textarea>
+      <input name="reportType" placeholder="Report type" value="Report" class="w-full rounded border border-border px-3 py-2" />
+      <input name="documentKey" placeholder="R2 document key (e.g. reports/x.pdf)" required class="w-full rounded border border-border px-3 py-2" />
+      <input name="projectId" placeholder="Project ID (optional)" class="w-full rounded border border-border px-3 py-2" />
+      <select name="visibility" class="w-full rounded border border-border px-3 py-2">
+        <option value="public">Public</option><option value="restricted">Restricted</option>
+      </select>
+      <button type="submit" class="px-4 py-2 rounded bg-primary text-white text-sm">Publish</button>
+    </form>
+    <p id="r" class="mt-4 text-sm"></p>
+  </section>
+  <script>
+    document.getElementById("f")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const res = await fetch("/api/admin/reports/publish", { method: "POST", body: fd });
+      const j = await res.json();
+      const el = document.getElementById("r");
+      if (el) el.textContent = res.ok ? `Published: ${j.data.slug}` : (j.error ?? "Error");
+    });
+  </script>
+</BaseLayout>

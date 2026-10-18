@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
 import { attestations, attestationChainRefs } from "@lib/schema";
 import { eq } from "drizzle-orm";
@@ -19,7 +20,8 @@ try {
 ---
 <BaseLayout title="Attestation — Kokonut Foundation" description="Attestation detail.">
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/transparency/attestations" class="text-sm text-primary">← Attestations</a>
+    <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/transparency/attestations", label: "Attestations" }, { label: uid }]} />
+    <a href="/transparency/attestations" class="text-sm text-primary mt-2 inline-block">← Attestations</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{att?.title ?? uid}</h1>
     {att && <p class="mt-2 text-muted">{att.description}</p>}
     <Card class="mt-6">
