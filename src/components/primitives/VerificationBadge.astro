@@ -1,0 +1,13 @@
+---
+interface Props { status?: string; }
+const { status = "reported" } = Astro.props;
+const colors: Record<string, string> = {
+  reported: "bg-surface-muted text-muted",
+  reviewed: "bg-secondary/20 text-strong",
+  verified: "bg-primary/10 text-primary",
+  attested: "bg-primary text-white",
+};
+---
+<span class={`inline-block px-2 py-0.5 rounded text-xs font-medium ${colors[status] ?? colors.reported}`}>
+  {status}
+</span>
