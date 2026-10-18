@@ -1,13 +1,32 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
 ---
 <BaseLayout title="Governance — Kokonut Foundation" description="Foundation governance.">
   <section class="max-w-3xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Governance</h1>
     <p class="mt-4 text-muted">Kokonut Foundation is a nonprofit deploying the Kokonut Framework. Governance combines Foundation stewardship with community participation via Kokonut Network.</p>
-    <div class="mt-8 space-y-4 text-muted">
-      <p>Decision-making processes, relevant public governance resources, and governance contracts where appropriate will be published here.</p>
-      <p>Blockchain terminology is avoided where plain language suffices.</p>
+    <div class="mt-8 space-y-6">
+      <Card>
+        <h2 class="font-semibold text-strong">Foundation Stewardship</h2>
+        <p class="mt-2 text-sm text-muted">The Foundation stewards regenerative projects, impact measurement, and public transparency. Decisions on project approval, funding allocation, and publication follow an internal review process.</p>
+      </Card>
+      <Card>
+        <h2 class="font-semibold text-strong">Community Participation (Kokonut Network)</h2>
+        <p class="mt-2 text-sm text-muted">Community members participate through Kokonut Network governance. Relevant community governance resources and decision-making processes are published here.</p>
+      </Card>
+      <Card>
+        <h2 class="font-semibold text-strong">Decision-Making Processes</h2>
+        <p class="mt-2 text-sm text-muted">Project proposals are reviewed, approved, and tracked through milestones. Impact metrics require verification before publication. Treasury movements are categorized and disclosed.</p>
+      </Card>
+      <Card>
+        <h2 class="font-semibold text-strong">Governance Resources</h2>
+        <ul class="mt-2 text-sm text-muted space-y-1">
+          <li><a href="/transparency/treasury" class="text-primary">Treasury</a></li>
+          <li><a href="/transparency/attestations" class="text-primary">Attestations</a></li>
+          <li><a href="/transparency/reports" class="text-primary">Reports</a></li>
+        </ul>
+      </Card>
     </div>
   </section>
 </BaseLayout>

@@ -1,0 +1,11 @@
+{
+  "name": "Kokonut Foundation",
+  "short_name": "Kokonut",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#009F4D",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

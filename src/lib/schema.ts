@@ -43,6 +43,7 @@ export const metrics = sqliteTable("metrics", {
   verificationStatus: text("verification_status").notNull().default("reported"),
   evidenceIds: text("evidence_ids").notNull().default("[]"),
   updatedAt: text("updated_at").notNull(),
+  status: text("status").notNull().default("published"),
 });
 
 export const measurements = sqliteTable("measurements", {
@@ -110,6 +111,7 @@ export const resources = sqliteTable("resources", {
   externalUrl: text("external_url"),
   publishedAt: text("published_at").notNull(),
   visibility: text("visibility").notNull().default("public"),
+  status: text("status").notNull().default("published"),
 });
 
 export const reports = sqliteTable("reports", {
@@ -125,6 +127,7 @@ export const reports = sqliteTable("reports", {
   documentKey: text("document_key").notNull(),
   authors: text("authors").notNull().default("[]"),
   visibility: text("visibility").notNull().default("public"),
+  status: text("status").notNull().default("published"),
 });
 
 export const evidence = sqliteTable("evidence", {
@@ -140,6 +143,7 @@ export const evidence = sqliteTable("evidence", {
   uploadedAt: text("uploaded_at").notNull(),
   hash: text("hash"),
   visibility: text("visibility").notNull().default("public"),
+  status: text("status").notNull().default("published"),
 });
 
 export const attestations = sqliteTable("attestations", {
