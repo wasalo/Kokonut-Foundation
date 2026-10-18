@@ -2,7 +2,7 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
-import { metrics, measurements, evidence } from "@lib/schema";
+import { metrics, measurements, evidence, farms, attestations, methodologies, sources } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { parseJson } from "@lib/utils";
 
@@ -12,12 +12,23 @@ const db = env.DB ? getDb(env) : null;
 let metric: any = null;
 let history: any[] = [];
 let ev: any[] = [];
+let farm: any = null;
+let attestationsList: any[] = [];
+let methodology: any = null;
+let source: any = null;
 try {
   if (db) {
     metric = await db.select().from(metrics).where(eq(metrics.slug, slug)).get();
     if (metric) {
       history = await db.select().from(measurements).where(eq(measurements.metricId, metric.id));
       ev = await db.select().from(evidence).where(eq(evidence.metricId, metric.id));
+      attestationsList = await db.select().from(attestations).where(eq(attestations.metricId, metric.id));
+      if (metric.projectId) {
+        const farmRows = await db.select().from(farms).where(eq(farms.projectId, metric.projectId));
+        farm = farmRows[0] ?? null;
+      }
+      if (metric.methodology) methodology = await db.select().from(methodologies).where(eq(methodologies.slug, metric.methodology)).get();
+      if (metric.source) source = await db.select().from(sources).where(eq(sources.slug, metric.source)).get();
     }
   }
 } catch {}
@@ -51,6 +62,20 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
             </ul>
           </Card>
         )}
+        <Card>
+          <h2 class="font-semibold text-strong">Provenance Chain</h2>
+          <p class="mt-2 text-xs text-muted">Metric → Farm → Measurement → Evidence → Methodology → Attestation → Source</p>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><strong>Metric:</strong> {metric.name} ({metric.verificationStatus})</li>
+            {farm && <li><strong>Farm:</strong> <a href={`/farms/${farm.slug}`} class="text-primary">{farm.name}</a></li>}
+            <li><strong>Measurements:</strong> {history.length} recorded</li>
+            <li><strong>Evidence:</strong> {ev.length} items</li>
+            {methodology && <li><strong>Methodology:</strong> <a href={`/impact/methodology/${methodology.slug}`} class="text-primary">{methodology.name}</a></li>}
+            {attestationsList.length > 0 && <li><strong>Attestations:</strong> {attestationsList.length} (see /transparency/attestations)</li>}
+            {source && <li><strong>Source:</strong> {source.url ? <a href={source.url} class="text-primary" target="_blank" rel="noopener">{source.name}</a> : source.name}</li>}
+          </ul>
+          <a href={`/api/v1/graph/metric/${metric.slug}`} class="mt-3 inline-block text-xs text-primary">View graph JSON →</a>
+        </Card>
       </div>
       <div>
         <Card>

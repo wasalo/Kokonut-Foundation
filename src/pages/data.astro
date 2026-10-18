@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+const links = [
+  { href: "/openapi.json", title: "OpenAPI Spec", desc: "Full API specification." },
+  { href: "/api/v1/projects", title: "Projects JSON", desc: "All projects." },
+  { href: "/api/v1/metrics", title: "Metrics JSON", desc: "All metrics." },
+  { href: "/api/v1/farms", title: "Farms JSON", desc: "All farms." },
+  { href: "/api/v1/impact", title: "Impact JSON", desc: "Impact aggregate." },
+  { href: "/api/v1/treasury", title: "Treasury JSON", desc: "Treasury data." },
+  { href: "/api/v1/attestations", title: "Attestations JSON", desc: "Attestations." },
+  { href: "/api/v1/downloads", title: "Downloads", desc: "Available datasets." },
+  { href: "/llms.txt", title: "llms.txt", desc: "Machine-readable site index." },
+  { href: "/sitemap.xml", title: "Sitemap", desc: "URL index." },
+];
+---
+<BaseLayout title="Data — Kokonut Foundation" description="Machine-readable data hub.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Data</h1>
+    <p class="mt-4 text-muted">Machine-readable Foundation data and APIs.</p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {links.map((l) => (
+        <a href={l.href} class="block">
+          <Card><h3 class="font-semibold text-strong">{l.title}</h3><p class="mt-2 text-sm text-muted">{l.desc}</p></Card>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

@@ -260,3 +260,110 @@ export const apiKeys = sqliteTable("api_keys", {
   createdAt: text("created_at").notNull(),
   lastUsedAt: text("last_used_at"),
 });
+
+export const naturalAssets = sqliteTable("natural_assets", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  assetType: text("asset_type").notNull(),
+  projectId: text("project_id"),
+  farmId: text("farm_id"),
+  description: text("description"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const activities = sqliteTable("activities", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  naturalAssetId: text("natural_asset_id"),
+  projectId: text("project_id"),
+  description: text("description"),
+  occurredAt: text("occurred_at"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const claims = sqliteTable("claims", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description"),
+  projectId: text("project_id"),
+  metricId: text("metric_id"),
+  status: text("status").notNull().default("reported"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const methodologies = sqliteTable("methodologies", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  version: text("version"),
+  documentKey: text("document_key"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const sources = sqliteTable("sources", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  sourceType: text("source_type").notNull(),
+  url: text("url"),
+  description: text("description"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const evidenceLinks = sqliteTable("evidence_links", {
+  evidenceId: text("evidence_id").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+});
+
+export const attestationChainRefs = sqliteTable("attestation_chain_refs", {
+  id: text("id").primaryKey(),
+  attestationId: text("attestation_id").notNull(),
+  chain: text("chain").notNull(),
+  uid: text("uid").notNull(),
+  txHash: text("tx_hash"),
+  attester: text("attester"),
+  schemaId: text("schema_id"),
+  issuedAt: text("issued_at"),
+  sourceUrl: text("source_url"),
+});
+
+export const historicalMetricSnapshots = sqliteTable("historical_metric_snapshots", {
+  id: text("id").primaryKey(),
+  metricId: text("metric_id").notNull(),
+  periodStart: text("period_start"),
+  periodEnd: text("period_end"),
+  value: real("value").notNull(),
+  unit: text("unit").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const treasuryTransactions = sqliteTable("treasury_transactions", {
+  id: text("id").primaryKey(),
+  walletId: text("wallet_id").notNull(),
+  txHash: text("tx_hash"),
+  chain: text("chain").notNull(),
+  blockNumber: integer("block_number"),
+  fromAddr: text("from_addr"),
+  toAddr: text("to_addr"),
+  asset: text("asset").notNull(),
+  amount: real("amount").notNull(),
+  valueUsd: real("value_usd"),
+  occurredAt: text("occurred_at").notNull(),
+  category: text("category"),
+  interpretationLabel: text("interpretation_label"),
+  source: text("source").notNull().default("foundation"),
+});
+
+export const reportTemplates = sqliteTable("report_templates", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  body: text("body").notNull(),
+  createdAt: text("created_at").notNull(),
+});

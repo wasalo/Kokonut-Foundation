@@ -1,0 +1,39 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import { getDb } from "@lib/db";
+import { attestations, attestationChainRefs } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const uid = Astro.params.uid as string;
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let ref: any = null;
+let att: any = null;
+try {
+  if (db) {
+    ref = await db.select().from(attestationChainRefs).where(eq(attestationChainRefs.uid, uid)).get();
+    if (ref) att = await db.select().from(attestations).where(eq(attestations.id, ref.attestationId)).get();
+  }
+} catch {}
+---
+<BaseLayout title="Attestation — Kokonut Foundation" description="Attestation detail.">
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <a href="/transparency/attestations" class="text-sm text-primary">← Attestations</a>
+    <h1 class="mt-4 text-3xl font-bold text-strong">{att?.title ?? uid}</h1>
+    {att && <p class="mt-2 text-muted">{att.description}</p>}
+    <Card class="mt-6">
+      <p class="text-sm"><strong>Source:</strong> {att?.source}</p>
+      <p class="text-sm"><strong>Status:</strong> {att?.verificationStatus}</p>
+      {ref && (
+        <div class="mt-3 space-y-1 text-sm">
+          <p><strong>Chain:</strong> {ref.chain}</p>
+          <p><strong>UID:</strong> <span class="font-mono text-xs break-all">{ref.uid}</span></p>
+          {ref.txHash && <p><strong>Tx:</strong> <span class="font-mono text-xs break-all">{ref.txHash}</span></p>}
+          {ref.attester && <p><strong>Attester:</strong> {ref.attester}</p>}
+          {ref.sourceUrl && <a href={ref.sourceUrl} class="text-primary text-sm" target="_blank" rel="noopener">View on-chain →</a>}
+        </div>
+      )}
+    </Card>
+  </section>
+</BaseLayout>

@@ -1,0 +1,41 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+---
+<BaseLayout title="Evidence Graph — Kokonut Foundation" description="Interactive evidence graph.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Evidence Graph</h1>
+    <p class="mt-4 text-muted">Interactive traversal of the Foundation evidence graph. Enter a metric slug to explore.</p>
+    <div class="mt-4 flex gap-2">
+      <input id="slug" placeholder="metric slug (e.g. coconut-trees)" class="rounded-md border border-border px-3 py-2 text-sm flex-1" />
+      <button id="load" class="px-4 py-2 rounded-md bg-primary text-white text-sm">Load</button>
+    </div>
+    <div id="graph" style="height:520px" class="mt-6 border border-border rounded-lg"></div>
+    <pre id="out" class="mt-4 text-xs bg-surface-muted p-3 rounded overflow-auto max-h-64"></pre>
+  </section>
+  <script type="module">
+    const btn = document.getElementById("load");
+    btn?.addEventListener("click", async () => {
+      const slug = (document.getElementById("slug") as HTMLInputElement).value.trim();
+      if (!slug) return;
+      const res = await fetch(`/api/v1/graph/metric/${slug}`);
+      const json = await res.json();
+      const out = document.getElementById("out");
+      if (out) out.textContent = JSON.stringify(json, null, 2);
+      // Render simple list-based graph (D3 optional)
+      const g = document.getElementById("graph");
+      if (g) {
+        g.innerHTML = "";
+        const data = json?.data?.chain ?? [];
+        const ul = document.createElement("ul");
+        ul.className = "p-4 space-y-1 text-sm";
+        for (const n of data) {
+          const li = document.createElement("li");
+          li.textContent = `${n.node}: ${n.data?.name ?? n.data?.title ?? n.data?.slug ?? n.data?.id ?? ""}`;
+          ul.appendChild(li);
+        }
+        g.appendChild(ul);
+      }
+    });
+  </script>
+</BaseLayout>
