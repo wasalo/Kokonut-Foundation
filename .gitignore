@@ -32,4 +32,4 @@ npm-debug.log*
 coverage/
 
 # keep PRD
-# (PRD.md is tracked)
+# (PRD.md is tracked).github/
