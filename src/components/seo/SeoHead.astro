@@ -3,9 +3,10 @@ interface Props {
   title: string;
   description: string;
   canonical?: string;
+  image?: string;
   jsonLd?: Record<string, unknown>;
 }
-const { title, description, canonical, jsonLd } = Astro.props;
+const { title, description, canonical, image = "/og-home.png", jsonLd } = Astro.props;
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <title>{title}</title>
@@ -15,7 +16,9 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />
 <meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={new URL(image, Astro.site).toString()} />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={new URL(image, Astro.site).toString()} />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 {jsonLd && (
