@@ -177,6 +177,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
     </div>
   </section>
   <script type="module">
+    fetch("/api/v1/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: "project_view" }) }).catch(() => {});
     const el = document.getElementById("pmap");
     if (el) {
       const lat = Number(el.dataset.lat);
