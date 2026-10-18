@@ -16,7 +16,7 @@ const links = [
     <a href="/" class="font-bold text-strong text-lg">Kokonut Foundation</a>
     <nav aria-label="Primary" class="hidden md:flex gap-1">
       {links.map((l) => (
-        <a href={l.href} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted">{l.label}</a>
+        <a href={l.href} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted" aria-current={Astro.url.pathname === l.href ? "page" : undefined}>{l.label}</a>
       ))}
     </nav>
     <a href="/contact" class="px-4 py-2 rounded-md bg-primary text-white text-sm font-medium">Contact</a>
