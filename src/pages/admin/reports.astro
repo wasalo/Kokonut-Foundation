@@ -14,7 +14,30 @@ try { if (db) list = await db.select().from(reports); } catch {}
     <a href="/admin/reports/new" class="mt-2 inline-block text-sm text-primary">+ New Report</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
-      {list.map((r: any) => <li class="text-sm">{r.title} — {r.status ?? "published"} ({r.visibility})</li>)}
+      {list.map((r: any) => (
+        <li class="text-sm flex items-center gap-2">
+          {r.title} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{r.status ?? "published"}</span>
+          <select data-entity="report" data-id={r.id} class="status-sel text-xs border border-border rounded px-1">
+            <option value="">change…</option>
+            <option value="draft">draft</option>
+            <option value="review">review</option>
+            <option value="approved">approved</option>
+            <option value="published">published</option>
+            <option value="archived">archived</option>
+          </select>
+        </li>
+      ))}
     </ul>
+    <script>
+      document.querySelectorAll(".status-sel").forEach((sel) => {
+        sel.addEventListener("change", async (e) => {
+          const t = e.target as HTMLSelectElement;
+          const v = t.value;
+          if (!v) return;
+          await fetch("/api/admin/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ entityType: t.dataset.entity, entityId: t.dataset.id, status: v }) });
+          location.reload();
+        });
+      });
+    </script>
   </section>
 </BaseLayout>

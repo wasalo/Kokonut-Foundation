@@ -14,7 +14,30 @@ try { if (db) list = await db.select().from(metrics); } catch {}
     <a href="/admin/metrics/new" class="mt-2 inline-block text-sm text-primary">+ New Metric</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
-      {list.map((m: any) => <li class="text-sm">{m.name}: {m.value} {m.unit} ({m.verificationStatus})</li>)}
+      {list.map((m: any) => (
+        <li class="text-sm flex items-center gap-2">
+          {m.name}: {m.value} {m.unit} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{m.status ?? "published"}</span>
+          <select data-entity="metric" data-id={m.id} class="status-sel text-xs border border-border rounded px-1">
+            <option value="">change…</option>
+            <option value="draft">draft</option>
+            <option value="review">review</option>
+            <option value="approved">approved</option>
+            <option value="published">published</option>
+            <option value="archived">archived</option>
+          </select>
+        </li>
+      ))}
     </ul>
+    <script>
+      document.querySelectorAll(".status-sel").forEach((sel) => {
+        sel.addEventListener("change", async (e) => {
+          const t = e.target as HTMLSelectElement;
+          const v = t.value;
+          if (!v) return;
+          await fetch("/api/admin/status", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ entityType: t.dataset.entity, entityId: t.dataset.id, status: v }) });
+          location.reload();
+        });
+      });
+    </script>
   </section>
 </BaseLayout>
