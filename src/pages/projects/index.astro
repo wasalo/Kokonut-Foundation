@@ -7,18 +7,48 @@ import { parseJson } from "@lib/utils";
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
+const sp = Astro.url.searchParams;
+const status = sp.get("status");
+const country = sp.get("country");
+const sdg = sp.get("sdg");
+const q = sp.get("q");
+
 let list: any[] = [];
-try {
-  if (db) list = await db.select().from(projects);
-} catch {}
+try { if (db) list = await db.select().from(projects); } catch {}
 if (!list.length) {
   list = [{ slug: "adelphi", name: "Adelphi Regenerative Farm", summary: "Live regenerative farm in the Dominican Republic.", status: "active", country: "Dominican Republic", sdgs: "[2,13,15]" }];
 }
+if (status) list = list.filter((p: any) => p.status === status);
+if (country) list = list.filter((p: any) => p.country?.toLowerCase() === country.toLowerCase());
+if (sdg) list = list.filter((p: any) => parseJson<number[]>(p.sdgs, []).includes(Number(sdg)));
+if (q) {
+  const ql = q.toLowerCase();
+  list = list.filter((p: any) => p.name?.toLowerCase().includes(ql) || p.summary?.toLowerCase().includes(ql));
+}
+const countries = [...new Set(list.map((p: any) => p.country).filter(Boolean))];
 ---
-<BaseLayout title="Projects — Kokonut Foundation" description="Foundation projects.">
+<BaseLayout title="Projects — Kokonut Foundation" description="Foundation projects." jsonLd={{ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Projects" }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl md:text-5xl font-bold text-strong">Projects</h1>
     <p class="mt-4 text-muted">Real projects, real farms, real impact.</p>
+    <form method="GET" class="mt-6 flex flex-wrap gap-3">
+      <input name="q" value={q ?? ""} placeholder="Search..." class="rounded-md border border-border px-3 py-2 text-sm" />
+      <select name="status" class="rounded-md border border-border px-3 py-2 text-sm">
+        <option value="">All statuses</option>
+        <option value="active" selected={status === "active"}>Active</option>
+        <option value="planned" selected={status === "planned"}>Planned</option>
+        <option value="completed" selected={status === "completed"}>Completed</option>
+      </select>
+      <select name="country" class="rounded-md border border-border px-3 py-2 text-sm">
+        <option value="">All countries</option>
+        {countries.map((c) => <option value={c} selected={country === c}>{c}</option>)}
+      </select>
+      <select name="sdg" class="rounded-md border border-border px-3 py-2 text-sm">
+        <option value="">All SDGs</option>
+        {[2, 13, 15].map((s) => <option value={s} selected={sdg === String(s)}>SDG {s}</option>)}
+      </select>
+      <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white text-sm">Filter</button>
+    </form>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.map((p: any) => (
         <ProjectCard slug={p.slug} name={p.name} summary={p.summary} status={p.status} country={p.country} sdgs={parseJson(p.sdgs ?? "[]", [])} />
