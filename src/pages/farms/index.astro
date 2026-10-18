@@ -33,16 +33,25 @@ if (!list.length) {
   <script>
     async function initMap() {
       const L = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      await import("https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js");
       const el = document.getElementById("map");
       if (!el) return;
       const farms = JSON.parse(el.dataset.farms || "[]");
       const map = L.map(el).setView([18.5, -70], 6);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+      const cluster = L.markerClusterGroup();
       for (const f of farms) {
-        if (f.latitude && f.longitude) L.marker([f.latitude, f.longitude]).addTo(map).bindPopup(f.name);
+        if (f.latitude && f.longitude) {
+          const m = L.marker([f.latitude, f.longitude]);
+          m.bindPopup(`<strong>${f.name}</strong><br/>${f.country ?? ""}`);
+          cluster.addLayer(m);
+        }
       }
+      map.addLayer(cluster);
     }
     initMap();
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 </BaseLayout>
