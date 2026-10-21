@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "node scripts/postbuild.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "typecheck": "tsc --noEmit",
@@ -17,8 +18,8 @@
     "db:check": "drizzle-kit check",
     "db:migrate:local": "wrangler d1 migrations apply kokonut-foundation-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply kokonut-foundation-db --remote",
-    "db:seed:local": "wrangler d1 execute kokonut-foundation-db --local --file=./migrations/seed.sql",
-    "db:seed:remote": "wrangler d1 execute kokonut-foundation-db --remote --file=./migrations/seed.sql",
+    "db:seed:local": "wrangler d1 execute kokonut-foundation-db --local --file=./scripts/seed.sql",
+    "db:seed:remote": "wrangler d1 execute kokonut-foundation-db --remote --file=./scripts/seed.sql",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

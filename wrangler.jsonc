@@ -11,11 +11,16 @@
     "enabled": true,
     "head_sampling_rate": 1
   },
+  "routes": [
+    { "pattern": "kokonut.foundation", "custom_domain": true },
+    { "pattern": "www.kokonut.foundation", "custom_domain": true },
+    { "pattern": "staging.kokonut.foundation", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "kokonut-foundation-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "9dc1ce8c-40c0-4f9f-92c3-80c105dc8b40",
       "migrations_dir": "migrations"
     }
   ],
@@ -23,7 +28,7 @@
     { "binding": "MEDIA", "bucket_name": "kokonut-foundation-media" }
   ],
   "kv_namespaces": [
-    { "binding": "CONFIG", "id": "00000000000000000000000000000000" }
+    { "binding": "CONFIG", "id": "7a52205d8b6c4aac854e70adedbbbc1a" }
   ],
   "queues": {
     "producers": [{ "binding": "SYNC_QUEUE", "queue": "kokonut-sync-queue" }],
@@ -37,7 +42,7 @@
   ],
   "vars": {
     "ENVIRONMENT": "production",
-    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAFfK8jwK4GUIbfFN",
     "ADMIN_DEV_BYPASS": "false"
   },
   "env": {
@@ -45,19 +50,19 @@
       "vars": {
         "ENVIRONMENT": "preview",
         "ADMIN_DEV_BYPASS": "true",
-        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+        "TURNSTILE_SITE_KEY": "0x4AAAAAAFfK8jwK4GUIbfFN"
       },
       "workflows": [
         { "binding": "PUBLISH_REPORT", "name": "publish-report-preview", "class_name": "PublishReportWorkflow" }
       ],
       "d1_databases": [
-        { "binding": "DB", "database_name": "kokonut-foundation-db-preview", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }
+        { "binding": "DB", "database_name": "kokonut-foundation-db-preview", "database_id": "0ad3a4e9-b1f7-4abf-b655-0e821350369f", "migrations_dir": "migrations" }
       ],
       "r2_buckets": [
         { "binding": "MEDIA", "bucket_name": "kokonut-foundation-media-preview" }
       ],
       "kv_namespaces": [
-        { "binding": "CONFIG", "id": "00000000000000000000000000000001" }
+        { "binding": "CONFIG", "id": "271b7876f4274571bd043f6fe2af8842" }
       ],
       "queues": {
         "producers": [{ "binding": "SYNC_QUEUE", "queue": "kokonut-sync-queue-preview" }],

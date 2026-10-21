@@ -19,7 +19,7 @@ export interface AccessClaims {
 
 export interface AccessVerifyOptions {
   teamDomain: string; // e.g. "myteam.cloudflareaccess.com"
-  audience: string; // Access application AUD tag
+  audience: string; // Access application AUD tag (comma-separated for multiple apps)
   certs?: Record<string, string>; // kid -> PEM
 }
 
@@ -63,6 +63,15 @@ export async function verifyAccessJwt(
     if (header.alg !== "RS256") return { valid: false, reason: `unsupported alg ${header.alg}` };
     if (!header.kid) return { valid: false, reason: "missing kid" };
 
+    const auds = (Array.isArray(claims.aud) ? claims.aud : [claims.aud]).filter(
+      (a): a is string => typeof a === "string",
+    );
+    const expected = opts.audience.split(",").map((a) => a.trim()).filter(Boolean);
+    if (!auds.some((a) => expected.includes(a))) return { valid: false, reason: "aud mismatch" };
+    if (typeof claims.exp === "number" && claims.exp * 1000 < Date.now()) {
+      return { valid: false, reason: "expired" };
+    }
+
     const certs = opts.certs ?? (await fetchTeamCerts(opts.teamDomain));
     const pem = certs[header.kid];
     if (!pem) return { valid: false, reason: "unknown kid" };
@@ -79,11 +88,6 @@ export async function verifyAccessJwt(
     const valid = await crypto.subtle.verify({ name: "RSASSA-PKCS1-v1_5" }, key, signature, signed);
     if (!valid) return { valid: false, reason: "bad signature" };
 
-    const auds = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (!auds.includes(opts.audience)) return { valid: false, reason: "aud mismatch" };
-    if (typeof claims.exp === "number" && claims.exp * 1000 < Date.now()) {
-      return { valid: false, reason: "expired" };
-    }
     return { valid: true, claims };
   } catch (e) {
     return { valid: false, reason: String(e) };

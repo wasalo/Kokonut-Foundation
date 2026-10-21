@@ -2,12 +2,15 @@
 INSERT OR IGNORE INTO projects (id, slug, name, summary, description, status, project_type, country, region, latitude, longitude, start_date, impact_areas, sdgs, metrics, created_at, updated_at)
 VALUES ('proj_adelphi', 'adelphi', 'Adelphi Regenerative Farm', 'Live regenerative farm in Gonzalo, Monte Plata, Dominican Republic.', 'Adelphi is a women-led syntropic farm in Gonzalo, Sabana Grande de Boyá, Monte Plata, DR, founded by sisters Yanny and Neury Hernández. First live Kokonut reference farm implementing the Kokonut Framework. Demonstrates Fund → Grow → Verify → Repeat with coconut production, free-range hens, and community governance. Framework phase: Phase II — Production & Regeneration.', 'active', 'Regenerative Farm', 'Dominican Republic', 'Gonzalo, Sabana Grande de Boyá, Monte Plata', 18.9388, -69.7350, '2024-01-01', '["Ecology","Agriculture","Community","Economic"]', '[1,2,5,8,15]', '["met_farm_area","met_coconut_trees","met_hens","met_sdgs","met_community"]', datetime('now'), datetime('now'));
 
-INSERT OR IGNORE INTO metrics (id, slug, name, description, category, value, unit, project_id, observed_at, source, verification_status, updated_at) VALUES
- ('met_farm_area','farm-area','Regenerative Farm Area','Total regenerative farm area.','Ecology',15725,'m²','proj_adelphi','2026-09-30','Kokonut Intelligence','verified',datetime('now')),
- ('met_coconut_trees','coconut-trees','Coconut Trees','Number of coconut trees.','Agriculture',96,'trees','proj_adelphi','2026-09-30','Kokonut Intelligence','verified',datetime('now')),
- ('met_hens','free-range-hens','Free-Range Hens','Number of free-range hens.','Agriculture',110,'hens','proj_adelphi','2026-09-30','Kokonut Intelligence','verified',datetime('now')),
- ('met_sdgs','sdgs-addressed','SDGs Addressed','Sustainable Development Goals addressed.','Public Goods',5,'','proj_adelphi','2026-09-30','Kokonut Intelligence','verified',datetime('now')),
- ('met_community','community-members','Community Members','Community members engaged.','Community',3000,'+','proj_adelphi','2026-09-30','Kokonut Network','reported',datetime('now'));
+INSERT OR IGNORE INTO metrics (id, slug, name, description, category, value, unit, project_id, observed_at, source, methodology, verification_status, updated_at) VALUES
+ ('met_farm_area','farm-area','Regenerative Farm Area','Total regenerative farm area.','Ecology',15725,'m²','proj_adelphi','2026-09-30','kokonut-intelligence','area-measurement','verified',datetime('now')),
+ ('met_coconut_trees','coconut-trees','Coconut Trees','Number of coconut trees.','Agriculture',96,'trees','proj_adelphi','2026-09-30','kokonut-intelligence','tree-count','verified',datetime('now')),
+ ('met_hens','free-range-hens','Free-Range Hens','Number of free-range hens.','Agriculture',110,'hens','proj_adelphi','2026-09-30','kokonut-intelligence',NULL,'verified',datetime('now')),
+ ('met_sdgs','sdgs-addressed','SDGs Addressed','Sustainable Development Goals addressed.','Public Goods',5,'','proj_adelphi','2026-09-30','kokonut-intelligence',NULL,'verified',datetime('now')),
+ ('met_community','community-members','Community Members','Community members engaged.','Community',3000,'+','proj_adelphi','2026-09-30','kokonut-network',NULL,'reported',datetime('now'));
+
+INSERT OR IGNORE INTO sources (id, slug, name, source_type, url, description, created_at)
+VALUES ('src_kn','kokonut-network','Kokonut Network','system','https://kokonut.network','Kokonut Network community data.',datetime('now'));
 
 INSERT OR IGNORE INTO milestones (id, project_id, title, description, status, due_date) VALUES
  ('ms1','proj_adelphi','Farm established','Initial farm setup.','completed','2024-06-01'),
