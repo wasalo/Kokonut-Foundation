@@ -9,6 +9,11 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      # Secrets are mapped to job-level env because `secrets` is not available in
+      # step-level `if` expressions.
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,19 +28,13 @@ jobs:
       - run: npm run test:e2e
       - run: npm run build
       - name: Apply D1 migrations (production)
-        if: github.ref == 'refs/heads/main' && secrets.CLOUDFLARE_API_TOKEN != ''
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         run: npx wrangler d1 migrations apply kokonut-foundation-db --remote
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Deploy (production)
-        if: github.ref == 'refs/heads/main' && secrets.CLOUDFLARE_API_TOKEN != ''
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         run: npx wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - name: Health check (production)
-        if: github.ref == 'refs/heads/main' && secrets.CLOUDFLARE_API_TOKEN != ''
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         run: |
           for i in $(seq 1 10); do
             code=$(curl -s -o /dev/null -w "%{http_code}" https://kokonut.foundation/api/health || true)
