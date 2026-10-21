@@ -9,11 +9,14 @@ interface Props {
   description?: string;
   canonical?: string;
   jsonLd?: Record<string, unknown>;
+  lang?: string;
 }
-const { title, description = "Kokonut Foundation — Growing Regenerative Farms Through Community Governance", canonical, jsonLd } = Astro.props;
+const { title, description = "Kokonut Foundation — Growing Regenerative Farms Through Community Governance", canonical, jsonLd, lang = "en" } = Astro.props;
+const env = (Astro.locals as any).runtime?.env ?? {};
+const analyticsToken = env.CF_WEB_ANALYTICS_TOKEN;
 ---
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +24,9 @@ const { title, description = "Kokonut Foundation — Growing Regenerative Farms 
     <link rel="manifest" href="/manifest.webmanifest" />
     <SeoHead title={title} description={description} canonical={canonical} jsonLd={jsonLd} />
     <!-- Cloudflare Web Analytics -->
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "PLACEHOLDER"}'></script>
+    {analyticsToken && (
+      <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>
+    )}
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("/sw.js").catch(() => {});

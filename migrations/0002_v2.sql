@@ -60,9 +60,9 @@ CREATE INDEX IF NOT EXISTS idx_milestones_project ON milestones(project_id);
 CREATE INDEX IF NOT EXISTS idx_resources_project ON resources(project_id);
 CREATE INDEX IF NOT EXISTS idx_reports_project ON reports(project_id);
 
--- Seed Adelphi farm
-INSERT OR IGNORE INTO farms (id, slug, name, project_id, country, region, latitude, longitude, area_m2, agricultural_area_m2, description, status, lifecycle_state, founders, jobs, framework_phase, funding_ref, public_goods_allocation, created_at, updated_at)
-VALUES ('farm_adelphi','adelphi','Adelphi Regenerative Farm','proj_adelphi','Dominican Republic','Gonzalo, Sabana Grande de Boyá, Monte Plata',18.9388,-69.7350,15725,13838,'Women-led syntropic farm. First live Kokonut reference farm.','active','published','Yanny & Neury Hernández',7,'Phase II — Production & Regeneration','Public Nouns Proposal #69',10,datetime('now'),datetime('now'));
+-- Seed Adelphi farm (KB-enriched columns are added in 0005_kb_enrichment.sql)
+INSERT OR IGNORE INTO farms (id, slug, name, project_id, country, region, latitude, longitude, area_m2, description, status, created_at, updated_at)
+VALUES ('farm_adelphi','adelphi','Adelphi Regenerative Farm','proj_adelphi','Dominican Republic','Gonzalo, Sabana Grande de Boyá, Monte Plata',18.9388,-69.7350,15725,'Women-led syntropic farm. First live Kokonut reference farm.','active',datetime('now'),datetime('now'));
 
 -- Seed sample treasury entries
 INSERT OR IGNORE INTO wallets (id, address, chain, label, wallet_type, visibility, created_at)

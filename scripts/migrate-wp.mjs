@@ -15,7 +15,7 @@ if (cmd === "crawl") {
   console.log("-- Redirects SQL");
   for (const line of lines.slice(1)) {
     const [from, to, code] = line.split(",");
-    console.log(`INSERT OR IGNORE INTO redirects (id, from_path, to_path, status_code) VALUES ('red_${from.replace(/\\W/g, "")}', '${from}', '${to}', ${code ?? 301});`);
+    console.log(`INSERT OR IGNORE INTO redirects (id, from_path, to_path, status_code) VALUES ('red_${from.replace(/[^A-Za-z0-9]+/g, "_")}', '${from}', '${to}', ${code ?? 301});`);
   }
 } else if (cmd === "classify") {
   console.log(JSON.stringify({ note: "Classify URLs into Page/Project/Impact/Resource/Partner/Team/External/Archive" }, null, 2));

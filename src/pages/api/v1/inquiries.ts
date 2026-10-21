@@ -3,7 +3,7 @@ import { getDb } from "@lib/db";
 import { inquiries } from "@lib/schema";
 import { ok, err } from "@lib/api";
 import { verifyTurnstile } from "@lib/turnstile";
-import { id, nowIso } from "@lib/utils";
+import { id, nowIso, sanitize } from "@lib/utils";
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const env = (locals as any).runtime?.env ?? {};
@@ -19,13 +19,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const token = data["cf-turnstile-response"] || data["turnstileToken"];
-  const okTurnstile = await verifyTurnstile(token, env.TURNSTILE_SECRET_KEY, ip);
+  const okTurnstile = await verifyTurnstile(token, env.TURNSTILE_SECRET_KEY, ip, env.ENVIRONMENT ?? "development");
   if (!okTurnstile) return err("Turnstile verification failed", 400);
 
-  const name = (data.name ?? "").trim();
-  const email = (data.email ?? "").trim();
-  const message = (data.message ?? "").trim();
+  const name = sanitize(data.name, 200);
+  const email = sanitize(data.email, 200).toLowerCase();
+  const message = sanitize(data.message, 5000);
+  const organization = sanitize(data.organization, 200);
   if (!name || !email || !message) return err("Missing required fields", 400);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err("Invalid email", 400);
 
   if (!env.DB) return err("DB not configured", 503);
   try {

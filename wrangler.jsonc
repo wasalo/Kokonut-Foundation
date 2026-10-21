@@ -42,7 +42,14 @@
   },
   "env": {
     "preview": {
-      "vars": { "ENVIRONMENT": "preview", "ADMIN_DEV_BYPASS": "true" },
+      "vars": {
+        "ENVIRONMENT": "preview",
+        "ADMIN_DEV_BYPASS": "true",
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+      },
+      "workflows": [
+        { "binding": "PUBLISH_REPORT", "name": "publish-report-preview", "class_name": "PublishReportWorkflow" }
+      ],
       "d1_databases": [
         { "binding": "DB", "database_name": "kokonut-foundation-db-preview", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }
       ],

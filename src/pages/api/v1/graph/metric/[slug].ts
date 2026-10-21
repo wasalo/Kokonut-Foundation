@@ -29,7 +29,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
       ? await db.select().from(methodologies).where(eq(methodologies.slug, metric.methodology)).get() ?? null
       : null;
     const src = metric.source
-      ? await db.select().from(sources).where(eq(sources.slug, metric.source)).get() ?? null
+      ? await db.select().from(sources).where(eq(sources.slug, metric.source)).get()
+        ?? await db.select().from(sources).where(eq(sources.name, metric.source)).get() ?? null
       : null;
     const assets = metric.projectId ? await db.select().from(naturalAssets).where(eq(naturalAssets.projectId, metric.projectId)) : [];
     const acts = metric.projectId ? await db.select().from(activities).where(eq(activities.projectId, metric.projectId)) : [];

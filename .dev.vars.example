@@ -1,0 +1,30 @@
+# Local development secrets. Copy to `.dev.vars` and fill in real values.
+# `.dev.vars` is gitignored — never commit it.
+
+# Cloudflare Access dev bypass (only for local dev; never enable in production)
+ADMIN_DEV_BYPASS=true
+
+# Turnstile — https://dash.cloudflare.com/?to=/:account/turnstile
+# Use the test keys (1x00000000000000000000AA / 1x0000000000000000000000000000000AA) locally.
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Cloudflare Web Analytics beacon token (optional locally)
+CF_WEB_ANALYTICS_TOKEN=
+
+# Cloudflare Access — admin protection. In production both are required:
+#   ACCESS_TEAM_DOMAIN = <team>.cloudflareaccess.com
+#   ACCESS_AUD         = Access application AUD tag
+# Without them, admin routes are denied in production.
+ACCESS_TEAM_DOMAIN=
+ACCESS_AUD=
+
+# Kokonut Intelligence (optional)
+KI_API_URL=
+KI_API_KEY=
+
+# Ethereum RPC for treasury balance reads (optional; defaults to cloudflare-eth.com)
+ETH_RPC_URL=
+
+# Token required to download restricted content
+RESTRICTED_ACCESS_TOKEN=

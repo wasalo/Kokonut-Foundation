@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["src/*"],
       "@lib/*": ["src/lib/*"],
-      "@components/*": ["src/components/*"]
+      "@components/*": ["src/components/*"],
+      "@layouts/*": ["src/layouts/*"]
     },
     "types": ["@cloudflare/workers-types", "astro/client"]
   },

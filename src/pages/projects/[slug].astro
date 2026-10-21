@@ -182,7 +182,8 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
     if (el) {
       const lat = Number(el.dataset.lat);
       const lng = Number(el.dataset.lng);
-      const L = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      const mod = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      const L = mod.default ?? mod;
       const map = L.map(el).setView([lat, lng], 10);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
       L.marker([lat, lng]).addTo(map);

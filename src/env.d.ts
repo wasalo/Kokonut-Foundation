@@ -11,6 +11,13 @@ interface RuntimeEnv {
   TURNSTILE_SITE_KEY: string;
   TURNSTILE_SECRET_KEY?: string;
   ADMIN_DEV_BYPASS?: string;
+  CF_WEB_ANALYTICS_TOKEN?: string;
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
+  KI_API_URL?: string;
+  KI_API_KEY?: string;
+  ETH_RPC_URL?: string;
+  RESTRICTED_ACCESS_TOKEN?: string;
 }
 
 declare global {

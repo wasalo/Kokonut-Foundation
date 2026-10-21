@@ -35,5 +35,4 @@ INSERT OR IGNORE INTO redirects (id, from_path, to_path, status_code) VALUES
  ('red4','/impact-report','/transparency/reports',301),
  ('red5','/contact-us','/contact',301),
  ('red6','/team','/about/team',301),
- ('red7','/farms','/farms',301),
  ('red8','/live-farm-data','https://hub.kokonut.network/projects/41',302);

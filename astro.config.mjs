@@ -24,7 +24,8 @@ export default defineConfig({
     },
   },
   security: {
-    checkOrigin: false,
+    // Origin check stays enabled so cross-site form posts to admin/API routes are rejected.
+    checkOrigin: true,
   },
   site: "https://kokonut.foundation",
   i18n: {

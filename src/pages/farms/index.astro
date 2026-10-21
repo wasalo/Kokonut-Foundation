@@ -9,7 +9,7 @@ const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(farms); } catch {}
 if (!list.length) {
-  list = [{ id: "farm_adelphi", slug: "adelphi", name: "Adelphi Regenerative Farm", country: "Dominican Republic", region: "Adelphi", areaM2: 15725, latitude: 18.4861, longitude: -69.9312, status: "active" }];
+  list = [{ id: "farm_adelphi", slug: "adelphi", name: "Adelphi Regenerative Farm", country: "Dominican Republic", region: "Gonzalo, Sabana Grande de Boyá, Monte Plata", areaM2: 15725, latitude: 18.9388, longitude: -69.7350, status: "active" }];
 }
 ---
 <BaseLayout title="Farms — Kokonut Foundation" description="Regenerative farms.">
@@ -33,22 +33,31 @@ if (!list.length) {
   </section>
   <script>
     async function initMap() {
-      const L = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
-      await import("https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js");
+      const mod = await import("https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js");
+      const L = mod.default ?? mod;
+      // markercluster ships UMD and expects a global `L`
+      (window as any).L = L;
+      await new Promise<void>((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js";
+        s.onload = () => resolve();
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
       const el = document.getElementById("map");
       if (!el) return;
       const farms = JSON.parse(el.dataset.farms || "[]");
-      const map = L.map(el).setView([18.5, -70], 6);
+      const map = L.map(el).setView([18.9, -69.7], 7);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
-      const cluster = L.markerClusterGroup();
+      const cluster = L.markerClusterGroup ? L.markerClusterGroup() : null;
       for (const f of farms) {
         if (f.latitude && f.longitude) {
           const m = L.marker([f.latitude, f.longitude]);
           m.bindPopup(`<strong>${f.name}</strong><br/>${f.country ?? ""}`);
-          cluster.addLayer(m);
+          if (cluster) cluster.addLayer(m); else m.addTo(map);
         }
       }
-      map.addLayer(cluster);
+      if (cluster) map.addLayer(cluster);
     }
     initMap();
   </script>

@@ -2,8 +2,10 @@ export async function verifyTurnstile(
   token: string | undefined,
   secret: string | undefined,
   ip?: string,
+  environment = "development",
 ): Promise<boolean> {
-  if (!secret) return true; // degrade gracefully in dev
+  // Fail closed in production: a missing secret must never silently allow submissions.
+  if (!secret) return environment !== "production";
   if (!token) return false;
   try {
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {

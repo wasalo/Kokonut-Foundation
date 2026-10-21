@@ -15,6 +15,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Start preview server
+        run: |
+          npx wrangler dev --port 4321 --local > /tmp/preview.log 2>&1 &
+          echo $! > /tmp/preview.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4321/ > /dev/null; then echo "server up"; break; fi
+            sleep 1
+          done
       - name: Run Lighthouse
         uses: treosh/lighthouse-ci-action@v12
         with:
@@ -24,3 +32,7 @@ jobs:
             http://localhost:4321/impact
           uploadArtifacts: true
           temporaryPublicStorage: true
+          configPath: ./lighthouserc.json
+      - name: Stop preview server
+        if: always()
+        run: kill $(cat /tmp/preview.pid) || true

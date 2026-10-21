@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getDb } from "@lib/db";
 import { measurements } from "@lib/schema";
 import { err } from "@lib/api";
+import { csvRow } from "@lib/utils";
 
 export const GET: APIRoute = async ({ locals }) => {
   const env = (locals as any).runtime?.env ?? {};
@@ -10,7 +11,7 @@ export const GET: APIRoute = async ({ locals }) => {
     const db = getDb(env);
     const rows = await db.select().from(measurements);
     const header = "id,metricId,projectId,value,observedAt,source,verificationStatus";
-    const lines = rows.map((m: any) => [m.id, m.metricId, m.projectId ?? "", m.value, m.observedAt, m.source ?? "", m.verificationStatus].join(","));
+    const lines = rows.map((m: any) => csvRow([m.id, m.metricId, m.projectId, m.value, m.observedAt, m.source, m.verificationStatus]));
     const csv = [header, ...lines].join("\n");
     return new Response(csv, { headers: { "Content-Type": "text/csv", "Content-Disposition": "attachment; filename=measurements.csv" } });
   } catch (e) {

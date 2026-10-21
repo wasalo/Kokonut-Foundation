@@ -59,23 +59,58 @@ export class PublishReportWorkflow extends WorkflowEntrypoint {
   }
 }
 
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; connect-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://unpkg.com https://cdn.jsdelivr.net https://easscan.org; frame-src https://challenges.cloudflare.com;";
+
+function applySecurityHeaders(headers: Headers) {
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  headers.set("Content-Security-Policy", CSP);
+}
+
+// Wraps the static-assets binding so prerendered pages also receive security headers
+// (Astro middleware does not run for prerendered routes).
+function withSecurityHeaders(env: any) {
+  if (!env || !env.ASSETS || env.__securityHeadersWrapped) return env;
+  const assets = env.ASSETS;
+  const patched = {
+    ...env,
+    __securityHeadersWrapped: true,
+    ASSETS: {
+      async fetch(input: any, init?: any) {
+        const res = await assets.fetch(input, init);
+        const headers = new Headers(res.headers);
+        applySecurityHeaders(headers);
+        return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+      },
+    },
+  };
+  return patched;
+}
+
 export function createExports(manifest: any) {
   const app = new App(manifest);
   const fetch = async (request: any, env: any, context: any) => {
-    return await handle(manifest, app, request, env, context);
+    return await handle(manifest, app, request, withSecurityHeaders(env), context);
   };
   const queue = async (batch: MessageBatch<any>, env: any, ctx: ExecutionContext) => {
     for (const msg of batch.messages) {
       try {
-        const job = msg.body as { source?: string; id?: string };
-        if (env?.DB) {
-          const db = getDb(env);
-          if (job?.id) {
-            await db.update(syncJobs).set({ status: "completed", finishedAt: nowIso(), details: "processed by queue consumer" }).where(eq(syncJobs.id, job.id));
-          }
+        const job = msg.body as { id?: string; source?: string };
+        if (job?.source === "kokonut-intelligence" || job?.source === "cron") {
+          const { runKiIngest } = await import("./lib/ki-ingest");
+          await runKiIngest(env);
         }
         msg.ack();
       } catch (e) {
+        if (env?.DB) {
+          const db = getDb(env);
+          const job = msg.body as { id?: string };
+          if (job?.id) {
+            await db.update(syncJobs).set({ status: "failed", finishedAt: nowIso(), details: String(e) }).where(eq(syncJobs.id, job.id));
+          }
+        }
         msg.retry();
       }
     }
@@ -94,5 +129,6 @@ export function createExports(manifest: any) {
     default: { fetch, queue, scheduled },
     queue,
     scheduled,
+    PublishReportWorkflow,
   };
 }

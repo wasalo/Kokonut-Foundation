@@ -21,6 +21,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const db = getDb(env);
   const slug = data.slug ? slugify(data.slug) : slugify(title);
   const reportId = id("rep_");
+
+  // Prefer the durable Workflow when the binding is available.
+  if (env.PUBLISH_REPORT) {
+    const instance = await env.PUBLISH_REPORT.create({
+      params: { title, slug, summary: data.summary ?? null, reportType: data.reportType ?? "Report", projectId: data.projectId ?? null, documentKey, visibility: data.visibility ?? "public" },
+    });
+    return ok({ id: instance.id, slug, workflow: true });
+  }
+
   await db.insert(reports).values({
     id: reportId,
     slug,

@@ -36,3 +36,24 @@ export function nowIso(): string {
 export function id(prefix = ""): string {
   return `${prefix}${crypto.randomUUID()}`;
 }
+
+// Strips control characters and caps length for user-submitted values.
+export function sanitize(value: unknown, maxLength = 1000): string {
+  if (value == null) return "";
+  return String(value)
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
+// RFC 4180 CSV field escaping.
+export function csvField(value: unknown): string {
+  if (value == null) return "";
+  const s = String(value).replace(/[\r\n]+/g, " ").trim();
+  if (/[",]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export function csvRow(values: unknown[]): string {
+  return values.map(csvField).join(",");
+}

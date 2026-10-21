@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getDb } from "@lib/db";
 import { treasuryEntries } from "@lib/schema";
 import { err } from "@lib/api";
+import { csvRow } from "@lib/utils";
 
 export const GET: APIRoute = async ({ locals }) => {
   const env = (locals as any).runtime?.env ?? {};
@@ -10,7 +11,7 @@ export const GET: APIRoute = async ({ locals }) => {
     const db = getDb(env);
     const rows = await db.select().from(treasuryEntries);
     const header = "id,walletId,asset,amount,valueUsd,occurredAt,category,source";
-    const lines = rows.map((t: any) => [t.id, t.walletId, t.asset, t.amount, t.valueUsd ?? "", t.occurredAt, t.category ?? "", t.source].join(","));
+    const lines = rows.map((t: any) => csvRow([t.id, t.walletId, t.asset, t.amount, t.valueUsd, t.occurredAt, t.category, t.source]));
     const csv = [header, ...lines].join("\n");
     return new Response(csv, { headers: { "Content-Type": "text/csv", "Content-Disposition": "attachment; filename=treasury.csv" } });
   } catch (e) {
