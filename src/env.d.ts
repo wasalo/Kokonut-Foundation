@@ -16,6 +16,10 @@ interface RuntimeEnv {
   ACCESS_AUD?: string;
   KI_API_URL?: string;
   KI_API_KEY?: string;
+  KI_API_EMAIL?: string;
+  KI_API_PASSWORD?: string;
+  KI_PATH_STYLE?: "directus" | "rest" | "auto";
+  KI_COLLECTION_MAP?: string;
   ETH_RPC_URL?: string;
   RESTRICTED_ACCESS_TOKEN?: string;
 }

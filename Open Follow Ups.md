@@ -64,13 +64,16 @@ CI runs: [39552883394](https://github.com/wasalo/Kokonut-Foundation/actions/runs
 ---
 
 ## Blocked on external resources / credentials
-- **KI real integration**: sync code is complete (`src/lib/ki-ingest.ts`, `api/admin/sync/ki.ts`, webhook, queue consumer, cron). Needs a live KI API endpoint plus `KI_API_URL` / `KI_API_KEY` to validate the endpoint paths (`/projects`, `/projects/:id/metrics`, `/metrics/:id/measurements`, `/projects/:id/attestations`) and the response shapes. KI repo: https://github.com/wasalo/Kokonut-Intelligence
+- **KI wiring (blocked on the KI refactor)**: Kokonut Intelligence is being re-factored and is **not ready to wire today** — the repository currently carries two branches (`main` and `feat/mobile-offline-acceptance`, the "kernel" stack). The Foundation side is now written to be contract-tolerant so the final wiring is configuration-only:
+  - `src/lib/ki-client.ts` — auto-detects the API path style (`/items/{collection}` Directus surface vs `/api/{collection}` kernel surface) via `KI_PATH_STYLE`, Bearer auth via `KI_API_KEY` or `KI_API_EMAIL`/`KI_API_PASSWORD`.
+  - `src/lib/ki-mapping.ts` — maps the real KI collections and fields: `farm`, `location`, `partner`, `metric_definition`, `metric_value`, `mrv_claim`, `mrv_event`, `attestation_record`, `report_snapshot`, `treasury_event`, `revenue_event`, `farm_registry_record`. Collection names are overridable with `KI_COLLECTION_MAP` (JSON).
+  - `src/lib/ki-ingest.ts` — pulls governed records, upserts them into D1, writes `sync_jobs` + `audit_log`, and stores the 13-field Common Data Schema baseline from `farm_registry_record`.
+  - Remaining once KI lands: confirm the final endpoint/collection names, set `KI_API_URL` + credentials, run `/api/admin/sync/ki`, and validate the imported records against the published Hub.
 - **CWV validation in production**: CI enforces *simulated* thresholds. Real 75th-percentile LCP/INP/CLS needs production traffic data.
-- **Cloudflare resource IDs**: `wrangler.jsonc` still contains placeholder `database_id` / KV `id` values. Replace with the real IDs from `wrangler d1 create` / `wrangler kv namespace create`.
-- **Custom domain**: `wrangler.jsonc` has no `routes` / `custom_domain` entry for `kokonut.foundation`. Add it (or attach the domain in the Cloudflare dashboard).
-- **Cloudflare Access**: needs the team domain (`ACCESS_TEAM_DOMAIN`) and the application AUD tag (`ACCESS_AUD`) to verify admin JWTs.
-- **Turnstile production keys**: the public site key is still Cloudflare's always-pass test key.
-- **Web Analytics token**: `CF_WEB_ANALYTICS_TOKEN` is not set, so the beacon is omitted.
+- **Cloudflare resource IDs**: `wrangler.jsonc` holds the real IDs created for this account (D1 `kokonut-foundation-db`, KV `kokonut-foundation-config`, R2 `kokonut-foundation-media`, Queue `kokonut-sync-queue`).
+- **Cloudflare Access**: `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD` are set as Worker secrets for `kokonut.foundation/admin*` and `kokonut.foundation/api/admin*`.
+- **Turnstile production keys**: the real site key/secret are set (widget `kokonut-foundation`).
+- **Web Analytics**: `CF_WEB_ANALYTICS_TOKEN` is set for the `kokonut.foundation` RUM site.
 
 ## Requires manual review / tooling
 - **a11y audit to WCAG 2.2 AA**: automated checks now pass at 1.00 (Lighthouse) plus 6 hand-written Playwright assertions. Still needs an axe run and a manual screen-reader pass.

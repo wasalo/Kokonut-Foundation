@@ -19,9 +19,16 @@ CF_WEB_ANALYTICS_TOKEN=
 ACCESS_TEAM_DOMAIN=
 ACCESS_AUD=
 
-# Kokonut Intelligence (optional)
+# Kokonut Intelligence (optional — KI is mid-refactor; the client auto-detects
+# the API path style and the collection names are overridable)
 KI_API_URL=
 KI_API_KEY=
+KI_API_EMAIL=
+KI_API_PASSWORD=
+# "auto" probes /items/{collection} first, then /api/{collection}
+KI_PATH_STYLE=auto
+# JSON map to override collection names, e.g. {"mrvEvent":"mrv_observation"}
+KI_COLLECTION_MAP=
 
 # Ethereum RPC for treasury balance reads (optional; defaults to cloudflare-eth.com)
 ETH_RPC_URL=
