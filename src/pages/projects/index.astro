@@ -31,24 +31,37 @@ const countries = [...new Set(list.map((p: any) => p.country).filter(Boolean))];
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl md:text-5xl font-bold text-strong">Projects</h1>
     <p class="mt-4 text-muted">Real projects, real farms, real impact.</p>
-    <form method="GET" class="mt-6 flex flex-wrap gap-3">
-      <input name="q" value={q ?? ""} placeholder="Search..." class="rounded-md border border-border px-3 py-2 text-sm" />
-      <select name="status" class="rounded-md border border-border px-3 py-2 text-sm">
-        <option value="">All statuses</option>
-        <option value="active" selected={status === "active"}>Active</option>
-        <option value="planned" selected={status === "planned"}>Planned</option>
-        <option value="completed" selected={status === "completed"}>Completed</option>
-      </select>
-      <select name="country" class="rounded-md border border-border px-3 py-2 text-sm">
-        <option value="">All countries</option>
-        {countries.map((c) => <option value={c} selected={country === c}>{c}</option>)}
-      </select>
-      <select name="sdg" class="rounded-md border border-border px-3 py-2 text-sm">
-        <option value="">All SDGs</option>
-        {[2, 13, 15].map((s) => <option value={s} selected={sdg === String(s)}>SDG {s}</option>)}
-      </select>
+    <form method="GET" class="mt-6 flex flex-wrap gap-3 items-end">
+      <div>
+        <label for="q" class="block text-xs text-muted mb-1">Search</label>
+        <input id="q" name="q" value={q ?? ""} placeholder="Search projects..." class="rounded-md border border-border px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label for="status" class="block text-xs text-muted mb-1">Status</label>
+        <select id="status" name="status" class="rounded-md border border-border px-3 py-2 text-sm">
+          <option value="">All statuses</option>
+          <option value="active" selected={status === "active"}>Active</option>
+          <option value="planned" selected={status === "planned"}>Planned</option>
+          <option value="completed" selected={status === "completed"}>Completed</option>
+        </select>
+      </div>
+      <div>
+        <label for="country" class="block text-xs text-muted mb-1">Country</label>
+        <select id="country" name="country" class="rounded-md border border-border px-3 py-2 text-sm">
+          <option value="">All countries</option>
+          {countries.map((c) => <option value={c} selected={country === c}>{c}</option>)}
+        </select>
+      </div>
+      <div>
+        <label for="sdg" class="block text-xs text-muted mb-1">SDG</label>
+        <select id="sdg" name="sdg" class="rounded-md border border-border px-3 py-2 text-sm">
+          <option value="">All SDGs</option>
+          {[1, 2, 5, 8, 13, 15].map((s) => <option value={s} selected={sdg === String(s)}>SDG {s}</option>)}
+        </select>
+      </div>
       <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white text-sm">Filter</button>
     </form>
+    <h2 class="sr-only">Projects</h2>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.map((p: any) => (
         <ProjectCard slug={p.slug} name={p.name} summary={p.summary} status={p.status} country={p.country} sdgs={parseJson(p.sdgs ?? "[]", [])} />

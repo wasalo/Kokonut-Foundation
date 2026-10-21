@@ -17,6 +17,7 @@ if (!list.length) {
     <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"farms_view"})}).catch(()=>{});</script>
     <h1 class="text-3xl md:text-5xl font-bold text-strong">Farms</h1>
     <p class="mt-4 text-muted">Regenerative farms implementing the Kokonut Framework.</p>
+    <h2 class="sr-only">Farms</h2>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.map((f: any) => (
         <a href={`/farms/${f.slug}`} class="block">
