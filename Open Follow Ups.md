@@ -5,6 +5,25 @@ Each item is either blocked on external resources/credentials, requires manual r
 
 ---
 
+## Verified by CI (2026-10-21)
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | ✅ clean |
+| `npm test` (vitest) | ✅ 23 tests / 5 files |
+| `npm run test:e2e` (Playwright chromium) | ✅ 10 tests / 3 files |
+| `npm run build` | ✅ server bundle + Cloudflare adapter |
+| Lighthouse `/` | ✅ performance 1.00 · accessibility 1.00 · best-practices 1.00 · SEO 1.00 |
+| Lighthouse `/projects` | ✅ performance 1.00 · accessibility 1.00 · best-practices 1.00 · SEO 1.00 |
+| Lighthouse `/impact` | ✅ performance 1.00 · accessibility 1.00 · best-practices 1.00 · SEO 1.00 |
+| CWV (simulated) | ✅ LCP 0.3 s (target < 2.5 s) · CLS 0 (target < 0.1) · TBT 0 ms (target < 200 ms) |
+| D1 migration chain (sqlite replay of `migrations/0001`–`0006` + `seed.sql`) | ✅ applies cleanly, no schema drift vs `src/lib/schema.ts` |
+| Built worker exports | ✅ `queue`, `scheduled`, `PublishReportWorkflow` present in `dist/_worker.js/index.js` |
+
+CI runs: [39552883394](https://github.com/wasalo/Kokonut-Foundation/actions/runs/39552883394) ✅ · Lighthouse [39552890765](https://github.com/wasalo/Kokonut-Foundation/actions/runs/39552890765) ✅
+
+---
+
 ## Fixed in the pre-deployment audit (2026-10-21)
 
 | # | Issue | Fix |
@@ -37,21 +56,26 @@ Each item is either blocked on external resources/credentials, requires manual r
 | 26 | `migrate-wp.mjs` redirect-ID regex was broken | Fixed to `/[^A-Za-z0-9]+/g` |
 | 27 | OpenAPI spec had a phantom path and missed `POST /api/v1/events` | Spec corrected |
 | 28 | Undeclared env vars (`TURNSTILE_SECRET_KEY`, `KI_API_*`, `ETH_RPC_URL`, `RESTRICTED_ACCESS_TOKEN`, `CF_WEB_ANALYTICS_TOKEN`, `ACCESS_*`) | Declared in `src/env.d.ts`, documented in README + `.dev.vars.example` |
+| 29 | CI workflow used `secrets` in a step-level `if` (invalid → workflow file error) | Secrets mapped to job-level `env`, referenced as `env.*` in step conditions |
+| 30 | Brand green `#009F4D` on white = 3.36:1 (fails AA for small text) | `--color-primary` is now `#007A3D` (5.43:1); `#009F4D` retained as `--color-primary-vivid` for large display/accent use |
+| 31 | Form controls had no labels; headings skipped levels | Labels added to all selects/inputs; `sr-only` section headings added; static checker confirms 0 heading-order violations |
+| 32 | Lighthouse accessibility 0.89 on `/projects` | Fixed → 1.00 on all three audited pages |
 
 ---
 
 ## Blocked on external resources / credentials
 - **KI real integration**: sync code is complete (`src/lib/ki-ingest.ts`, `api/admin/sync/ki.ts`, webhook, queue consumer, cron). Needs a live KI API endpoint plus `KI_API_URL` / `KI_API_KEY` to validate the endpoint paths (`/projects`, `/projects/:id/metrics`, `/metrics/:id/measurements`, `/projects/:id/attestations`) and the response shapes. KI repo: https://github.com/wasalo/Kokonut-Intelligence
-- **CWV validation**: requires real production traffic data to measure LCP/INP/CLS at the 75th percentile. CI now enforces simulated thresholds via Lighthouse.
+- **CWV validation in production**: CI enforces *simulated* thresholds. Real 75th-percentile LCP/INP/CLS needs production traffic data.
 - **Cloudflare resource IDs**: `wrangler.jsonc` still contains placeholder `database_id` / KV `id` values. Replace with the real IDs from `wrangler d1 create` / `wrangler kv namespace create`.
 - **Custom domain**: `wrangler.jsonc` has no `routes` / `custom_domain` entry for `kokonut.foundation`. Add it (or attach the domain in the Cloudflare dashboard).
 - **Cloudflare Access**: needs the team domain (`ACCESS_TEAM_DOMAIN`) and the application AUD tag (`ACCESS_AUD`) to verify admin JWTs.
 - **Turnstile production keys**: the public site key is still Cloudflare's always-pass test key.
+- **Web Analytics token**: `CF_WEB_ANALYTICS_TOKEN` is not set, so the beacon is omitted.
 
 ## Requires manual review / tooling
-- **a11y audit to WCAG 2.2 AA**: automated checks only so far (skip link, focus-visible, reduced motion, `aria-current`, `lang`, mobile nav, 6 hand-written Playwright assertions). Still needs an axe run and a manual screen-reader pass.
+- **a11y audit to WCAG 2.2 AA**: automated checks now pass at 1.00 (Lighthouse) plus 6 hand-written Playwright assertions. Still needs an axe run and a manual screen-reader pass.
 - **Expanded tests**: unit (23) and e2e (10) exist; no component tests, no integration tests against a live D1/R2, no axe assertions.
-- **CI verification**: the new Lighthouse job, e2e job, migration step, and health check have not yet run on GitHub.
+- **CI deploy path**: the migration / deploy / health-check steps are skipped until `CLOUDFLARE_API_TOKEN` is set; they have never executed against Cloudflare.
 - **Admin roles**: Cloudflare Access handles authentication, but the PRD's role split (Administrator / Field Worker / Supervisor / Manager / Finance / Analyst) is not modelled in the app.
 
 ## Incremental content work
