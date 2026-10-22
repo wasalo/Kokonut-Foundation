@@ -2,13 +2,15 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 ---
 <BaseLayout title="Governance — Kokonut Foundation" description="Foundation governance." jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation" }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-strong">Governance</h1>
-    <p class="mt-4 text-muted">Kokonut coordinates multiple forms of authority. Authorization follows the domain of the decision — no single layer owns everything.</p>
+    <h1 class="text-3xl font-bold text-strong">{t("gov.title")}</h1>
+    <p class="mt-4 text-muted">{t("gov.lede")}</p>
     <div class="mt-8 overflow-x-auto">
       <table class="w-full text-sm border border-border">
         <thead class="bg-surface-muted">
@@ -32,11 +34,11 @@ const path = (p: string) => localePath(locale, p);
     </div>
     <div class="mt-8 space-y-6">
       <Card>
-        <h2 class="font-semibold text-strong">Foundation Stewardship</h2>
+        <h2 class="font-semibold text-strong">{t("gov.facility")}</h2>
         <p class="mt-2 text-sm text-muted">The Foundation stewards regenerative projects, impact measurement, and public transparency. Decisions on project approval, funding allocation, and publication follow an internal review process.</p>
       </Card>
       <Card>
-        <h2 class="font-semibold text-strong">Community Participation (Kokonut Network)</h2>
+        <h2 class="font-semibold text-strong">{t("gov.network")}</h2>
         <p class="mt-2 text-sm text-muted">Community members participate through Kokonut Network governance. Relevant community governance resources and decision-making processes are published here.</p>
       </Card>
       <Card>

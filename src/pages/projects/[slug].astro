@@ -8,6 +8,8 @@ import { projects, metrics, milestones, partners, projectPartners, farms, eviden
 import { eq } from "drizzle-orm";
 import { parseJson, formatDate } from "@lib/utils";
 import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -79,16 +81,16 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
     <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
         <Card>
-          <h2 class="font-semibold text-strong">Overview</h2>
+          <h2 class="font-semibold text-strong">{t("detail.overview")}</h2>
           <p class="mt-2 text-muted">{project.description}</p>
         </Card>
         <Card>
-          <h2 class="font-semibold text-strong">Purpose</h2>
+          <h2 class="font-semibold text-strong">{t("detail.purpose")}</h2>
           <p class="mt-2 text-muted">Demonstrate regenerative agriculture combined with community governance and public verification.</p>
         </Card>
         {projectMetrics.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Impact</h2>
+            <h2 class="font-semibold text-strong">{t("detail.impact")}</h2>
             <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
               {projectMetrics.map((m: any) => (
                 <div class="text-center">
@@ -101,7 +103,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
         )}
         {projectNaturalAssets.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Natural Assets</h2>
+            <h2 class="font-semibold text-strong">{t("detail.assets")}</h2>
             <ul class="mt-3 space-y-2 text-sm">
               {projectNaturalAssets.map((a: any) => <li>{a.name} ({a.assetType})</li>)}
             </ul>
@@ -109,7 +111,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
         )}
         {projectActivities.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Activities</h2>
+            <h2 class="font-semibold text-strong">{t("detail.activities")}</h2>
             <ul class="mt-3 space-y-2 text-sm">
               {projectActivities.map((a: any) => <li>{a.name}{a.occurredAt ? ` — ${formatDate(a.occurredAt)}` : ""}</li>)}
             </ul>
@@ -117,7 +119,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
         )}
         {projectEvidence.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Evidence</h2>
+            <h2 class="font-semibold text-strong">{t("detail.evidence")}</h2>
             <ul class="mt-3 space-y-2 text-sm">
               {projectEvidence.map((e: any) => (
                 <li><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type})</span></li>
@@ -127,7 +129,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
         )}
         {projectResources.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Resources</h2>
+            <h2 class="font-semibold text-strong">{t("detail.resources")}</h2>
             <ul class="mt-3 space-y-2 text-sm">
               {projectResources.map((r: any) => <li><a href={`/resources/${r.slug}`} class="text-primary">{r.title}</a></li>)}
             </ul>

@@ -7,6 +7,8 @@ import { metrics, measurements, evidence, farms, attestations, methodologies, so
 import { eq } from "drizzle-orm";
 import { parseJson } from "@lib/utils";
 import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -48,18 +50,18 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
         <Card>
-          <h2 class="font-semibold text-strong">Current Value</h2>
+          <h2 class="font-semibold text-strong">{t("detail.current")}</h2>
           <div class="mt-2 text-3xl font-bold text-primary">{metric.value} {metric.unit}</div>
           <p class="mt-2 text-sm text-muted">Status: {metric.verificationStatus} · Source: {metric.source}</p>
           {metric.methodology && <p class="mt-2 text-sm text-muted">Methodology: {metric.methodology}</p>}
         </Card>
         <Card>
-          <h2 class="font-semibold text-strong">History</h2>
+          <h2 class="font-semibold text-strong">{t("detail.history")}</h2>
           <canvas id="chart" height="200"></canvas>
         </Card>
         {ev.length > 0 && (
           <Card>
-            <h2 class="font-semibold text-strong">Evidence</h2>
+            <h2 class="font-semibold text-strong">{t("detail.evidence")}</h2>
             <ul class="mt-3 space-y-2">
               {ev.map((e: any) => (
                 <li class="text-sm"><a href={e.externalUrl ?? `/api/v1/downloads/evidence/${e.id}`} class="text-primary">{e.title}</a> <span class="text-muted">({e.type} · {e.evidenceClass ?? "measurement"} · {e.maturity ?? "structured"})</span></li>
@@ -68,7 +70,7 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
           </Card>
         )}
         <Card>
-          <h2 class="font-semibold text-strong">Provenance Chain</h2>
+          <h2 class="font-semibold text-strong">{t("detail.provenance")}</h2>
           <p class="mt-2 text-xs text-muted">Metric → Farm → Measurement → Evidence → Methodology → Attestation → Source</p>
           <ul class="mt-3 space-y-2 text-sm">
             <li><strong>Metric:</strong> {metric.name} ({metric.verificationStatus})</li>

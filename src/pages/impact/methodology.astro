@@ -1,13 +1,15 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 ---
 <BaseLayout title="Impact Methodology — Kokonut Foundation" description="How impact is measured.">
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-strong">Impact Methodology</h1>
-    <p class="mt-4 text-muted">MRV turns farm claims into evidence that can be inspected. Every metric should answer: who produced this data, when, how, using what methodology, for which project, what evidence supports it, has it been reviewed, verified, attested.</p>
+    <h1 class="text-3xl font-bold text-strong">{t("mrv.title")}</h1>
+    <p class="mt-4 text-muted">{t("mrv.lede")}</p>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Evidence classes</h2>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.classes")}</h2>
     <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card><h3 class="font-semibold text-strong">Direct observation</h3><p class="mt-2 text-sm text-muted">Field note, photo, GPS record, operator observation.</p></Card>
       <Card><h3 class="font-semibold text-strong">Measurement</h3><p class="mt-2 text-sm text-muted">Sensor reading, area, soil value, quantity, harvest entry.</p></Card>
@@ -17,11 +19,11 @@ import Card from "@components/primitives/Card.astro";
       <Card><h3 class="font-semibold text-strong">Interpretation</h3><p class="mt-2 text-sm text-muted">EBF, CRISP, SDG mapping applied to evidence.</p></Card>
     </div>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Record lifecycle</h2>
-    <p class="mt-2 text-muted text-sm">draft → submitted → verified → published (rejected for rework). "Verified" is a workflow state, not scientific certification.</p>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.lifecycle")}</h2>
+    <p class="mt-2 text-muted text-sm">{t("mrv.lifecycleLede")}</p>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Evidence maturity</h2>
-    <p class="mt-2 text-muted text-sm">narrative/self-reported → structured → reviewed → evidence-linked → attested → externally verified. Evidence strength is distinct from record status.</p>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.maturity")}</h2>
+    <p class="mt-2 text-muted text-sm">{t("mrv.maturityLede")}</p>
 
     <h2 class="mt-8 text-xl font-semibold text-strong">MRV payload (shared)</h2>
     <pre class="mt-2 text-xs bg-surface-muted p-3 rounded overflow-auto">farm_id, timestamp, measurement_type (ground|remote|community)
@@ -30,13 +32,13 @@ remote: ndvi, reci, ndre, msavi, source (landsat_8|sentinel|drone), image_url
 community: crop_cycle_stage, plant_health_notes, water_analysis, soil_texture, disease_flags
 attested_by, attestor_address</pre>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Claim standard</h2>
-    <p class="mt-2 text-muted text-sm">A material claim should state: claim, evidence class, farm/location, time period, source, method, record status, evidence pointer, reviewer, limitations.</p>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.claim")}</h2>
+    <p class="mt-2 text-muted text-sm">{t("mrv.claimLede")}</p>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Chain roles</h2>
-    <p class="mt-2 text-muted text-sm">Gnosis = governance + treasury. Celo = EAS attestations. Different chains, different authority.</p>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.chain")}</h2>
+    <p class="mt-2 text-muted text-sm">{t("mrv.chainLede")}</p>
 
-    <h2 class="mt-8 text-xl font-semibold text-strong">Forecast discipline</h2>
-    <p class="mt-2 text-muted text-sm">Forecasts are never overwritten by actuals. Planned yield ≠ harvested yield. Modeled allocation ≠ realized distribution. 10% public-goods allocation is a modeling assumption, not a universal rule.</p>
+    <h2 class="mt-8 text-xl font-semibold text-strong">{t("mrv.forecast")}</h2>
+    <p class="mt-2 text-muted text-sm">{t("mrv.forecastLede")}</p>
   </section>
 </BaseLayout>

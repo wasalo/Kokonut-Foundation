@@ -3,6 +3,8 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { evidence } from "@lib/schema";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -12,8 +14,8 @@ try { if (db) list = await db.select().from(evidence); } catch {}
 <BaseLayout title="Evidence — Kokonut Foundation" description="Evidence browser.">
   <section class="max-w-7xl mx-auto px-4 py-16">
   <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"evidence_view"})}).catch(()=>{});</script>
-    <h1 class="text-3xl font-bold text-strong">Evidence</h1>
-    <p class="mt-4 text-muted">Supporting evidence for metrics and projects.</p>
+    <h1 class="text-3xl font-bold text-strong">{t("ev.title")}</h1>
+    <p class="mt-4 text-muted">{t("ev.lede")}</p>
     <h2 class="sr-only">Evidence records</h2>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.length === 0 && <p class="text-muted">No evidence records yet.</p>}
