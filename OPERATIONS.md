@@ -101,9 +101,9 @@ what you can do.
 | Role | What they run | What they cannot do |
 |---|---|---|
 | **Administrator** | Everything | — |
-| **Manager** | Projects, farms, partners, team, reports, resources, enquiries, content, attestations, media | Delete media or attestations, manage roles, run the KI sync |
-| **Supervisor** | Farms, milestones, measurements, evidence | Delete, manage roles |
-| **Field Worker** | Measurements, evidence, farm notes, milestones, media uploads | Delete, publish, manage roles |
+| **Manager** | Projects, farms, partners, team, reports, resources, enquiries, content, attestations, the catalogues, media | Delete media or attestations, manage roles, run the KI sync |
+| **Supervisor** | Farms, milestones, measurements, evidence, natural assets, activities | Delete, manage roles |
+| **Field Worker** | Measurements, evidence, farm notes, milestones, natural assets, activities, media uploads | Delete, publish, manage roles |
 | **Finance** | Funding events, reports | Content pipeline, delete, manage roles |
 | **Analyst** | Reads everything, sees analytics | Any write at all |
 
@@ -158,6 +158,27 @@ Tick the checkboxes on a list to select several records, and a bar appears at th
 Each affected record gets its own entry in the audit log, so the trail names every
 record rather than one opaque "bulk" line. Bulk publish and archive only appear if your
 role can publish that entity.
+
+## The catalogue editors
+
+Six reference-data screens share one mechanism: `/admin/content` (content blocks),
+`/admin/natural-assets`, `/admin/activities`, `/admin/claims`, `/admin/methodologies`
+and `/admin/sources`.
+
+- **Create, edit and delete** work exactly like the rest of the admin, and the
+  field definitions come from the entity registry — one list of fields, used by
+  the screen and the API together.
+- **Slugs are derived** from the name or title when you leave the slug blank, and
+  must be unique. A duplicate is refused with a clear message rather than a
+  database error.
+- **Content blocks** are addressed by key rather than slug (`baseline:adelphi`,
+  `home:intro`). Their body may be plain text or a JSON document: if it starts
+  with `{` or `[` it is parsed and stored pretty-printed, and a broken JSON
+  document is refused rather than saved. Content blocks are readable publicly at
+  `/api/v1/content` and `/api/v1/content/{key}`.
+- **Natural assets and activities** are the farm-level catalogue: what is growing
+  and what was done to it. A Field Worker can add them; only a Manager or
+  Supervisor can publish.
 
 ## The media library
 
@@ -224,7 +245,7 @@ npm run dev                                  # :4321
 
 # Validation — run these before every push
 npm run typecheck
-npm test                                     # 90 unit + integration tests
+npm test                                     # 112 unit + integration tests
 npm run build
 npm run test:e2e                             # 23 Playwright tests (needs chromium)
 

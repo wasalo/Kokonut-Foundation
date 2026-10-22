@@ -2,9 +2,10 @@
 interface Field {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "select";
+  type?: "text" | "textarea" | "number" | "select" | "date";
   options?: { value: string; label: string }[];
   required?: boolean;
+  help?: string;
 }
 interface Props {
   endpoint: string;
@@ -25,11 +26,13 @@ const { endpoint, method = id ? "PUT" : "POST", id, fields, record = {}, submitL
 >
   {fields.map((f) => (
     <div>
-      <label for={`f-${f.name}`} class="block text-sm font-medium mb-1">{f.label}</label>
+      <label for={`f-${f.name}`} class="block text-sm font-medium mb-1">
+        {f.label}{f.required && <span class="text-critical" aria-hidden="true"> *</span>}
+      </label>
       {f.type === "textarea" ? (
-        <textarea id={`f-${f.name}`} name={f.name} required={f.required} rows={3} class="w-full rounded border border-border px-3 py-2 text-sm">{String(record[f.name] ?? "")}</textarea>
+        <textarea id={`f-${f.name}`} name={f.name} required={f.required} rows={6} class="w-full rounded border border-border px-3 py-2 text-sm font-mono">{String(record[f.name] ?? "")}</textarea>
       ) : f.type === "select" ? (
-        <select id={`f-${f.name}`} name={f.name} required={f.required} class="w-full rounded border border-border px-3 py-2 text-sm">
+        <select id={`f-${f.name}`} name={f.name} required={f.required} class="w-full rounded border border-border px-3 py-2 text-sm bg-surface">
           {(f.options ?? []).map((o) => (
             <option value={o.value} selected={String(record[f.name] ?? "") === o.value}>{o.label}</option>
           ))}
@@ -41,9 +44,10 @@ const { endpoint, method = id ? "PUT" : "POST", id, fields, record = {}, submitL
           type={f.type ?? "text"}
           required={f.required}
           value={String(record[f.name] ?? "")}
-          class="w-full rounded border border-border px-3 py-2 text-sm"
+          class="w-full rounded border border-border px-3 py-2 text-sm bg-surface"
         />
       )}
+      {f.help && <p class="mt-1 text-xs text-muted">{f.help}</p>}
     </div>
   ))}
   <button type="submit" class="px-4 py-2 rounded bg-primary text-on-primary text-sm">{submitLabel}</button>
@@ -61,14 +65,17 @@ const { endpoint, method = id ? "PUT" : "POST", id, fields, record = {}, submitL
       const payload: Record<string, unknown> = {};
       fd.forEach((v, k) => { payload[k] = typeof v === "string" ? v : v; });
       if (id) payload.id = id;
+      const out = form.querySelector("[data-admin-result]");
+      if (out) out.textContent = "Saving…";
       const res = await fetch(id ? `${endpoint}?id=${encodeURIComponent(id)}` : endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const out = form.querySelector("[data-admin-result]");
-      if (out) out.textContent = res.ok ? "Saved." : "Error — check the fields.";
+      const j = await res.json().catch(() => ({}));
+      if (out) out.textContent = res.ok ? "Saved." : (j.error ?? "Error — check the fields.");
       if (res.ok && id) setTimeout(() => location.reload(), 600);
+      if (res.ok && !id) setTimeout(() => location.reload(), 600);
     });
   });
 </script>

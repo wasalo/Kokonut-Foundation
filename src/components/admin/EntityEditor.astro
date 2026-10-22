@@ -1,0 +1,38 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import { genericEntity } from "@lib/admin-entities";
+import { getDb } from "@lib/db";
+import { eq } from "drizzle-orm";
+
+interface Props { entity: string; id?: string }
+const { entity: entityKey, id } = Astro.props;
+
+const entity = genericEntity(entityKey);
+if (!entity) return new Response("Not found", { status: 404 });
+
+const denied = adminPageGuard(Astro, `${id ? entity.permissionEntity : entity.permissionEntity}.${id ? "update" : "create"}` as any);
+if (denied) return denied;
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let record: Record<string, unknown> = {};
+if (id && db) {
+  try { record = (await db.select().from(entity.table).where(eq(entity.table.id, id)).get()) ?? {}; } catch {}
+}
+---
+<AdminLayout title={`${id ? "Edit" : "New"} ${entity.label} — Admin`} description={`Admin ${entity.label.toLowerCase()}.`}>
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href={`/admin/${entity.key}`} class="text-sm text-primary">← {entity.plural}</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">{id ? `Edit ${entity.label}` : `New ${entity.label}`}</h1>
+    {id && <p class="mt-2 text-sm text-muted">{String(record.title ?? record.name ?? record.key ?? id)}</p>}
+    <EntityForm
+      endpoint={`/api/admin/${entity.key}`}
+      id={id}
+      submitLabel={id ? "Save changes" : "Create"}
+      record={record}
+      fields={entity.fields!.map((f) => ({ ...f, help: f.help }))}
+    />
+  </section>
+</AdminLayout>

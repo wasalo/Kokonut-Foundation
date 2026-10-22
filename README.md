@@ -179,6 +179,12 @@ Also served: `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/openapi.json`, `/sw.j
 | `/admin/inquiries` | Contact enquiries |
 | `/admin/media` | R2 media library — upload, edit metadata, delete |
 | `/admin/redirects` | Redirect rules |
+| `/admin/content` | Content blocks — the addressable content store |
+| `/admin/natural-assets` | Natural assets catalogue |
+| `/admin/activities` | Activities catalogue |
+| `/admin/claims` | Claims catalogue |
+| `/admin/methodologies` | Methodologies catalogue |
+| `/admin/sources` | Sources catalogue |
 | `/admin/roles` | Role assignments |
 | `/admin/audit` | Audit log |
 | `/admin/analytics` | Product event analytics |
@@ -196,9 +202,9 @@ inheritance, so granting a role never silently widens access.
 | Role | Scope |
 |---|---|
 | **Administrator** | Everything, including role assignment, media deletion and the audit trail |
-| **Manager** | Projects, farms, partners, team, reports, resources, inquiries, content, attestations, media (no delete) |
-| **Supervisor** | Farms, milestones, measurements, evidence; read-only elsewhere |
-| **Field Worker** | Measurements, evidence, farm notes, milestones; uploads media |
+| **Manager** | Projects, farms, partners, team, reports, resources, inquiries, content, attestations, the catalogues, media (no delete) |
+| **Supervisor** | Farms, milestones, measurements, evidence, natural assets, activities; read-only elsewhere |
+| **Field Worker** | Measurements, evidence, farm notes, milestones, natural assets, activities; uploads media |
 | **Finance** | Funding events and reports; read-only elsewhere |
 | **Analyst** | Read-only across all data, plus analytics |
 
@@ -237,6 +243,7 @@ Enforcement is real, not cosmetic:
 | Impact | `GET /api/v1/impact` |
 | Graph | `GET /api/v1/graph/project/[slug]`, `/graph/metric/[slug]` |
 | Catalogue | `GET /api/v1/methodologies`, `/sources`, `/natural-assets`, `/activities`, `/claims` |
+| Content blocks | `GET /api/v1/content` — list; `GET /api/v1/content/{key}` — one block, body parsed as JSON when it is JSON |
 | Downloads | `GET /api/v1/downloads/{type}` — CSV exports (metrics, measurements, farms, treasury, attestations); `GET /api/v1/downloads/{type}/{slug}` — the report or evidence file itself |
 | Search | `GET /api/v1/search?q=` |
 | Funding | `GET /api/v1/funding-events` |
@@ -369,8 +376,8 @@ WCAG 2.1 AA is enforced, not aspirational:
 
 | Suite | Count | Command |
 |---|---|---|
-| Unit | 58 | `npm test` |
-| Integration | 32 | `npm test` |
+| Unit | 61 | `npm test` |
+| Integration | 51 | `npm test` |
 | E2E (Playwright) | 23 | `npm run test:e2e` |
 | — of which axe | 13 | 12 public pages in both locales + a dark-theme pass |
 

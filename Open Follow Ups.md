@@ -41,7 +41,8 @@ Each item is either blocked on external resources/credentials, requires manual r
 ## Incremental content work
 - **Full Spanish content**: navigation, footer, skip link, canonical URLs and the body copy of every public page are translated — home, how it works, about, support, contact, impact, transparency and all its modules (governance, treasury, attestations, reports, funding, methodologies, open source), the MRV methodology page, the evidence explorer, and the project/farm/metric detail headings. Still open: the long-form descriptive paragraphs on the project and farm detail pages, which are generated from the database and therefore follow the source record's language.
 - **Product event tracking UI calls**: added to project detail, impact, farms, transparency, treasury, attestations, reports, evidence, resources, partners, about, support, contact, home, data, API docs, graph and search. All 18 tracked events are read back in `/admin/analytics`.
-- **Admin editors still missing**: content blocks and the natural-asset / activity / claim / methodology / source catalogues are read-only in the admin UI — they have no create/edit/delete forms yet.
+- **Admin catalogue editors**: `/admin/content`, `/admin/natural-assets`, `/admin/activities`, `/admin/claims`, `/admin/methodologies` and `/admin/sources` share one registry-driven endpoint and one shared list/editor UI, with slug derivation, JSON-aware content-block bodies, and public read access at `/api/v1/content`.
+- **Localisation of the 404 page**: the 404 route is server-rendered, so `/es/<missing>` answers in Spanish and the build no longer warns about reading request headers on a prerendered route.
 
 ## Deliberately deferred
 - **Durable Objects** — not introduced; the PRD explicitly advises against it without a concrete need.

@@ -1,0 +1,48 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import Can from "@components/admin/Can.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
+import DeleteButton from "@components/admin/DeleteButton.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import { genericEntity } from "@lib/admin-entities";
+import { getDb } from "@lib/db";
+
+interface Props { entity: string }
+const { entity: entityKey } = Astro.props;
+
+const entity = genericEntity(entityKey);
+if (!entity) return new Response("Not found", { status: 404 });
+
+const denied = adminPageGuard(Astro, `${entity.permissionEntity}.read` as any);
+if (denied) return denied;
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(entity.table).all(); } catch {}
+---
+<AdminLayout title={`${entity.plural} — Admin`} description={`Admin ${entity.plural.toLowerCase()}.`}>
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">{entity.plural} (Admin)</h1>
+    <Can capability={`${entity.permissionEntity}.create` as any}>
+      <a href={`/admin/${entity.key}/new`} class="mt-2 inline-block text-sm text-primary">+ New {entity.label}</a>
+    </Can>
+    <p class="mt-2 text-muted text-sm">{list.length} records.</p>
+
+    <ul class="mt-6 space-y-2">
+      {list.map((row: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <input type="checkbox" data-bulk-entity={entity.key} value={row.id} aria-label="Select record" />
+          <span>{entity.rowLabel(row)}</span>
+          <Can capability={`${entity.permissionEntity}.update` as any}>
+            <a href={`/admin/${entity.key}/${row.id}/edit`} class="text-xs text-primary underline">Edit</a>
+          </Can>
+          <Can capability={`${entity.permissionEntity}.delete` as any}>
+            <DeleteButton endpoint={`/api/admin/${entity.key}`} id={row.id} capability={`${entity.permissionEntity}.delete` as any} />
+          </Can>
+        </li>
+      ))}
+    </ul>
+    <BulkBar entity={entity.key} deleteCapability={`${entity.permissionEntity}.delete` as any} />
+  </section>
+</AdminLayout>

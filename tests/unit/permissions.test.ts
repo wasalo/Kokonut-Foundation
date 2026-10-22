@@ -93,6 +93,29 @@ describe("role matrix", () => {
     expect(can("analyst", "funding.update")).toBe(false);
   });
 
+  it("gives the catalogue editors their own capability scope", () => {
+    for (const entity of ["natural_assets", "activities", "claims", "methodologies", "sources", "content"]) {
+      expect(can("manager", `${entity}.create` as Capability), `manager should create ${entity}`).toBe(true);
+      expect(can("manager", `${entity}.update` as Capability), `manager should update ${entity}`).toBe(true);
+      expect(can("analyst", `${entity}.update` as Capability), `analyst must not update ${entity}`).toBe(false);
+    }
+  });
+
+  it("lets field workers catalogue what they observe, but not publish it", () => {
+    expect(can("field_worker", "natural_assets.create")).toBe(true);
+    expect(can("field_worker", "activities.create")).toBe(true);
+    expect(can("field_worker", "natural_assets.publish")).toBe(false);
+    expect(can("field_worker", "claims.create")).toBe(false);
+    expect(can("field_worker", "content.create")).toBe(false);
+  });
+
+  it("keeps content-block editing with the manager", () => {
+    expect(can("manager", "content.update")).toBe(true);
+    expect(can("supervisor", "content.read")).toBe(true);
+    expect(can("supervisor", "content.update")).toBe(false);
+    expect(can("field_worker", "content.read")).toBe(false);
+  });
+
   it("contains no duplicate capabilities in a role", () => {
     for (const r of ROLES) {
       const list = ROLE_CAPABILITIES[r];

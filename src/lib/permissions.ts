@@ -51,6 +51,11 @@ export const ENTITIES = [
   "attestations",
   "funding",
   "content",
+  "natural_assets",
+  "activities",
+  "claims",
+  "methodologies",
+  "sources",
 ] as const;
 
 export type Entity = (typeof ENTITIES)[number];
@@ -78,7 +83,8 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 const READ_ONLY_ENTITIES: Entity[] = [
   "projects", "farms", "metrics", "measurements", "milestones", "evidence",
   "partners", "team", "reports", "resources", "inquiries", "media", "redirects",
-  "attestations", "funding", "content",
+  "attestations", "funding", "content", "natural_assets", "activities", "claims",
+  "methodologies", "sources",
 ];
 
 function cap(entity: Entity, action: Action): Capability {
@@ -106,6 +112,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
   manager: [
     ...writeSet(["projects", "farms", "milestones", "partners", "team", "reports", "resources", "inquiries", "content"]),
     ...writeSet(["metrics", "measurements", "evidence"], ["read", "create", "update", "publish"]),
+    ...writeSet(["natural_assets", "activities", "claims", "methodologies", "sources"], ["read", "create", "update", "publish"]),
     cap("media", "read"), cap("media", "create"), cap("media", "update"),
     cap("redirects", "read"), cap("redirects", "create"), cap("redirects", "update"),
     cap("attestations", "read"), cap("attestations", "create"), cap("attestations", "update"),
@@ -116,16 +123,19 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
   supervisor: [
     ...writeSet(["farms", "milestones"]),
     ...writeSet(["measurements", "evidence"], ["read", "create", "update", "publish"]),
+    ...writeSet(["natural_assets", "activities"], ["read", "create", "update", "publish"]),
     cap("projects", "read"), cap("projects", "update"),
     cap("metrics", "read"), cap("metrics", "update"),
     cap("team", "read"), cap("reports", "read"), cap("resources", "read"),
     cap("inquiries", "read"), cap("media", "read"), cap("redirects", "read"),
     cap("attestations", "read"), cap("funding", "read"), cap("content", "read"),
+    cap("claims", "read"), cap("methodologies", "read"), cap("sources", "read"),
     "access.admin", "access.audit",
   ],
 
   field_worker: [
     ...writeSet(["measurements", "evidence"], ["read", "create", "update"]),
+    ...writeSet(["natural_assets", "activities"], ["read", "create", "update"]),
     cap("farms", "read"), cap("farms", "update"),
     cap("projects", "read"), cap("milestones", "read"), cap("milestones", "update"),
     cap("metrics", "read"), cap("media", "read"), cap("media", "create"),
@@ -137,6 +147,7 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     cap("reports", "read"), cap("reports", "create"), cap("reports", "update"), cap("reports", "publish"),
     cap("projects", "read"), cap("metrics", "read"), cap("partners", "read"),
     cap("attestations", "read"), cap("media", "read"), cap("redirects", "read"),
+    cap("claims", "read"), cap("methodologies", "read"), cap("sources", "read"),
     "access.admin", "access.audit", "access.analytics",
   ],
 
