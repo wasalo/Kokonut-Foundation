@@ -26,7 +26,32 @@ export interface AdminActor {
  * read-only, so adding a colleague to Access never silently grants them write
  * access.
  */
-export async function resolveAdminActor(request: Request, env: any): Promise<AdminActor | null> {
+/**
+ * True when the request is addressed to the local machine.
+ *
+ * A deployed Worker only ever sees the public host it was reached on, so this
+ * cannot be used to open a deployed admin — it is how `astro dev` and
+ * `wrangler dev` reach the admin without an Access identity.
+ */
+export function isLoopbackRequest(request: Request): boolean {
+  let hostname: string;
+  try {
+    hostname = new URL(request.url).hostname;
+  } catch {
+    return false;
+  }
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    hostname.endsWith(".localhost")
+  );
+}
+
+export async function resolveAdminActor(
+  request: Request,
+  env: any,
+): Promise<AdminActor | null> {
   const token = request.headers.get("cf-access-jwt-assertion");
   const teamDomain = env?.ACCESS_TEAM_DOMAIN;
   const audience = env?.ACCESS_AUD;
@@ -43,11 +68,14 @@ export async function resolveAdminActor(request: Request, env: any): Promise<Adm
     email = typeof result.claims?.email === "string" ? result.claims.email : "";
     if (!email) return null;
   } else {
-    // Unconfigured Access: only the explicit local development bypass is
-    // allowed. This must not be keyed off the environment name — a staging
-    // environment that is merely "not production" would otherwise hand full
-    // administrator rights to anyone who asked.
-    if (env?.ADMIN_DEV_BYPASS !== "true") return null;
+    // Unconfigured Access: only the local development bypass is allowed. This
+    // must not be keyed off the environment name — a staging environment that
+    // is merely "not production" would otherwise hand full administrator
+    // rights to anyone who asked.
+    //
+    // Two ways in: the explicit opt-in flag, or a request addressed to a
+    // loopback host, which only a developer's own machine can send.
+    if (env?.ADMIN_DEV_BYPASS !== "true" && !isLoopbackRequest(request)) return null;
     email = env?.ADMIN_DEV_EMAIL || "dev@kokonut.foundation";
   }
 

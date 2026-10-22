@@ -43,6 +43,7 @@ describe("access jwt verification", () => {
 
 describe("admin actor resolution without an Access token", () => {
   const noToken = () => new Request("https://kokonut.foundation/admin/");
+  const loopback = () => new Request("http://localhost:4321/admin/");
 
   it("allows the local development bypass", async () => {
     const actor = await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "true" });
@@ -68,6 +69,22 @@ describe("admin actor resolution without an Access token", () => {
   it("denies a bypass that is not exactly 'true'", async () => {
     expect(await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "1" })).toBeNull();
     expect(await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "yes" })).toBeNull();
+  });
+
+  it("allows the bypass for a loopback request", async () => {
+    // `astro dev` and `wrangler dev` address the local machine, so the admin
+    // is reachable without an Access identity. A deployed Worker only ever
+    // sees its public host.
+    const actor = await resolveAdminActor(loopback(), {});
+    expect(actor).not.toBeNull();
+    expect(actor!.email).toBe("dev@kokonut.foundation");
+  });
+
+  it("does not allow the loopback bypass when a token is presented", async () => {
+    const request = new Request("http://localhost:4321/admin/", {
+      headers: { "cf-access-jwt-assertion": "not.a.jwt" },
+    });
+    expect(await resolveAdminActor(request, {})).toBeNull();
   });
 
   it("never accepts a request that carries an unverifiable token, even with a bypass", async () => {

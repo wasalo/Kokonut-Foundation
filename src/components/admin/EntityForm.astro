@@ -15,7 +15,8 @@ interface Props {
   record?: Record<string, unknown>;
   submitLabel?: string;
 }
-const { endpoint, method = id ? "PUT" : "POST", id, fields, record = {}, submitLabel = "Save" } = Astro.props;
+const { endpoint, id, fields, record = {}, submitLabel = "Save" } = Astro.props;
+const method = Astro.props.method ?? (id ? "PUT" : "POST");
 ---
 <form
   data-admin-form
