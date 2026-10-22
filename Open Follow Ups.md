@@ -10,10 +10,12 @@ Each item is either blocked on external resources/credentials, requires manual r
 - **Dark mode**: semantic light/dark token palettes in `src/styles/global.css`, a pre-paint theme script (no flash), a `ThemeToggle` in the nav, theme-aware charts/badges, and `localStorage` persistence. Verified visually in a real browser and by axe in both themes.
 - **i18n (PRD §53)**: Astro i18n routing plus a middleware rewrite means every route — including dynamic detail pages — is served under `/es/`. Pages are authored once; strings come from `src/lib/i18n.ts`. Navigation, footer, skip link, canonical URLs, and page bodies are localized. Verified live for all public routes.
 - **Accessibility automation**: axe (WCAG 2.1 A/AA) runs over the public pages in both locales and both themes — no serious or critical violations. In-text links are underlined so they are distinguishable without relying on colour (WCAG 1.4.1). The `tests/e2e/axe.spec.ts` suite enforces this in CI.
-- **Integration tests**: `tests/integration/db.test.ts` replays the real ordered migration chain (0001–0006 + seed) against a real SQL engine (sql.js) and asserts no schema drift against the Drizzle model.
+- **Integration tests**: `tests/integration/db.test.ts` replays the real ordered migration chain (0001–0007 + seed) against a real SQL engine (sql.js) and asserts no schema drift against the Drizzle model; `tests/integration/admin-roles.test.ts` covers role resolution and first-run bootstrap against the same engine.
 - **Product event analytics**: events are written to KV by 18 page types and read back in `/admin/analytics` (the counters were previously write-only).
 - **Admin delete actions**: DELETE endpoints + UI buttons for projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners.
 - **Admin edit forms**: prefilled update forms for projects, metrics and farms, built on a shared `EntityForm` component that posts JSON to the existing PUT endpoints.
+- **Admin roles and permissions**: six roles (Administrator, Manager, Supervisor, Field Worker, Finance, Analyst) with an explicit capability matrix in `src/lib/permissions.ts`. The verified Cloudflare Access identity maps to a role through the `admin_roles` table (migration 0007); the first identity bootstraps as administrator and every unassigned identity falls back to read-only. Capabilities are enforced at the API (`denyUnless`) and at the page (`adminPageGuard`), the admin chrome hides actions the role cannot use, and `audit_log` records the real actor email. Roles are assigned and revoked at `/admin/roles`.
+- **Admin CRUD**: create, edit and delete now exist for every managed entity (projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners). Still to build: bulk actions and media/attestations/funding editors.
 
 ## Blocked on external resources / credentials
 - **KI wiring (blocked on the KI refactor)**: Kokonut Intelligence is being re-factored and is **not ready to wire today** — the repository currently carries two branches (`main` and `feat/mobile-offline-acceptance`, the "kernel" stack). The Foundation side is written to be contract-tolerant so the final wiring is configuration-only:
@@ -29,14 +31,13 @@ Each item is either blocked on external resources/credentials, requires manual r
 
 ## Requires manual review / tooling
 - **a11y audit to WCAG 2.2 AA**: automated checks pass at 1.00 (Lighthouse + axe) with no serious/critical violations. Still needs a manual screen-reader pass and a check of the map/chart interactions specifically.
-- **Component tests**: unit (38) + integration (9) + e2e (10) + axe suites exist; there are no Astro component-render tests.
+- **Component tests**: unit (56) + integration (15) + e2e (10) + axe suites exist; there are no Astro component-render tests.
 - **CI deploy path**: the migration / deploy / health-check steps are skipped until `CLOUDFLARE_API_TOKEN` is set in GitHub Actions secrets; they have never executed against Cloudflare.
-- **Admin roles**: Cloudflare Access handles authentication, but the PRD's role split (Administrator / Field Worker / Supervisor / Manager / Finance / Analyst) is not modelled in the app.
 
 ## Incremental content work
 - **Full Spanish content**: navigation, footer, skip link, canonical URLs and the body copy of every public page are translated — home, how it works, about, support, contact, impact, transparency and all its modules (governance, treasury, attestations, reports, funding, methodologies, open source), the MRV methodology page, the evidence explorer, and the project/farm/metric detail headings. Still open: the long-form descriptive paragraphs on the project and farm detail pages, which are generated from the database and therefore follow the source record's language.
 - **Product event tracking UI calls**: added to project detail, impact, farms, transparency, treasury, attestations, reports, evidence, resources, partners, about, support, contact, home, data, API docs, graph and search. All 18 tracked events are read back in `/admin/analytics`.
-- **Admin CRUD**: create forms, edit forms (projects, metrics, farms) and delete actions exist for every managed entity (projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners). Still to build: edit forms for the remaining entity types and bulk actions.
+- **Admin editors still missing**: media, attestations, funding and content blocks are read-only in the admin UI — they have no create/edit/delete forms yet.
 
 ## Deliberately deferred
 - **Durable Objects** — not introduced; the PRD explicitly advises against it without a concrete need.
