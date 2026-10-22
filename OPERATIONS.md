@@ -168,8 +168,9 @@ Tick the checkboxes on a list to select several records, and a bar appears at th
 - **Delete** — removes the selection (with a confirmation)
 
 Each affected record gets its own entry in the audit log, so the trail names every
-record rather than one opaque "bulk" line. Bulk publish and archive only appear if your
-role can publish that entity.
+record rather than one opaque "bulk" line. **Publish** appears only if your role can
+publish that entity; **Archive** appears if it can change it; **Delete** appears only
+if it can delete.
 
 ## Editing in another language
 
@@ -194,9 +195,8 @@ edited without a deploy.
 
 ## The catalogue editors
 
-Six reference-data screens share one mechanism: `/admin/content` (content blocks),
-`/admin/natural-assets`, `/admin/activities`, `/admin/claims`, `/admin/methodologies`
-and `/admin/sources`.
+Five reference-data screens share one mechanism: `/admin/natural-assets`,
+`/admin/activities`, `/admin/claims`, `/admin/methodologies` and `/admin/sources`.
 
 - **Create, edit and delete** work exactly like the rest of the admin, and the
   field definitions come from the entity registry — one list of fields, used by
@@ -204,11 +204,8 @@ and `/admin/sources`.
 - **Slugs are derived** from the name or title when you leave the slug blank, and
   must be unique. A duplicate is refused with a clear message rather than a
   database error.
-- **Content blocks** are addressed by key rather than slug (`baseline:adelphi`,
-  `home:intro`). Their body may be plain text or a JSON document: if it starts
-  with `{` or `[` it is parsed and stored pretty-printed, and a broken JSON
-  document is refused rather than saved. Content blocks are readable publicly at
-  `/api/v1/content` and `/api/v1/content/{key}`.
+- **Content blocks** are addressed by key rather than slug — see
+  [the content store](#the-content-store).
 - **Natural assets and activities** are the farm-level catalogue: what is growing
   and what was done to it. A Field Worker can add them; only a Manager or
   Supervisor can publish.
