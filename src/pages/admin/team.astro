@@ -2,6 +2,7 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getDb } from "@lib/db";
 import { teamMembers } from "@lib/schema";
+import DeleteButton from "@components/admin/DeleteButton.astro";
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -13,26 +14,8 @@ try { if (db) list = await db.select().from(teamMembers); } catch {}
     <h1 class="text-3xl font-bold text-strong">Team (Admin)</h1>
     <a href="/admin/team/new" class="mt-2 inline-block text-sm text-primary">+ New Team Member</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
-    <ul class="mt-6 space-y-2" data-delete-endpoint="/api/admin/team">
-      {list.map((t: any) => <li class="text-sm">{t.name} — {t.role}</li>)}
+    <ul class="mt-6 space-y-2">
+      {list.map((t: any) => <li class="text-sm flex items-center gap-3">{t.name} — {t.role}<DeleteButton endpoint="/api/admin/team" id={t.id} /></li>)}
     </ul>
-
-    <script>
-      const list = document.querySelector("[data-delete-endpoint]");
-      if (list) {
-        const endpoint = list.getAttribute("data-delete-endpoint");
-        list.querySelectorAll(".status-sel").forEach((sel) => {
-          const btn = document.createElement("button");
-          btn.textContent = "Delete";
-          btn.className = "text-xs text-critical underline";
-          btn.addEventListener("click", async () => {
-            if (!confirm("Delete this record? This cannot be undone.")) return;
-            const res = await fetch(`${endpoint}?id=${encodeURIComponent(sel.dataset.id ?? "")}`, { method: "DELETE" });
-            if (res.ok) location.reload();
-          });
-          sel.parentElement?.appendChild(btn);
-        });
-      }
-    </script>
   </section>
 </BaseLayout>

@@ -1,0 +1,27 @@
+---
+interface Props { endpoint: string; id: string; label?: string }
+const { endpoint, id, label = "Delete" } = Astro.props;
+---
+<button
+  type="button"
+  data-delete
+  data-endpoint={endpoint}
+  data-id={id}
+  class="text-xs text-critical underline"
+>
+  {label}
+</button>
+
+<script>
+  document.querySelectorAll("[data-delete]").forEach((btn) => {
+    if (btn.getAttribute("data-wired") === "1") return;
+    btn.setAttribute("data-wired", "1");
+    btn.addEventListener("click", async () => {
+      if (!confirm("Delete this record? This cannot be undone.")) return;
+      const endpoint = btn.getAttribute("data-endpoint") ?? "";
+      const id = btn.getAttribute("data-id") ?? "";
+      const res = await fetch(`${endpoint}?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (res.ok) location.reload();
+    });
+  });
+</script>

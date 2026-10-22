@@ -1,0 +1,26 @@
+---
+interface Props { entity: string; id: string }
+const { entity, id } = Astro.props;
+const states = ["draft", "submitted", "verified", "published", "rejected", "archived"];
+---
+<select data-status-sel data-entity={entity} data-id={id} class="status-sel text-xs border border-border rounded px-1 bg-surface">
+  <option value="">change…</option>
+  {states.map((s) => <option value={s}>{s}</option>)}
+</select>
+
+<script>
+  document.querySelectorAll("[data-status-sel]").forEach((sel) => {
+    if (sel.getAttribute("data-wired") === "1") return;
+    sel.setAttribute("data-wired", "1");
+    sel.addEventListener("change", async () => {
+      const value = (sel as HTMLSelectElement).value;
+      if (!value) return;
+      await fetch("/api/admin/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entityType: sel.getAttribute("data-entity"), entityId: sel.getAttribute("data-id"), status: value }),
+      });
+      location.reload();
+    });
+  });
+</script>

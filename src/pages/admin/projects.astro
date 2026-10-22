@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
+import DeleteButton from "@components/admin/DeleteButton.astro";
 import { getDb } from "@lib/db";
 import { projects } from "@lib/schema";
 
@@ -13,26 +14,14 @@ try { if (db) list = await db.select().from(projects); } catch {}
     <h1 class="text-3xl font-bold text-strong">Projects (Admin)</h1>
     <a href="/admin/projects/new" class="mt-2 inline-block text-sm text-primary">+ New Project</a>
     <p class="mt-2 text-muted text-sm">Manage via D1. {list.length} records.</p>
-    <ul class="mt-6 space-y-2" data-delete-endpoint="/api/admin/projects">
-      {list.map((p: any) => <li class="text-sm">{p.name} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{p.status}</span></li>)}
+    <ul class="mt-6 space-y-2">
+      {list.map((p: any) => (
+        <li class="text-sm flex items-center gap-3">
+          <span>{p.name} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{p.status}</span></span>
+          <a href={`/admin/projects/${p.id}/edit`} class="text-xs text-primary underline">Edit</a>
+          <DeleteButton endpoint="/api/admin/projects" id={p.id} />
+        </li>
+      ))}
     </ul>
-
-    <script>
-      const list = document.querySelector("[data-delete-endpoint]");
-      if (list) {
-        const endpoint = list.getAttribute("data-delete-endpoint");
-        list.querySelectorAll(".status-sel").forEach((sel) => {
-          const btn = document.createElement("button");
-          btn.textContent = "Delete";
-          btn.className = "text-xs text-critical underline";
-          btn.addEventListener("click", async () => {
-            if (!confirm("Delete this record? This cannot be undone.")) return;
-            const res = await fetch(`${endpoint}?id=${encodeURIComponent(sel.dataset.id ?? "")}`, { method: "DELETE" });
-            if (res.ok) location.reload();
-          });
-          sel.parentElement?.appendChild(btn);
-        });
-      }
-    </script>
   </section>
 </BaseLayout>

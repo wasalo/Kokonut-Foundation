@@ -1,0 +1,74 @@
+---
+interface Field {
+  name: string;
+  label: string;
+  type?: "text" | "textarea" | "number" | "select";
+  options?: { value: string; label: string }[];
+  required?: boolean;
+}
+interface Props {
+  endpoint: string;
+  method?: "POST" | "PUT";
+  id?: string;
+  fields: Field[];
+  record?: Record<string, unknown>;
+  submitLabel?: string;
+}
+const { endpoint, method = id ? "PUT" : "POST", id, fields, record = {}, submitLabel = "Save" } = Astro.props;
+---
+<form
+  data-admin-form
+  data-endpoint={endpoint}
+  data-method={method}
+  data-id={id}
+  class="mt-6 space-y-4"
+>
+  {fields.map((f) => (
+    <div>
+      <label for={`f-${f.name}`} class="block text-sm font-medium mb-1">{f.label}</label>
+      {f.type === "textarea" ? (
+        <textarea id={`f-${f.name}`} name={f.name} required={f.required} rows={3} class="w-full rounded border border-border px-3 py-2 text-sm">{String(record[f.name] ?? "")}</textarea>
+      ) : f.type === "select" ? (
+        <select id={`f-${f.name}`} name={f.name} required={f.required} class="w-full rounded border border-border px-3 py-2 text-sm">
+          {(f.options ?? []).map((o) => (
+            <option value={o.value} selected={String(record[f.name] ?? "") === o.value}>{o.label}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={`f-${f.name}`}
+          name={f.name}
+          type={f.type ?? "text"}
+          required={f.required}
+          value={String(record[f.name] ?? "")}
+          class="w-full rounded border border-border px-3 py-2 text-sm"
+        />
+      )}
+    </div>
+  ))}
+  <button type="submit" class="px-4 py-2 rounded bg-primary text-on-primary text-sm">{submitLabel}</button>
+  <span data-admin-result class="text-sm text-muted"></span>
+</form>
+
+<script>
+  document.querySelectorAll("[data-admin-form]").forEach((form) => {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const endpoint = form.getAttribute("data-endpoint") ?? "";
+      const method = form.getAttribute("data-method") ?? "POST";
+      const id = form.getAttribute("data-id");
+      const fd = new FormData(form);
+      const payload: Record<string, unknown> = {};
+      fd.forEach((v, k) => { payload[k] = typeof v === "string" ? v : v; });
+      if (id) payload.id = id;
+      const res = await fetch(id ? `${endpoint}?id=${encodeURIComponent(id)}` : endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const out = form.querySelector("[data-admin-result]");
+      if (out) out.textContent = res.ok ? "Saved." : "Error — check the fields.";
+      if (res.ok && id) setTimeout(() => location.reload(), 600);
+    });
+  });
+</script>

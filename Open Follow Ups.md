@@ -34,8 +34,8 @@ Each item is either blocked on external resources/credentials, requires manual r
 
 ## Incremental content work
 - **Full Spanish content**: navigation, footer, skip link, and the main page bodies are translated (home, how it works, about, support, contact, impact, transparency, partners, resources, projects, farms, explorer). Still to translate: the long-form bodies of the transparency modules, the farm/project/metric detail pages, the methodology page, and the evidence explorer.
-- **Product event tracking UI calls**: added to project detail, impact, farms, transparency, treasury, attestations, reports, evidence, resources, partners, about, support, contact, home. Remaining: the data and API-docs pages.
-- **Admin CRUD**: create forms and delete actions exist for all managed entities; edit forms (prefilled update) and bulk actions are not yet built.
+- **Product event tracking UI calls**: added to project detail, impact, farms, transparency, treasury, attestations, reports, evidence, resources, partners, about, support, contact, home, data, API docs, graph and search. All 18 tracked events are read back in `/admin/analytics`.
+- **Admin CRUD**: create forms, edit forms (projects, metrics, farms) and delete actions exist for every managed entity (projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners). Still to build: edit forms for the remaining entity types and bulk actions.
 
 ## Deliberately deferred
 - **Durable Objects** — not introduced; the PRD explicitly advises against it without a concrete need.

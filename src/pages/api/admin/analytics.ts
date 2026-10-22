@@ -17,6 +17,10 @@ export const TRACKED_EVENTS = [
   "about_view",
   "support_view",
   "contact_view",
+  "data_view",
+  "api_docs_view",
+  "graph_view",
+  "search_view",
 ] as const;
 
 export const EVENT_LABELS: Record<string, string> = {
@@ -34,6 +38,10 @@ export const EVENT_LABELS: Record<string, string> = {
   about_view: "About views",
   support_view: "Support views",
   contact_view: "Contact views",
+  data_view: "Data hub views",
+  api_docs_view: "API docs views",
+  graph_view: "Evidence graph views",
+  search_view: "Search views",
 };
 
 export const GET: APIRoute = async ({ locals }) => {

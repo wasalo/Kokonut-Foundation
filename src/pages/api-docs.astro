@@ -2,7 +2,8 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 ---
 <BaseLayout title="API Docs — Kokonut Foundation" description="Public API documentation.">
-  <section class="max-w-7xl mx-auto px-4 py-8">
+  
+  <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"api_docs_view"})}).catch(()=>{});</script><section class="max-w-7xl mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold text-strong mb-4">API Documentation</h1>
     <div id="swagger-ui"></div>
   </section>

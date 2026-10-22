@@ -1,0 +1,41 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { getDb } from "@lib/db";
+import { projects } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const id = Astro.params.id as string;
+let record: Record<string, unknown> = {};
+try { if (db) record = (await db.select().from(projects).where(eq(projects.id, id)).get()) ?? {}; } catch {}
+---
+<BaseLayout title="Edit Project — Admin" description="Admin project edit.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/projects" class="text-sm text-primary">← Projects</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">Edit Project</h1>
+    <p class="mt-2 text-sm text-muted">{String(record.name ?? id)}</p>
+    <EntityForm
+      endpoint="/api/admin/projects"
+      id={id}
+      submitLabel="Save changes"
+      record={record}
+      fields={[
+        { name: "name", label: "Name", required: true },
+        { name: "summary", label: "Summary", type: "textarea" },
+        { name: "description", label: "Description", type: "textarea" },
+        { name: "country", label: "Country" },
+        { name: "region", label: "Region" },
+        { name: "projectType", label: "Type" },
+        { name: "status", label: "Status", type: "select", options: [
+          { value: "planned", label: "planned" },
+          { value: "active", label: "active" },
+          { value: "completed", label: "completed" },
+          { value: "paused", label: "paused" },
+          { value: "archived", label: "archived" },
+        ] },
+      ]}
+    />
+  </section>
+</BaseLayout>

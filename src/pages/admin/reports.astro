@@ -2,6 +2,8 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getDb } from "@lib/db";
 import { reports } from "@lib/schema";
+import DeleteButton from "@components/admin/DeleteButton.astro";
+import StatusSelect from "@components/admin/StatusSelect.astro";
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -13,19 +15,12 @@ try { if (db) list = await db.select().from(reports); } catch {}
     <h1 class="text-3xl font-bold text-strong">Reports (Admin)</h1>
     <a href="/admin/reports/new" class="mt-2 inline-block text-sm text-primary">+ New Report</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
-    <ul class="mt-6 space-y-2" data-delete-endpoint="/api/admin/reports">
+    <ul class="mt-6 space-y-2">
       {list.map((r: any) => (
         <li class="text-sm flex items-center gap-2">
           {r.title} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{r.status ?? "published"}</span>
-          <select data-entity="report" data-id={r.id} class="status-sel text-xs border border-border rounded px-1">
-            <option value="">change…</option>
-            <option value="draft">draft</option>
-            <option value="submitted">submitted</option>
-            <option value="verified">verified</option>
-            <option value="published">published</option>
-            <option value="rejected">rejected</option>
-            <option value="archived">archived</option>
-          </select>
+          <StatusSelect entity="report" id={r.id} />
+          <DeleteButton endpoint="/api/admin/reports" id={r.id} />
         </li>
       ))}
     </ul>
@@ -39,24 +34,6 @@ try { if (db) list = await db.select().from(reports); } catch {}
           location.reload();
         });
       });
-    </script>
-
-    <script>
-      const list = document.querySelector("[data-delete-endpoint]");
-      if (list) {
-        const endpoint = list.getAttribute("data-delete-endpoint");
-        list.querySelectorAll(".status-sel").forEach((sel) => {
-          const btn = document.createElement("button");
-          btn.textContent = "Delete";
-          btn.className = "text-xs text-critical underline";
-          btn.addEventListener("click", async () => {
-            if (!confirm("Delete this record? This cannot be undone.")) return;
-            const res = await fetch(`${endpoint}?id=${encodeURIComponent(sel.dataset.id ?? "")}`, { method: "DELETE" });
-            if (res.ok) location.reload();
-          });
-          sel.parentElement?.appendChild(btn);
-        });
-      }
     </script>
   </section>
 </BaseLayout>
