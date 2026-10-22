@@ -5,6 +5,7 @@ import { teamMembers } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
 import { adminPageGuard } from "@lib/admin-page";
 import Can from "@components/admin/Can.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
 const denied = adminPageGuard(Astro, "team.read");
 if (denied) return denied;
 
@@ -21,11 +22,13 @@ try { if (db) list = await db.select().from(teamMembers); } catch {}
     <ul class="mt-6 space-y-2">
       {list.map((t: any) => (
         <li class="text-sm flex flex-wrap items-center gap-3">
+          <input type="checkbox" data-bulk-entity="team" value={t.id} aria-label="Select record" />
           <span>{t.name} — {t.role}</span>
           <Can capability="team.update"><a href={`/admin/team/${t.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
           <Can capability="team.delete"><DeleteButton endpoint="/api/admin/team" id={t.id} capability="team.delete" /></Can>
         </li>
       ))}
     </ul>
+        <BulkBar entity="team" deleteCapability="team.delete" />
   </section>
 </AdminLayout>

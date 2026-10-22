@@ -6,6 +6,7 @@ import DeleteButton from "@components/admin/DeleteButton.astro";
 import { adminPageGuard } from "@lib/admin-page";
 import Can from "@components/admin/Can.astro";
 import StatusSelect from "@components/admin/StatusSelect.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
 const denied = adminPageGuard(Astro, "farms.read");
 if (denied) return denied;
 
@@ -22,6 +23,7 @@ try { if (db) list = await db.select().from(farms); } catch {}
     <ul class="mt-6 space-y-2">
       {list.map((f: any) => (
         <li class="text-sm flex flex-wrap items-center gap-3">
+          <input type="checkbox" data-bulk-entity="farms" value={f.id} aria-label="Select record" />
           <span>{f.name} — {f.status}</span>
           <Can capability="farms.update"><a href={`/admin/farms/${f.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
           <StatusSelect entity="farm" id={f.id} capability="farms.publish" />
@@ -29,5 +31,6 @@ try { if (db) list = await db.select().from(farms); } catch {}
         </li>
       ))}
     </ul>
+        <BulkBar entity="farms" publishCapability="farms.publish" deleteCapability="farms.delete" />
   </section>
 </AdminLayout>

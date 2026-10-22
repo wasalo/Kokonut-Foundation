@@ -108,7 +108,8 @@ export const ROLE_CAPABILITIES: Record<Role, Capability[]> = {
     ...writeSet(["metrics", "measurements", "evidence"], ["read", "create", "update", "publish"]),
     cap("media", "read"), cap("media", "create"), cap("media", "update"),
     cap("redirects", "read"), cap("redirects", "create"), cap("redirects", "update"),
-    cap("attestations", "read"), cap("funding", "read"),
+    cap("attestations", "read"), cap("attestations", "create"), cap("attestations", "update"),
+    cap("funding", "read"),
     "access.admin", "access.audit", "access.analytics",
   ],
 

@@ -76,6 +76,23 @@ describe("role matrix", () => {
     }
   });
 
+  it("keeps destructive media and attestation actions with the administrator", () => {
+    expect(can("manager", "media.delete")).toBe(false);
+    expect(can("manager", "attestations.delete")).toBe(false);
+    expect(can("finance", "funding.delete")).toBe(false);
+    expect(can("supervisor", "media.delete")).toBe(false);
+    expect(can("administrator", "media.delete")).toBe(true);
+    expect(can("administrator", "attestations.delete")).toBe(true);
+    expect(can("administrator", "funding.delete")).toBe(true);
+  });
+
+  it("gives finance the funding write path and nobody else", () => {
+    expect(can("finance", "funding.create")).toBe(true);
+    expect(can("finance", "funding.update")).toBe(true);
+    expect(can("manager", "funding.create")).toBe(false);
+    expect(can("analyst", "funding.update")).toBe(false);
+  });
+
   it("contains no duplicate capabilities in a role", () => {
     for (const r of ROLES) {
       const list = ROLE_CAPABILITIES[r];

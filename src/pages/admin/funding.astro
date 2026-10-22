@@ -1,0 +1,35 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import Can from "@components/admin/Can.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
+import DeleteButton from "@components/admin/DeleteButton.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "funding.read");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { fundingEvents } from "@lib/schema";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let list: any[] = [];
+try { if (db) list = await db.select().from(fundingEvents); } catch {}
+---
+<AdminLayout title="Funding — Admin" description="Admin funding events.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Funding (Admin)</h1>
+    <Can capability="funding.create"><a href="/admin/funding/new" class="mt-2 inline-block text-sm text-primary">+ New Funding Event</a></Can>
+    <p class="mt-2 text-muted text-sm">{list.length} records.</p>
+    <ul class="mt-6 space-y-2">
+      {list.map((f: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <input type="checkbox" data-bulk-entity="funding" value={f.id} aria-label={`Select ${f.title}`} />
+          <span>{f.title} — {f.amount ?? "?"} {f.currency ?? ""}{f.funder ? ` · ${f.funder}` : ""}</span>
+          <Can capability="funding.update"><a href={`/admin/funding/${f.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <Can capability="funding.delete"><DeleteButton endpoint="/api/admin/funding" id={f.id} capability="funding.delete" /></Can>
+        </li>
+      ))}
+    </ul>
+    <BulkBar entity="funding" />
+  </section>
+</AdminLayout>

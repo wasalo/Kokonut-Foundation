@@ -5,6 +5,7 @@ import { measurements } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
 import { adminPageGuard } from "@lib/admin-page";
 import Can from "@components/admin/Can.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
 const denied = adminPageGuard(Astro, "measurements.read");
 if (denied) return denied;
 
@@ -21,11 +22,13 @@ try { if (db) list = await db.select().from(measurements); } catch {}
     <ul class="mt-6 space-y-2">
       {list.map((m: any) => (
         <li class="text-sm flex flex-wrap items-center gap-3">
+          <input type="checkbox" data-bulk-entity="measurements" value={m.id} aria-label="Select record" />
           <span>{m.metricId}: {m.value} ({m.observedAt})</span>
           <Can capability="measurements.update"><a href={`/admin/measurements/${m.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
           <Can capability="measurements.delete"><DeleteButton endpoint="/api/admin/measurements" id={m.id} capability="measurements.delete" /></Can>
         </li>
       ))}
     </ul>
+        <BulkBar entity="measurements" deleteCapability="measurements.delete" />
   </section>
 </AdminLayout>

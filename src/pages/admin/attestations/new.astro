@@ -1,0 +1,32 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "attestations.create");
+if (denied) return denied;
+---
+<AdminLayout title="New Attestation — Admin" description="Create attestation.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/attestations" class="text-sm text-primary">← Attestations</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">New Attestation</h1>
+    <EntityForm
+      endpoint="/api/admin/attestations"
+      submitLabel="Create"
+      fields={[
+        { name: "title", label: "Title", required: true },
+        { name: "source", label: "Source" },
+        { name: "description", label: "Description", type: "textarea" },
+        { name: "projectId", label: "Project ID" },
+        { name: "metricId", label: "Metric ID" },
+        { name: "externalUrl", label: "External URL" },
+        { name: "issuedAt", label: "Issued at" },
+        { name: "verificationStatus", label: "Verification", type: "select", options: [
+          { value: "reported", label: "reported" },
+          { value: "reviewed", label: "reviewed" },
+          { value: "verified", label: "verified" },
+          { value: "attested", label: "attested" },
+        ] },
+      ]}
+    />
+  </section>
+</AdminLayout>

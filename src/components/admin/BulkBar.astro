@@ -1,0 +1,81 @@
+---
+import { can, type Capability } from "@lib/permissions";
+
+interface Props {
+  entity: string;
+  /** Capability required to publish or archive a record. */
+  publishCapability?: Capability;
+  /** Capability required to delete a record. */
+  deleteCapability?: Capability;
+}
+const { entity, publishCapability, deleteCapability } = Astro.props;
+const canPublish = publishCapability ? can(Astro.locals.admin?.role, publishCapability) : false;
+const canDelete = deleteCapability ? can(Astro.locals.admin?.role, deleteCapability) : false;
+---
+<div
+  data-bulk-bar
+  data-entity={entity}
+  data-publish={canPublish ? "1" : ""}
+  data-delete={canDelete ? "1" : ""}
+  hidden
+  class="sticky top-2 z-10 mt-4 flex flex-wrap items-center gap-3 rounded border border-border bg-surface-raised px-4 py-3 shadow-sm"
+>
+  <span class="text-sm text-muted"><span data-bulk-count>0</span> selected</span>
+  {canPublish && (
+    <>
+      <button type="button" data-bulk-action="publish" class="px-3 py-1.5 rounded bg-primary text-on-primary text-xs">Publish</button>
+      <button type="button" data-bulk-action="archive" class="px-3 py-1.5 rounded border border-border text-xs">Archive</button>
+    </>
+  )}
+  {canDelete && (
+    <button type="button" data-bulk-action="delete" class="px-3 py-1.5 rounded border border-critical text-xs text-critical">Delete</button>
+  )}
+  <span data-bulk-result class="text-xs text-muted"></span>
+</div>
+
+<script>
+  function initBulkBars() {
+    document.querySelectorAll("[data-bulk-bar]").forEach((bar) => {
+      if (bar.getAttribute("data-wired") === "1") return;
+      bar.setAttribute("data-wired", "1");
+      const entity = bar.getAttribute("data-entity") ?? "";
+      const count = bar.querySelector("[data-bulk-count]");
+      const result = bar.querySelector("[data-bulk-result]");
+
+      const boxes = () => Array.from(document.querySelectorAll("[data-bulk-entity]")) as HTMLInputElement[];
+
+      const refresh = () => {
+        const selected = boxes().filter((b) => b.checked);
+        if (count) count.textContent = String(selected.length);
+        (bar as HTMLElement).hidden = selected.length === 0;
+      };
+
+      document.querySelectorAll("[data-bulk-entity]").forEach((box) => {
+        box.addEventListener("change", refresh);
+      });
+
+      bar.querySelectorAll("[data-bulk-action]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const action = btn.getAttribute("data-bulk-action") ?? "";
+          const ids = boxes().filter((b) => b.checked).map((b) => b.value);
+          if (!ids.length) return;
+          if (action === "delete" && !confirm(`Delete ${ids.length} record(s)? This cannot be undone.`)) return;
+          if (result) result.textContent = "Working…";
+          const res = await fetch("/api/admin/bulk", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entity, action, ids }),
+          });
+          const j = await res.json().catch(() => ({}));
+          if (result) result.textContent = res.ok ? `Done: ${j.data?.affected ?? ids.length} record(s).` : (j.error ?? "Error");
+          if (res.ok) setTimeout(() => location.reload(), 600);
+        });
+      });
+
+      refresh();
+    });
+  }
+
+  initBulkBars();
+  document.addEventListener("astro:page-load", initBulkBars);
+</script>

@@ -1,5 +1,6 @@
 ---
 import AdminLayout from "@components/admin/AdminLayout.astro";
+import BulkBar from "@components/admin/BulkBar.astro";
 import { getDb } from "@lib/db";
 import { inquiries } from "@lib/schema";
 import { desc } from "drizzle-orm";
@@ -21,7 +22,10 @@ try { if (db) list = await db.select().from(inquiries).orderBy(desc(inquiries.cr
       {list.map((i: any) => (
         <div class="rounded-lg border border-border p-4">
           <div class="flex justify-between text-sm">
-            <span class="font-semibold">{i.name} &lt;{i.email}&gt;</span>
+            <span class="font-semibold">
+              <input type="checkbox" data-bulk-entity="inquiries" value={i.id} aria-label="Select inquiry" class="mr-2" />
+              {i.name} &lt;{i.email}&gt;
+            </span>
             <span class="text-muted">{formatDate(i.createdAt)}</span>
           </div>
           <p class="mt-1 text-sm text-muted">{i.type} · {i.status}</p>
@@ -29,5 +33,6 @@ try { if (db) list = await db.select().from(inquiries).orderBy(desc(inquiries.cr
         </div>
       ))}
     </div>
+    <BulkBar entity="inquiries" publishCapability="inquiries.publish" deleteCapability="inquiries.delete" />
   </section>
 </AdminLayout>

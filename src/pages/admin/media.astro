@@ -1,23 +1,178 @@
 ---
 import AdminLayout from "@components/admin/AdminLayout.astro";
-import { getDb } from "@lib/db";
-import { evidence } from "@lib/schema";
+import Can from "@components/admin/Can.astro";
 import { adminPageGuard } from "@lib/admin-page";
 const denied = adminPageGuard(Astro, "media.read");
 if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
-const db = env.DB ? getDb(env) : null;
-let list: any[] = [];
-try { if (db) list = await db.select().from(evidence); } catch {}
-const media = list.filter((e: any) => e.objectKey);
+const bucket = env.MEDIA ? "R2 bucket connected" : "R2 bucket not configured";
 ---
-<AdminLayout title="Media — Admin" description="Admin media.">
+<AdminLayout title="Media — Admin" description="Admin media library.">
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-strong">Media (Admin)</h1>
-    <p class="mt-2 text-muted text-sm">{media.length} files in R2.</p>
-    <ul class="mt-6 space-y-2">
-      {media.map((m: any) => <li class="text-sm font-mono text-xs">{m.objectKey} — {m.title}</li>)}
-    </ul>
+    <h1 class="text-3xl font-bold text-strong">Media</h1>
+    <p class="mt-2 text-muted text-sm">{bucket}. Objects are listed straight from R2; titles, descriptions and alt text travel with the object as custom metadata.</p>
+
+    <Can capability="media.create">
+      <form id="upload" class="mt-6 rounded border border-border p-4 space-y-3">
+        <h2 class="font-semibold text-strong">Upload</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-2">
+            <label for="file" class="block text-sm font-medium mb-1">File</label>
+            <input id="file" name="file" type="file" required class="w-full text-sm" />
+          </div>
+          <div>
+            <label for="folder" class="block text-sm font-medium mb-1">Folder</label>
+            <input id="folder" name="folder" value="media" class="w-full rounded border border-border px-3 py-2 text-sm bg-surface" />
+          </div>
+          <div>
+            <label for="visibility" class="block text-sm font-medium mb-1">Visibility</label>
+            <select id="visibility" name="visibility" class="w-full rounded border border-border px-3 py-2 text-sm bg-surface">
+              <option value="public">public</option>
+              <option value="private">private</option>
+              <option value="consented">consented</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label for="title" class="block text-sm font-medium mb-1">Title</label>
+            <input id="title" name="title" class="w-full rounded border border-border px-3 py-2 text-sm bg-surface" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="description" class="block text-sm font-medium mb-1">Description</label>
+            <input id="description" name="description" class="w-full rounded border border-border px-3 py-2 text-sm bg-surface" />
+          </div>
+        </div>
+        <div>
+          <label for="altText" class="block text-sm font-medium mb-1">Alt text</label>
+          <input id="altText" name="altText" class="w-full rounded border border-border px-3 py-2 text-sm bg-surface" />
+        </div>
+        <button type="submit" class="px-4 py-2 rounded bg-primary text-on-primary text-sm">Upload</button>
+        <span id="upload-result" class="text-sm text-muted"></span>
+      </form>
+    </Can>
+
+    <div class="mt-8 flex flex-wrap items-end gap-3">
+      <div>
+        <label for="prefix" class="block text-sm font-medium mb-1">Folder prefix</label>
+        <input id="prefix" placeholder="evidence/" class="rounded border border-border px-3 py-2 text-sm bg-surface" />
+      </div>
+      <button type="button" id="reload" class="px-3 py-2 rounded border border-border text-sm">List</button>
+      <span id="list-result" class="text-sm text-muted"></span>
+    </div>
+
+    <ul id="objects" class="mt-4 space-y-2"></ul>
   </section>
+
+  <script>
+    const listResult = document.getElementById("list-result");
+    const objects = document.getElementById("objects");
+
+    function row(o: any) {
+      const li = document.createElement("li");
+      li.className = "text-sm rounded border border-border p-3 space-y-2";
+
+      const head = document.createElement("div");
+      head.className = "flex flex-wrap items-center gap-2";
+      const key = document.createElement("span");
+      key.className = "font-mono text-xs";
+      key.textContent = o.key;
+      const size = document.createElement("span");
+      size.className = "text-xs text-muted";
+      size.textContent = `${(o.size / 1024).toFixed(1)} kB · ${o.contentType ?? "unknown"} · ${o.uploaded ?? ""}`;
+      head.append(key, size);
+
+      const title = document.createElement("input");
+      title.className = "w-full rounded border border-border px-3 py-2 text-sm bg-surface";
+      title.value = o.title;
+      title.setAttribute("aria-label", `Title for ${o.key}`);
+
+      const alt = document.createElement("input");
+      alt.className = "w-full rounded border border-border px-3 py-2 text-sm bg-surface";
+      alt.value = o.altText;
+      alt.setAttribute("aria-label", `Alt text for ${o.key}`);
+
+      const desc = document.createElement("input");
+      desc.className = "w-full rounded border border-border px-3 py-2 text-sm bg-surface";
+      desc.value = o.description;
+      desc.setAttribute("aria-label", `Description for ${o.key}`);
+
+      const visibility = document.createElement("select");
+      visibility.className = "rounded border border-border px-3 py-2 text-sm bg-surface";
+      visibility.setAttribute("aria-label", `Visibility for ${o.key}`);
+      for (const v of ["public", "private", "consented"]) {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        if (o.visibility === v) opt.selected = true;
+        visibility.append(opt);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "flex items-center gap-3";
+
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "px-3 py-1 rounded bg-primary text-on-primary text-xs";
+      save.textContent = "Save";
+      save.addEventListener("click", async () => {
+        save.disabled = true;
+        const res = await fetch(`/api/admin/media?key=${encodeURIComponent(o.key)}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: title.value, altText: alt.value, description: desc.value, visibility: visibility.value }),
+        });
+        save.disabled = false;
+        if (listResult) listResult.textContent = res.ok ? "Saved." : "Error.";
+      });
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "text-xs text-critical underline";
+      del.textContent = "Delete";
+      del.addEventListener("click", async () => {
+        if (!confirm(`Delete ${o.key} from R2? This cannot be undone.`)) return;
+        const res = await fetch(`/api/admin/media?key=${encodeURIComponent(o.key)}`, { method: "DELETE" });
+        if (res.ok) {
+          li.remove();
+          if (listResult) listResult.textContent = "Deleted.";
+        }
+      });
+
+      actions.append(save, del);
+      li.append(head, title, alt, desc, visibility, actions);
+      return li;
+    }
+
+    async function load() {
+      if (!objects) return;
+      const prefix = (document.getElementById("prefix") as HTMLInputElement | null)?.value ?? "";
+      const res = await fetch(`/api/admin/media?prefix=${encodeURIComponent(prefix)}`);
+      const j = await res.json().catch(() => ({}));
+      objects.replaceChildren();
+      if (!res.ok) {
+        if (listResult) listResult.textContent = j.error ?? "Error.";
+        return;
+      }
+      const list = j.data?.objects ?? [];
+      for (const o of list) objects.append(row(o));
+      if (listResult) listResult.textContent = `${list.length} object(s)${j.data?.truncated ? " (more available)" : ""}.`;
+    }
+
+    document.getElementById("reload")?.addEventListener("click", load);
+
+    const upload = document.getElementById("upload") as HTMLFormElement | null;
+    upload?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const out = document.getElementById("upload-result");
+      if (out) out.textContent = "Uploading…";
+      const res = await fetch("/api/admin/media", { method: "POST", body: new FormData(upload) });
+      const j = await res.json().catch(() => ({}));
+      if (out) out.textContent = res.ok ? `Uploaded ${j.data?.key}.` : (j.error ?? "Error");
+      if (res.ok) { upload.reset(); load(); }
+    });
+
+    load();
+  </script>
 </AdminLayout>
