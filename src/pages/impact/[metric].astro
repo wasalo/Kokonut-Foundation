@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { parseJson } from "@lib/utils";
 import { localePath, resolveLocale } from "@lib/i18n";
 import { getTranslator, resolveLocale } from "@lib/i18n";
+import { localizeRecord, localizeRecords } from "@lib/translations";
 const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
@@ -35,6 +36,13 @@ try {
       }
       if (metric.methodology) methodology = await db.select().from(methodologies).where(eq(methodologies.slug, metric.methodology)).get();
       if (metric.source) source = await db.select().from(sources).where(eq(sources.slug, metric.source)).get();
+
+      metric = await localizeRecord(db, "metric", metric, locale, ["name", "description"]);
+      ev = await localizeRecords(db, "evidence", ev, locale, ["title", "description"]);
+      attestationsList = await localizeRecords(db, "attestation", attestationsList, locale, ["title", "description"]);
+      farm = await localizeRecord(db, "farm", farm, locale, ["name", "description"]);
+      methodology = await localizeRecord(db, "methodology", methodology, locale, ["name", "description"]);
+      source = await localizeRecord(db, "source", source, locale, ["name", "description"]);
     }
   }
 } catch {}

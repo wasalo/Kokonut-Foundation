@@ -39,6 +39,8 @@ export interface AdminEntity {
   hasSlug?: boolean;
   /** Whether the body is a JSON document rather than plain text. */
   bodyIsJson?: boolean;
+  /** Long-form fields that can carry a translated copy. */
+  translatableFields?: string[];
 }
 
 const STATUS_OPTIONS = [
@@ -60,17 +62,17 @@ const VERIFICATION_OPTIONS = [
 export const ADMIN_ENTITIES: AdminEntity[] = [
   {
     key: "projects", label: "Project", plural: "Projects", table: projects,
-    entityType: "project", hasStatus: true, permissionEntity: "projects",
+    entityType: "project", hasStatus: true, permissionEntity: "projects", translatableFields: ["name", "summary", "description"],
     rowLabel: (r) => `${r.name} — ${r.status}`,
   },
   {
     key: "farms", label: "Farm", plural: "Farms", table: farms,
-    entityType: "farm", hasStatus: true, permissionEntity: "farms",
+    entityType: "farm", hasStatus: true, permissionEntity: "farms", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name} — ${r.status}`,
   },
   {
     key: "metrics", label: "Metric", plural: "Metrics", table: metrics,
-    entityType: "metric", hasStatus: true, permissionEntity: "metrics",
+    entityType: "metric", hasStatus: true, permissionEntity: "metrics", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name}: ${r.value} ${r.unit} — ${r.status}`,
   },
   {
@@ -85,32 +87,32 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "evidence", label: "Evidence", plural: "Evidence", table: evidence,
-    entityType: "evidence", hasStatus: true, permissionEntity: "evidence",
+    entityType: "evidence", hasStatus: true, permissionEntity: "evidence", translatableFields: ["title", "description"],
     rowLabel: (r) => `${r.title} — ${r.status}`,
   },
   {
     key: "attestations", label: "Attestation", plural: "Attestations", table: attestations,
-    entityType: "attestation", hasStatus: false, permissionEntity: "attestations",
+    entityType: "attestation", hasStatus: false, permissionEntity: "attestations", translatableFields: ["title", "description"],
     rowLabel: (r) => `${r.title} — ${r.verificationStatus}`,
   },
   {
     key: "partners", label: "Partner", plural: "Partners", table: partners,
-    entityType: "partner", hasStatus: false, permissionEntity: "partners",
+    entityType: "partner", hasStatus: false, permissionEntity: "partners", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name} — ${r.type} (${r.country})`,
   },
   {
     key: "team", label: "Team Member", plural: "Team", table: teamMembers,
-    entityType: "team_member", hasStatus: false, permissionEntity: "team",
+    entityType: "team_member", hasStatus: false, permissionEntity: "team", translatableFields: ["name", "role", "bio"],
     rowLabel: (r) => `${r.name} — ${r.role}`,
   },
   {
     key: "reports", label: "Report", plural: "Reports", table: reports,
-    entityType: "report", hasStatus: true, permissionEntity: "reports",
+    entityType: "report", hasStatus: true, permissionEntity: "reports", translatableFields: ["title", "summary"],
     rowLabel: (r) => `${r.title} — ${r.status}`,
   },
   {
     key: "resources", label: "Resource", plural: "Resources", table: resources,
-    entityType: "resource", hasStatus: true, permissionEntity: "resources",
+    entityType: "resource", hasStatus: true, permissionEntity: "resources", translatableFields: ["title", "summary"],
     rowLabel: (r) => `${r.title} — ${r.resourceType}`,
   },
   {
@@ -135,7 +137,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
 
   {
     key: "content", label: "Content Block", plural: "Content Blocks", table: contentBlocks,
-    entityType: "content_block", hasStatus: false, permissionEntity: "content",
+    entityType: "content_block", hasStatus: false, permissionEntity: "content", translatableFields: ["title", "body"],
     rowLabel: (r) => `${r.title ?? r.key} (${r.key})`,
     idPrefix: "blk_",
     bodyIsJson: true,
@@ -147,7 +149,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "natural-assets", label: "Natural Asset", plural: "Natural Assets", table: naturalAssets,
-    entityType: "natural_asset", hasStatus: false, permissionEntity: "natural_assets",
+    entityType: "natural_asset", hasStatus: false, permissionEntity: "natural_assets", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name} — ${r.assetType}`,
     idPrefix: "na_",
     hasSlug: true,
@@ -162,7 +164,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "activities", label: "Activity", plural: "Activities", table: activities,
-    entityType: "activity", hasStatus: false, permissionEntity: "activities",
+    entityType: "activity", hasStatus: false, permissionEntity: "activities", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name}`,
     idPrefix: "act_",
     hasSlug: true,
@@ -177,7 +179,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "claims", label: "Claim", plural: "Claims", table: claims,
-    entityType: "claim", hasStatus: false, permissionEntity: "claims",
+    entityType: "claim", hasStatus: false, permissionEntity: "claims", translatableFields: ["title", "description"],
     rowLabel: (r) => `${r.title} — ${r.status}`,
     idPrefix: "clm_",
     hasSlug: true,
@@ -192,7 +194,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "methodologies", label: "Methodology", plural: "Methodologies", table: methodologies,
-    entityType: "methodology", hasStatus: false, permissionEntity: "methodologies",
+    entityType: "methodology", hasStatus: false, permissionEntity: "methodologies", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name}${r.version ? ` v${r.version}` : ""}`,
     idPrefix: "meth_",
     hasSlug: true,
@@ -206,7 +208,7 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
   },
   {
     key: "sources", label: "Source", plural: "Sources", table: sources,
-    entityType: "source", hasStatus: false, permissionEntity: "sources",
+    entityType: "source", hasStatus: false, permissionEntity: "sources", translatableFields: ["name", "description"],
     rowLabel: (r) => `${r.name} — ${r.sourceType}`,
     idPrefix: "src_",
     hasSlug: true,

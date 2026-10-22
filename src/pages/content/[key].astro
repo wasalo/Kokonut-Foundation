@@ -1,0 +1,45 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getDb } from "@lib/db";
+import { getContentBlock, parseBlockBody, toParagraphs, toFields } from "@lib/content";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+
+const t = getTranslator(resolveLocale(Astro));
+
+const key = (Astro.params.key ?? "").replace(/\/$/, "");
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const block = await getContentBlock(db, key);
+
+if (!block) {
+  return new Response("Not found", { status: 404 });
+}
+
+const parsed = parseBlockBody(block.body);
+const paragraphs = parsed.kind === "text" ? toParagraphs(parsed.text) : [];
+const fields = parsed.kind === "json" && parsed.json ? toFields(parsed.json) : [];
+---
+<BaseLayout title={`${block.title ?? block.key} — Kokonut Foundation`} description={block.title ?? block.key}>
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <a href="/content" class="text-sm text-primary">← {t("content.all")}</a>
+    <h1 class="mt-2 text-3xl md:text-5xl font-bold text-strong">{block.title ?? block.key}</h1>
+    <p class="mt-2 text-xs text-muted font-mono">{block.key}</p>
+
+    {parsed.kind === "text" && (
+      <div class="mt-8 space-y-4 text-strong">
+        {paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+    )}
+
+    {parsed.kind === "json" && (
+      <dl class="mt-8 divide-y divide-border rounded border border-border">
+        {fields.map((f) => (
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 p-4">
+            <dt class="text-sm font-semibold text-strong">{f.label}</dt>
+            <dd class="md:col-span-2 text-sm text-muted break-words">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </section>
+</BaseLayout>

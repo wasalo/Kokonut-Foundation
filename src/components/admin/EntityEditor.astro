@@ -5,6 +5,7 @@ import { adminPageGuard } from "@lib/admin-page";
 import { genericEntity } from "@lib/admin-entities";
 import { getDb } from "@lib/db";
 import { eq } from "drizzle-orm";
+import { getTranslation } from "@lib/translations";
 
 interface Props { entity: string; id?: string }
 const { entity: entityKey, id } = Astro.props;
@@ -12,7 +13,7 @@ const { entity: entityKey, id } = Astro.props;
 const entity = genericEntity(entityKey);
 if (!entity) return new Response("Not found", { status: 404 });
 
-const denied = adminPageGuard(Astro, `${id ? entity.permissionEntity : entity.permissionEntity}.${id ? "update" : "create"}` as any);
+const denied = adminPageGuard(Astro, `${entity.permissionEntity}.${id ? "update" : "create"}` as any);
 if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -20,6 +21,15 @@ const db = env.DB ? getDb(env) : null;
 let record: Record<string, unknown> = {};
 if (id && db) {
   try { record = (await db.select().from(entity.table).where(eq(entity.table.id, id)).get()) ?? {}; } catch {}
+}
+
+// Existing translations, so the editor opens on what is already written.
+const translatable = entity.translatableFields ?? [];
+const translationValues: Record<string, Record<string, string>> = {};
+if (id && db && translatable.length) {
+  for (const locale of ["es"]) {
+    translationValues[locale] = await getTranslation(db, entity.entityType, id, locale);
+  }
 }
 ---
 <AdminLayout title={`${id ? "Edit" : "New"} ${entity.label} — Admin`} description={`Admin ${entity.label.toLowerCase()}.`}>
@@ -33,6 +43,9 @@ if (id && db) {
       submitLabel={id ? "Save changes" : "Create"}
       record={record}
       fields={entity.fields!.map((f) => ({ ...f, help: f.help }))}
+      translations={translatable.length ? { entityType: entity.entityType, fields: translatable.map((name) => ({ name, label: name.charAt(0).toUpperCase() + name.slice(1) })) } : undefined}
+      locales={["es"]}
+      translationValues={translationValues}
     />
   </section>
 </AdminLayout>

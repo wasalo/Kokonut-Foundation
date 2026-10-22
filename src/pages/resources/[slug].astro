@@ -7,6 +7,7 @@ import { resources } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { formatDate } from "@lib/utils";
 import { localePath, resolveLocale } from "@lib/i18n";
+import { localizeRecord, localizeRecords } from "@lib/translations";
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -15,6 +16,7 @@ const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let r: any = null;
 try { if (db) r = await db.select().from(resources).where(eq(resources.slug, slug)).get(); } catch {}
+r = await localizeRecord(db, "resource", r, locale, ["title", "summary"]);
 if (!r) r = { slug, title: slug, summary: "", resourceType: "Resource", publishedAt: new Date().toISOString() };
 ---
 <BaseLayout title={`${r.title} — Kokonut Foundation`} description={r.summary ?? ""}>

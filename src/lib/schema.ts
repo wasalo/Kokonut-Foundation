@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const projects = sqliteTable("projects", {
   id: text("id").primaryKey(),
@@ -217,6 +217,17 @@ export const adminRoles = sqliteTable("admin_roles", {
   grantedAt: text("granted_at").notNull(),
   active: integer("active").notNull().default(1),
 });
+
+export const recordTranslations = sqliteTable("record_translations", {
+  id: text("id").primaryKey(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  locale: text("locale").notNull(),
+  fields: text("fields").notNull().default("{}"),
+  updatedAt: text("updated_at").notNull(),
+}, (t) => ({
+  uniqueRecord: uniqueIndex("record_translations_record").on(t.entityType, t.entityId, t.locale),
+}));
 
 export const syncJobs = sqliteTable("sync_jobs", {
   id: text("id").primaryKey(),

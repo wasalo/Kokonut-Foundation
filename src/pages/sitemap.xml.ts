@@ -7,7 +7,7 @@ const base = [
   "/transparency/methodologies", "/transparency/open-source",
   "/partners", "/resources", "/about", "/about/team", "/about/foundation",
   "/support", "/contact", "/explorer", "/explorer/evidence", "/explorer/graph",
-  "/farms", "/data", "/api-docs", "/search",
+  "/farms", "/data", "/api-docs", "/search", "/content",
 ];
 
 // Every public route is served in both locales.

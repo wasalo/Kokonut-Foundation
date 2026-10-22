@@ -8,7 +8,7 @@ import { getDb } from "@lib/db";
 import { projects, metrics } from "@lib/schema";
 import { parseJson } from "@lib/utils";
 import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
-import { getTranslator, resolveLocale } from "@lib/i18n";
+import { getContentBlock } from "@lib/content";
 const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
@@ -18,10 +18,12 @@ const db = env.DB ? getDb(env) : null;
 
 let featuredProjects: any[] = [];
 let proofMetrics: any[] = [];
+let ledeBlock: any = null;
 try {
   if (db) {
     featuredProjects = await db.select().from(projects).limit(3);
     proofMetrics = await db.select().from(metrics).limit(6);
+    ledeBlock = await getContentBlock(db, "home:lede");
   }
 } catch {
   // fallback empty
@@ -55,7 +57,7 @@ const jsonLd = {
   <section class="max-w-7xl mx-auto px-4 py-16 md:py-24">
     <div class="max-w-3xl">
       <h1 class="text-4xl md:text-6xl font-bold text-strong leading-tight">{t("home.title")}</h1>
-      <p class="mt-6 text-lg text-muted">{t("home.lede")}</p>
+      <p class="mt-6 text-lg text-muted">{ledeBlock?.body ?? t("home.lede")}</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <Button href={path("/projects")} variant="primary">{t("home.cta.work")}</Button>
         <Button href={path("/impact")} variant="secondary">{t("home.cta.impact")}</Button>

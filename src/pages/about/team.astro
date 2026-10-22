@@ -3,11 +3,16 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { teamMembers } from "@lib/schema";
+import { localizeRecord, localizeRecords } from "@lib/translations";
+import { resolveLocale } from "@lib/i18n";
+
+const locale = resolveLocale(Astro);
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(teamMembers); } catch {}
+list = await localizeRecords(db, "team_member", list, locale, ["name", "role", "bio"]);
 if (!list.length) {
   list = [{ id: "t1", name: "Foundation Team", role: "Stewards", bio: "The people growing regenerative farms." }];
 }

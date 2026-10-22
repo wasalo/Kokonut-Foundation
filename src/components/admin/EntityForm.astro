@@ -7,6 +7,11 @@ interface Field {
   required?: boolean;
   help?: string;
 }
+interface TranslationField {
+  name: string;
+  label: string;
+  type?: "text" | "textarea";
+}
 interface Props {
   endpoint: string;
   method?: "POST" | "PUT";
@@ -14,15 +19,29 @@ interface Props {
   fields: Field[];
   record?: Record<string, unknown>;
   submitLabel?: string;
+  /** Long-form fields that can carry a translated copy. */
+  translations?: { entityType: string; fields: TranslationField[] };
+  /** Locales the translations are authored in. */
+  locales?: string[];
+  /** Existing translated values, keyed by locale. */
+  translationValues?: Record<string, Record<string, string>>;
 }
-const { endpoint, id, fields, record = {}, submitLabel = "Save" } = Astro.props;
+const {
+  endpoint, id, fields, record = {}, submitLabel = "Save",
+  translations, locales = ["es"], translationValues = {},
+} = Astro.props;
 const method = Astro.props.method ?? (id ? "PUT" : "POST");
+
+const LOCALE_NAMES: Record<string, string> = { es: "Español" };
+const localeName = (locale: string): string => LOCALE_NAMES[locale] ?? locale.toUpperCase();
 ---
 <form
   data-admin-form
   data-endpoint={endpoint}
   data-method={method}
   data-id={id}
+  data-entity-type={translations?.entityType ?? ""}
+  data-locales={(translations ? locales : []).join(",")}
   class="mt-6 space-y-4"
 >
   {fields.map((f) => (
@@ -51,6 +70,42 @@ const method = Astro.props.method ?? (id ? "PUT" : "POST");
       {f.help && <p class="mt-1 text-xs text-muted">{f.help}</p>}
     </div>
   ))}
+
+  {translations && translations.fields.length > 0 && (
+    <fieldset class="mt-8 rounded border border-border p-4 space-y-4">
+      <legend class="px-2 text-sm font-semibold text-strong">Translations</legend>
+      <p class="text-xs text-muted">
+        Leave a field blank to keep the default-language copy.
+      </p>
+      {locales.map((locale) => (
+        <div class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">{localeName(locale)}</p>
+          {translations.fields.map((tf) => (
+            <div>
+              <label for={`t-${locale}-${tf.name}`} class="block text-sm font-medium mb-1">{tf.label}</label>
+              {tf.type === "textarea" ? (
+                <textarea
+                  id={`t-${locale}-${tf.name}`}
+                  name={`__t_${locale}_${tf.name}`}
+                  rows={4}
+                  class="w-full rounded border border-border px-3 py-2 text-sm font-mono"
+                >{String(translationValues?.[locale]?.[tf.name] ?? "")}</textarea>
+              ) : (
+                <input
+                  id={`t-${locale}-${tf.name}`}
+                  name={`__t_${locale}_${tf.name}`}
+                  type="text"
+                  value={String(translationValues?.[locale]?.[tf.name] ?? "")}
+                  class="w-full rounded border border-border px-3 py-2 text-sm bg-surface"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+    </fieldset>
+  )}
+
   <button type="submit" class="px-4 py-2 rounded bg-primary text-on-primary text-sm">{submitLabel}</button>
   <span data-admin-result class="text-sm text-muted"></span>
 </form>
@@ -62,21 +117,55 @@ const method = Astro.props.method ?? (id ? "PUT" : "POST");
       const endpoint = form.getAttribute("data-endpoint") ?? "";
       const method = form.getAttribute("data-method") ?? "POST";
       const id = form.getAttribute("data-id");
+      const entityType = form.getAttribute("data-entity-type") ?? "";
+      const locales = (form.getAttribute("data-locales") ?? "").split(",").filter(Boolean);
+
       const fd = new FormData(form);
       const payload: Record<string, unknown> = {};
-      fd.forEach((v, k) => { payload[k] = typeof v === "string" ? v : v; });
+      const translations: Record<string, Record<string, string>> = {};
+      fd.forEach((v, k) => {
+        const key = String(k);
+        if (key.startsWith("__t_")) {
+          const [, locale, ...rest] = key.split("_");
+          const field = rest.join("_");
+          translations[locale] = translations[locale] ?? {};
+          translations[locale][field] = String(v);
+          return;
+        }
+        payload[key] = typeof v === "string" ? v : v;
+      });
       if (id) payload.id = id;
+
       const out = form.querySelector("[data-admin-result]");
       if (out) out.textContent = "Saving…";
+
       const res = await fetch(id ? `${endpoint}?id=${encodeURIComponent(id)}` : endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const j = await res.json().catch(() => ({}));
-      if (out) out.textContent = res.ok ? "Saved." : (j.error ?? "Error — check the fields.");
-      if (res.ok && id) setTimeout(() => location.reload(), 600);
-      if (res.ok && !id) setTimeout(() => location.reload(), 600);
+      if (!res.ok) {
+        if (out) out.textContent = j.error ?? "Error — check the fields.";
+        return;
+      }
+
+      // Translations are saved separately, against the saved record's id.
+      if (entityType && locales.length) {
+        const recordId = id ?? j?.data?.id;
+        for (const locale of locales) {
+          const fields = translations[locale] ?? {};
+          if (!Object.keys(fields).length) continue;
+          await fetch("/api/admin/translations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ entityType, entityId: recordId, locale, fields }),
+          });
+        }
+      }
+
+      if (out) out.textContent = "Saved.";
+      setTimeout(() => location.reload(), 600);
     });
   });
 </script>

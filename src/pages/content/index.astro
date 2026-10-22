@@ -1,0 +1,37 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getDb } from "@lib/db";
+import { listContentBlocks, parseBlockBody } from "@lib/content";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+
+const t = getTranslator(resolveLocale(Astro));
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const blocks = await listContentBlocks(db);
+---
+<BaseLayout title="Content — Kokonut Foundation" description={t("content.lede")}>
+  <section class="max-w-4xl mx-auto px-4 py-16">
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("content.title")}</h1>
+    <p class="mt-4 text-lg text-muted">{t("content.lede")}</p>
+
+    {blocks.length === 0 ? (
+      <p class="mt-8 text-muted text-sm">{t("content.empty")}</p>
+    ) : (
+      <ul class="mt-8 space-y-3">
+        {blocks.map((b) => {
+          const parsed = parseBlockBody(b.body);
+          return (
+            <li class="rounded border border-border p-4">
+              <a href={`/content/${b.key}`} class="font-semibold text-strong hover:underline">{b.title ?? b.key}</a>
+              <p class="mt-1 text-xs text-muted font-mono">{b.key}</p>
+              <p class="mt-2 text-sm text-muted line-clamp-2">
+                {parsed.kind === "text" ? parsed.text : Object.keys(parsed.json ?? {}).join(", ")}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+</BaseLayout>

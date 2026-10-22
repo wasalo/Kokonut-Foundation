@@ -4,6 +4,7 @@ import EntityForm from "@components/admin/EntityForm.astro";
 import { getDb } from "@lib/db";
 import { farms } from "@lib/schema";
 import { eq } from "drizzle-orm";
+import { getTranslation } from "@lib/translations";
 import { adminPageGuard } from "@lib/admin-page";
 const denied = adminPageGuard(Astro, "farms.update");
 if (denied) return denied;
@@ -12,6 +13,8 @@ const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 const id = Astro.params.id as string;
 let record: Record<string, unknown> = {};
+let translationValues: Record<string, Record<string, string>> = {};
+try { if (db) translationValues["es"] = await getTranslation(db, "farm", id, "es"); } catch {}
 try { if (db) record = (await db.select().from(farms).where(eq(farms.id, id)).get()) ?? {}; } catch {}
 ---
 <AdminLayout title="Edit Farm — Admin" description="Admin farm edit.">
@@ -24,6 +27,9 @@ try { if (db) record = (await db.select().from(farms).where(eq(farms.id, id)).ge
       id={id}
       submitLabel="Save changes"
       record={record}
+      translations={{ entityType: "farm", fields: [{ name: "name", label: "Name" }, { name: "description", label: "Description" }] }}
+      locales={["es"]}
+      translationValues={translationValues}
       fields={[
         { name: "name", label: "Name", required: true },
         { name: "description", label: "Description", type: "textarea" },
