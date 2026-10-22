@@ -1,7 +1,10 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { syncJobs } from "@lib/schema";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "access.sync");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -9,7 +12,7 @@ let list: any[] = [];
 try { if (db) list = await db.select().from(syncJobs); } catch {}
 list = [...list].sort((a: any, b: any) => (b.startedAt ?? "").localeCompare(a.startedAt ?? ""));
 ---
-<BaseLayout title="Sync — Admin" description="KI sync.">
+<AdminLayout title="Sync — Admin" description="KI sync.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Kokonut Intelligence Sync</h1>
     <button id="sync-btn" class="mt-4 px-4 py-2 rounded-md bg-primary text-on-primary text-sm">Run Sync Now</button>
@@ -29,4 +32,4 @@ list = [...list].sort((a: any, b: any) => (b.startedAt ?? "").localeCompare(a.st
       if (el) el.textContent = res.ok ? `Sync ${json.data.status}: ${json.data.details}` : (json.error ?? "Error");
     });
   </script>
-</BaseLayout>
+</AdminLayout>

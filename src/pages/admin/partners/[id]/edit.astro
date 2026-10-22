@@ -1,0 +1,39 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "partners.update");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { partners } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const id = Astro.params.id as string;
+let record: Record<string, unknown> = {};
+try { if (db) record = (await db.select().from(partners).where(eq(partners.id, id)).get()) ?? {}; } catch {}
+---
+<AdminLayout title="Edit Partner — Admin" description="Admin Partner edit.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/partners" class="text-sm text-primary">← Partners</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">Edit Partner</h1>
+    <p class="mt-2 text-sm text-muted">{String(record.name ?? id)}</p>
+    <EntityForm
+      endpoint="/api/admin/partners"
+      id={id}
+      submitLabel="Save changes"
+      record={record}
+      fields={[
+        { name: "name", label: "Name", required: true },
+        { name: "slug", label: "Slug" },
+        { name: "type", label: "Type" },
+        { name: "description", label: "Description", type: "textarea" },
+        { name: "website", label: "Website" },
+        { name: "logo", label: "Logo URL" },
+        { name: "country", label: "Country" },
+      ]}
+    />
+  </section>
+</AdminLayout>

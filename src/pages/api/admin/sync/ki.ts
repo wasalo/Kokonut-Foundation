@@ -2,8 +2,12 @@ import type { APIRoute } from "astro";
 import { getDb } from "@lib/db";
 import { syncJobs } from "@lib/schema";
 import { ok, err } from "@lib/api";
+import { denyUnless } from "@lib/admin-guard";
+import { actorOf } from "@lib/admin-actor";
 
 export const POST: APIRoute = async ({ locals }) => {
+  const denied = denyUnless(locals, "access.sync");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   try {
@@ -16,6 +20,8 @@ export const POST: APIRoute = async ({ locals }) => {
 };
 
 export const GET: APIRoute = async ({ locals }) => {
+  const denied = denyUnless(locals, "access.sync");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   try {

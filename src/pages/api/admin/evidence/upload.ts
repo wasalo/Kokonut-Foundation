@@ -3,8 +3,12 @@ import { getDb } from "@lib/db";
 import { evidence } from "@lib/schema";
 import { ok, err } from "@lib/api";
 import { id, nowIso } from "@lib/utils";
+import { denyUnless } from "@lib/admin-guard";
+import { actorOf } from "@lib/admin-actor";
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const denied = denyUnless(locals, "evidence.create");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   if (!env.MEDIA) return err("Storage not configured", 503);

@@ -1,0 +1,106 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "access.roles");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { adminRoles } from "@lib/schema";
+import { ROLES, ROLE_LABELS, ROLE_DESCRIPTIONS, ROLE_CAPABILITIES } from "@lib/permissions";
+import { formatDate } from "@lib/utils";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+let assignments: any[] = [];
+try { if (db) assignments = await db.select().from(adminRoles).all(); } catch {}
+
+const actor = Astro.locals.admin ?? null;
+const matrix = ROLES.map((r) => ({
+  role: r,
+  label: ROLE_LABELS[r],
+  description: ROLE_DESCRIPTIONS[r],
+  count: ROLE_CAPABILITIES[r].length,
+}));
+---
+<AdminLayout title="Roles — Admin" description="Admin role assignments.">
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-strong">Roles</h1>
+    <p class="mt-2 text-muted text-sm">
+      Authentication is Cloudflare Access. A role decides what an authenticated person may do.
+      Unassigned identities are read-only.
+    </p>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+      {matrix.map((m) => (
+        <div class="rounded border border-border p-4">
+          <div class="flex items-baseline justify-between gap-2">
+            <h2 class="font-semibold text-strong">{m.label}</h2>
+            <span class="text-xs text-muted">{m.count} capabilities</span>
+          </div>
+          <p class="mt-1 text-sm text-muted">{m.description}</p>
+        </div>
+      ))}
+    </div>
+
+    <h2 class="mt-10 text-xl font-semibold text-strong">Assignments</h2>
+    <form id="assign" class="mt-4 flex flex-wrap items-end gap-3">
+      <div>
+        <label for="email" class="block text-sm font-medium mb-1">Email</label>
+        <input id="email" name="email" type="email" required placeholder="person@kokonut.foundation"
+               class="rounded border border-border px-3 py-2 text-sm bg-surface" />
+      </div>
+      <div>
+        <label for="role" class="block text-sm font-medium mb-1">Role</label>
+        <select id="role" name="role" class="rounded border border-border px-3 py-2 text-sm bg-surface">
+          {ROLES.map((r) => <option value={r}>{ROLE_LABELS[r]}</option>)}
+        </select>
+      </div>
+      <button type="submit" class="px-4 py-2 rounded bg-primary text-on-primary text-sm">Assign role</button>
+      <span id="assign-result" class="text-sm text-muted"></span>
+    </form>
+
+    <ul class="mt-6 space-y-2" id="assignments">
+      {assignments.length === 0 && (
+        <li class="text-sm text-muted">No explicit assignments yet.</li>
+      )}
+      {assignments.map((a: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3 rounded border border-border px-3 py-2">
+          <span class="font-medium">{a.email}</span>
+          <span class="px-2 py-0.5 rounded text-xs bg-primary-soft text-primary">{ROLE_LABELS[a.role as keyof typeof ROLE_LABELS] ?? a.role}</span>
+          <span class="text-xs text-muted">granted {formatDate(a.grantedAt)}{a.grantedBy ? ` by ${a.grantedBy}` : ""}</span>
+          {a.email !== actor?.email && (
+            <button type="button" data-revoke={a.email} class="ml-auto text-xs text-critical underline">Revoke</button>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <script>
+    const result = document.getElementById("assign-result");
+    const form = document.getElementById("assign") as HTMLFormElement | null;
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const res = await fetch("/api/admin/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: fd.get("email"), role: fd.get("role") }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (result) result.textContent = res.ok ? `Assigned ${j.data?.role} to ${j.data?.email}.` : (j.error ?? "Error");
+      if (res.ok) setTimeout(() => location.reload(), 600);
+    });
+
+    document.querySelectorAll("[data-revoke]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const email = btn.getAttribute("data-revoke") ?? "";
+        if (!confirm(`Revoke the role for ${email}?`)) return;
+        const res = await fetch(`/api/admin/roles?email=${encodeURIComponent(email)}`, { method: "DELETE" });
+        const j = await res.json().catch(() => ({}));
+        if (result) result.textContent = res.ok ? `Revoked ${email}.` : (j.error ?? "Error");
+        if (res.ok) setTimeout(() => location.reload(), 600);
+      });
+    });
+  </script>
+</AdminLayout>

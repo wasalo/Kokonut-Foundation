@@ -1,27 +1,16 @@
 import { defineMiddleware } from "astro:middleware";
-import { verifyAccessJwt } from "@lib/access";
+import { resolveAdminActor } from "@lib/admin-actor";
 
 /**
- * Verifies the request is authorized for admin surfaces.
- * Uses a full Cloudflare Access JWT check (signature, aud, expiry) when
- * ACCESS_TEAM_DOMAIN + ACCESS_AUD are configured. In production the absence of
- * those settings is a hard deny — a present-but-unverified header is not enough.
+ * Verifies the request is authorized for admin surfaces and resolves the
+ * caller's Foundation role.
+ *
+ * Authentication is Cloudflare Access (PRD §33): a full JWT check (signature,
+ * aud, expiry) when ACCESS_TEAM_DOMAIN + ACCESS_AUD are configured. In
+ * production the absence of those settings is a hard deny — a
+ * present-but-unverified header is not enough. The role behind the verified
+ * identity comes from `admin_roles` (PRD §34).
  */
-async function isAuthorizedAdmin(request: Request, env: any): Promise<boolean> {
-  const token = request.headers.get("cf-access-jwt-assertion");
-  if (!token) return false;
-
-  const teamDomain = env.ACCESS_TEAM_DOMAIN;
-  const audience = env.ACCESS_AUD;
-  if (!teamDomain || !audience) {
-    // Unconfigured: allow only outside production so local preview still works.
-    return env.ENVIRONMENT !== "production";
-  }
-
-  const result = await verifyAccessJwt(token, { teamDomain, audience });
-  return result.valid;
-}
-
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, locals } = context;
   const pathname = url.pathname;
@@ -41,16 +30,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   locals.locale = "en";
 
-  // Admin gate
+  // Admin gate: Cloudflare Access identity + Foundation role.
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     const env = (locals as any).runtime?.env ?? {};
-    const bypass = env.ADMIN_DEV_BYPASS === "true";
-    if (!bypass) {
-      const ok = await isAuthorizedAdmin(context.request, env);
-      if (!ok) {
-        return new Response("Unauthorized", { status: 401 });
-      }
+    const actor = await resolveAdminActor(context.request, env);
+    if (!actor) {
+      const bypass = env.ADMIN_DEV_BYPASS === "true";
+      if (!bypass) return new Response("Unauthorized", { status: 401 });
     }
+    locals.admin = actor;
   }
 
   // Redirects (D1-backed) - best-effort

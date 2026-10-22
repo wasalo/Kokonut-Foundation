@@ -1,0 +1,70 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "evidence.update");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { evidence } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const id = Astro.params.id as string;
+let record: Record<string, unknown> = {};
+try { if (db) record = (await db.select().from(evidence).where(eq(evidence.id, id)).get()) ?? {}; } catch {}
+---
+<AdminLayout title="Edit Evidence — Admin" description="Admin Evidence edit.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/evidence" class="text-sm text-primary">← Evidences</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">Edit Evidence</h1>
+    <p class="mt-2 text-sm text-muted">{String(record.title ?? id)}</p>
+    <EntityForm
+      endpoint="/api/admin/evidence"
+      id={id}
+      submitLabel="Save changes"
+      record={record}
+      fields={[
+        { name: "title", label: "Title", required: true },
+        { name: "type", label: "Type" },
+        { name: "description", label: "Description", type: "textarea" },
+        { name: "projectId", label: "Project ID" },
+        { name: "metricId", label: "Metric ID" },
+        { name: "objectKey", label: "Object key" },
+        { name: "externalUrl", label: "External URL" },
+        { name: "capturedAt", label: "Captured at" },
+        { name: "hash", label: "Hash" },
+        { name: "visibility", label: "Visibility", type: "select", options: [
+            { value: "public", label: "public" },
+            { value: "private", label: "private" },
+            { value: "consented", label: "consented" },
+          ] },
+        { name: "status", label: "Status", type: "select", options: [
+            { value: "draft", label: "draft" },
+            { value: "submitted", label: "submitted" },
+            { value: "verified", label: "verified" },
+            { value: "published", label: "published" },
+            { value: "rejected", label: "rejected" },
+            { value: "archived", label: "archived" },
+          ] },
+        { name: "evidenceClass", label: "Evidence class", type: "select", options: [
+            { value: "direct_observation", label: "direct observation" },
+            { value: "measurement", label: "measurement" },
+            { value: "derived_indicator", label: "derived indicator" },
+            { value: "forecast", label: "forecast / model" },
+            { value: "attestation", label: "attestation / reviewed claim" },
+            { value: "interpretation", label: "interpretation" },
+          ] },
+        { name: "maturity", label: "Maturity", type: "select", options: [
+            { value: "narrative", label: "narrative / self-reported" },
+            { value: "structured", label: "structured" },
+            { value: "reviewed", label: "reviewed" },
+            { value: "evidence_linked", label: "evidence-linked" },
+            { value: "attested", label: "attested" },
+            { value: "externally_verified", label: "externally verified" },
+          ] },
+      ]}
+    />
+  </section>
+</AdminLayout>

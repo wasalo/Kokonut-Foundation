@@ -209,6 +209,15 @@ export const auditLog = sqliteTable("audit_log", {
   timestamp: text("timestamp").notNull(),
 });
 
+export const adminRoles = sqliteTable("admin_roles", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  role: text("role").notNull(),
+  grantedBy: text("granted_by"),
+  grantedAt: text("granted_at").notNull(),
+  active: integer("active").notNull().default(1),
+});
+
 export const syncJobs = sqliteTable("sync_jobs", {
   id: text("id").primaryKey(),
   source: text("source").notNull(),

@@ -1,0 +1,8 @@
+---
+import { can, type Capability } from "@lib/permissions";
+
+interface Props { capability: Capability }
+const { capability } = Astro.props;
+const allowed = can(Astro.locals.admin?.role, capability);
+---
+{allowed && <slot />}

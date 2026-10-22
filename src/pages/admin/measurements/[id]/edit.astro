@@ -1,0 +1,45 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "measurements.update");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { measurements } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const id = Astro.params.id as string;
+let record: Record<string, unknown> = {};
+try { if (db) record = (await db.select().from(measurements).where(eq(measurements.id, id)).get()) ?? {}; } catch {}
+---
+<AdminLayout title="Edit Measurement — Admin" description="Admin Measurement edit.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/measurements" class="text-sm text-primary">← Measurements</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">Edit Measurement</h1>
+    <p class="mt-2 text-sm text-muted">{String(record.metricId ?? id)}</p>
+    <EntityForm
+      endpoint="/api/admin/measurements"
+      id={id}
+      submitLabel="Save changes"
+      record={record}
+      fields={[
+        { name: "metricId", label: "Metric ID", required: true },
+        { name: "projectId", label: "Project ID" },
+        { name: "value", label: "Value", type: "number", required: true },
+        { name: "observedAt", label: "Observed at", required: true },
+        { name: "source", label: "Source" },
+        { name: "methodology", label: "Methodology" },
+        { name: "verificationStatus", label: "Verification", type: "select", options: [
+            { value: "reported", label: "reported" },
+            { value: "reviewed", label: "reviewed" },
+            { value: "verified", label: "verified" },
+            { value: "attested", label: "attested" },
+          ] },
+        { name: "evidenceId", label: "Evidence ID" },
+      ]}
+    />
+  </section>
+</AdminLayout>

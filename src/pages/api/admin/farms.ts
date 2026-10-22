@@ -4,8 +4,12 @@ import { farms, auditLog } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { ok, err } from "@lib/api";
 import { id, nowIso, slugify } from "@lib/utils";
+import { denyUnless } from "@lib/admin-guard";
+import { actorOf } from "@lib/admin-actor";
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const denied = denyUnless(locals, "farms.create");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   let data: any = {};
@@ -37,11 +41,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     createdAt: nowIso(),
     updatedAt: nowIso(),
   });
-  await db.insert(auditLog).values({ id: id("aud_"), actor: "admin", action: "create_farm", entityType: "farm", entityId: fid, after: JSON.stringify({ name: data.name, slug }), timestamp: nowIso() });
+  await db.insert(auditLog).values({ id: id("aud_"), actor: actorOf(locals), action: "create_farm", entityType: "farm", entityId: fid, after: JSON.stringify({ name: data.name, slug }), timestamp: nowIso() });
   return ok({ id: fid, slug });
 };
 
 export const PUT: APIRoute = async ({ request, locals }) => {
+  const denied = denyUnless(locals, "farms.update");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   let data: any = {};
@@ -66,17 +72,19 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     publicGoodsAllocation: data.publicGoodsAllocation != null ? Number(data.publicGoodsAllocation) : undefined,
     updatedAt: nowIso(),
   }).where(eq(farms.id, data.id));
-  await db.insert(auditLog).values({ id: id("aud_"), actor: "admin", action: "update_farm", entityType: "farm", entityId: data.id, after: JSON.stringify(data), timestamp: nowIso() });
+  await db.insert(auditLog).values({ id: id("aud_"), actor: actorOf(locals), action: "update_farm", entityType: "farm", entityId: data.id, after: JSON.stringify(data), timestamp: nowIso() });
   return ok({ id: data.id });
 };
 
 export const DELETE: APIRoute = async ({ request, locals, url }) => {
+  const denied = denyUnless(locals, "farms.delete");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   const idParam = url.searchParams.get("id");
   if (!idParam) return err("id required", 400);
   const db = getDb(env);
   await db.delete(farms).where(eq(farms.id, idParam));
-  await db.insert(auditLog).values({ id: id("aud_"), actor: "admin", action: "delete_farm", entityType: "farm", entityId: idParam, timestamp: nowIso() });
+  await db.insert(auditLog).values({ id: id("aud_"), actor: actorOf(locals), action: "delete_farm", entityType: "farm", entityId: idParam, timestamp: nowIso() });
   return ok({ deleted: idParam });
 };

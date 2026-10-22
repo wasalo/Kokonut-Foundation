@@ -1,9 +1,12 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import EntityForm from "@components/admin/EntityForm.astro";
 import { getDb } from "@lib/db";
 import { projects } from "@lib/schema";
 import { eq } from "drizzle-orm";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "projects.update");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -11,7 +14,7 @@ const id = Astro.params.id as string;
 let record: Record<string, unknown> = {};
 try { if (db) record = (await db.select().from(projects).where(eq(projects.id, id)).get()) ?? {}; } catch {}
 ---
-<BaseLayout title="Edit Project — Admin" description="Admin project edit.">
+<AdminLayout title="Edit Project — Admin" description="Admin project edit.">
   <section class="max-w-2xl mx-auto px-4 py-16">
     <a href="/admin/projects" class="text-sm text-primary">← Projects</a>
     <h1 class="mt-2 text-3xl font-bold text-strong">Edit Project</h1>
@@ -38,4 +41,4 @@ try { if (db) record = (await db.select().from(projects).where(eq(projects.id, i
       ]}
     />
   </section>
-</BaseLayout>
+</AdminLayout>

@@ -1,7 +1,10 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "evidence.create");
+if (denied) return denied;
 ---
-<BaseLayout title="New Evidence — Admin" description="Create evidence.">
+<AdminLayout title="New Evidence — Admin" description="Create evidence.">
   <section class="max-w-2xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">New Evidence</h1>
     <form id="f" class="mt-6 space-y-4" enctype="multipart/form-data">
@@ -29,4 +32,4 @@ import BaseLayout from "@layouts/BaseLayout.astro";
       if (el) el.textContent = res.ok ? `Uploaded: ${j.data.id}` : (j.error ?? "Error");
     });
   </script>
-</BaseLayout>
+</AdminLayout>

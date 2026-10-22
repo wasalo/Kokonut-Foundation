@@ -1,26 +1,31 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { metrics } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
 import StatusSelect from "@components/admin/StatusSelect.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import Can from "@components/admin/Can.astro";
+const denied = adminPageGuard(Astro, "metrics.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(metrics); } catch {}
 ---
-<BaseLayout title="Metrics — Admin" description="Admin metrics.">
+<AdminLayout title="Metrics — Admin" description="Admin metrics.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Metrics (Admin)</h1>
-    <a href="/admin/metrics/new" class="mt-2 inline-block text-sm text-primary">+ New Metric</a>
+    <Can capability="metrics.create"><a href="/admin/metrics/new" class="mt-2 inline-block text-sm text-primary">+ New Metric</a></Can>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
       {list.map((m: any) => (
-        <li class="text-sm flex items-center gap-2">
-          {m.name}: {m.value} {m.unit} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{m.status ?? "published"}</span>
-          <StatusSelect entity="metric" id={m.id} />
-          <DeleteButton endpoint="/api/admin/metrics" id={m.id} />
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <span>{m.name}: {m.value} {m.unit} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{m.status ?? "published"}</span></span>
+          <Can capability="metrics.update"><a href={`/admin/metrics/${m.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <StatusSelect entity="metric" id={m.id} capability="metrics.publish" />
+          <Can capability="metrics.delete"><DeleteButton endpoint="/api/admin/metrics" id={m.id} capability="metrics.delete" /></Can>
         </li>
       ))}
     </ul>
@@ -36,4 +41,4 @@ try { if (db) list = await db.select().from(metrics); } catch {}
       });
     </script>
   </section>
-</BaseLayout>
+</AdminLayout>

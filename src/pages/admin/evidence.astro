@@ -1,26 +1,31 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { evidence } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
 import StatusSelect from "@components/admin/StatusSelect.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import Can from "@components/admin/Can.astro";
+const denied = adminPageGuard(Astro, "evidence.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(evidence); } catch {}
 ---
-<BaseLayout title="Evidence — Admin" description="Admin evidence.">
+<AdminLayout title="Evidence — Admin" description="Admin evidence.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Evidence (Admin)</h1>
-    <a href="/admin/evidence/new" class="mt-2 inline-block text-sm text-primary">+ New Evidence</a>
+    <Can capability="evidence.create"><a href="/admin/evidence/new" class="mt-2 inline-block text-sm text-primary">+ New Evidence</a></Can>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
       {list.map((e: any) => (
-        <li class="text-sm flex items-center gap-2">
-          {e.title} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{e.status ?? "published"}</span>
-          <StatusSelect entity="evidence" id={e.id} />
-          <DeleteButton endpoint="/api/admin/evidence" id={e.id} />
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <span>{e.title} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{e.status ?? "published"}</span></span>
+          <Can capability="evidence.update"><a href={`/admin/evidence/${e.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <StatusSelect entity="evidence" id={e.id} capability="evidence.publish" />
+          <Can capability="evidence.delete"><DeleteButton endpoint="/api/admin/evidence" id={e.id} capability="evidence.delete" /></Can>
         </li>
       ))}
     </ul>
@@ -36,4 +41,4 @@ try { if (db) list = await db.select().from(evidence); } catch {}
       });
     </script>
   </section>
-</BaseLayout>
+</AdminLayout>

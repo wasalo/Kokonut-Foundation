@@ -1,16 +1,22 @@
 ---
-interface Props { endpoint: string; id: string; label?: string }
-const { endpoint, id, label = "Delete" } = Astro.props;
+import { can, type Capability } from "@lib/permissions";
+
+interface Props {
+  endpoint: string;
+  id: string;
+  label?: string;
+  capability?: Capability;
+}
+const { endpoint, id, label = "Delete", capability } = Astro.props;
+const allowed = capability ? can(Astro.locals.admin?.role, capability) : true;
 ---
-<button
-  type="button"
-  data-delete
-  data-endpoint={endpoint}
-  data-id={id}
-  class="text-xs text-critical underline"
->
-  {label}
-</button>
+{
+  allowed && (
+    <button type="button" data-delete data-endpoint={endpoint} data-id={id} class="text-xs text-critical underline">
+      {label}
+    </button>
+  )
+}
 
 <script>
   document.querySelectorAll("[data-delete]").forEach((btn) => {

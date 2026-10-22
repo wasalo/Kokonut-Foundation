@@ -1,12 +1,19 @@
 ---
-interface Props { entity: string; id: string }
-const { entity, id } = Astro.props;
+import { can, type Capability } from "@lib/permissions";
+
+interface Props { entity: string; id: string; capability?: Capability }
+const { entity, id, capability } = Astro.props;
+const allowed = capability ? can(Astro.locals.admin?.role, capability) : true;
 const states = ["draft", "submitted", "verified", "published", "rejected", "archived"];
 ---
-<select data-status-sel data-entity={entity} data-id={id} class="status-sel text-xs border border-border rounded px-1 bg-surface">
-  <option value="">change…</option>
-  {states.map((s) => <option value={s}>{s}</option>)}
-</select>
+{
+  allowed && (
+    <select data-status-sel data-entity={entity} data-id={id} class="status-sel text-xs border border-border rounded px-1 bg-surface">
+      <option value="">change…</option>
+      {states.map((s) => <option value={s}>{s}</option>)}
+    </select>
+  )
+}
 
 <script>
   document.querySelectorAll("[data-status-sel]").forEach((sel) => {

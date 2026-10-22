@@ -30,6 +30,12 @@ declare global {
   namespace App {
     interface Locals {
       locale?: string;
+      admin?: {
+        email: string;
+        role: string;
+        capabilities: string[];
+        bootstrapped: boolean;
+      } | null;
     }
   }
 }

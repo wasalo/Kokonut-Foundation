@@ -1,21 +1,31 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { measurements } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import Can from "@components/admin/Can.astro";
+const denied = adminPageGuard(Astro, "measurements.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(measurements); } catch {}
 ---
-<BaseLayout title="Measurements — Admin" description="Admin measurements.">
+<AdminLayout title="Measurements — Admin" description="Admin measurements.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Measurements (Admin)</h1>
-    <a href="/admin/measurements/new" class="mt-2 inline-block text-sm text-primary">+ New Measurement</a>
+    <Can capability="measurements.create"><a href="/admin/measurements/new" class="mt-2 inline-block text-sm text-primary">+ New Measurement</a></Can>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
-      {list.map((m: any) => <li class="text-sm flex items-center gap-3">{m.metricId}: {m.value} ({m.observedAt})<DeleteButton endpoint="/api/admin/measurements" id={m.id} /></li>)}
+      {list.map((m: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <span>{m.metricId}: {m.value} ({m.observedAt})</span>
+          <Can capability="measurements.update"><a href={`/admin/measurements/${m.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <Can capability="measurements.delete"><DeleteButton endpoint="/api/admin/measurements" id={m.id} capability="measurements.delete" /></Can>
+        </li>
+      ))}
     </ul>
   </section>
-</BaseLayout>
+</AdminLayout>

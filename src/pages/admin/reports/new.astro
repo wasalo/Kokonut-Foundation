@@ -1,7 +1,10 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "reports.create");
+if (denied) return denied;
 ---
-<BaseLayout title="New Report — Admin" description="Create report.">
+<AdminLayout title="New Report — Admin" description="Create report.">
   <section class="max-w-2xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">New Report</h1>
     <form id="f" class="mt-6 space-y-4">
@@ -28,4 +31,4 @@ import BaseLayout from "@layouts/BaseLayout.astro";
       if (el) el.textContent = res.ok ? `Published: ${j.data.slug}` : (j.error ?? "Error");
     });
   </script>
-</BaseLayout>
+</AdminLayout>

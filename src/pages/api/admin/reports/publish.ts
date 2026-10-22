@@ -3,8 +3,12 @@ import { getDb } from "@lib/db";
 import { reports, auditLog } from "@lib/schema";
 import { ok, err } from "@lib/api";
 import { id, nowIso, slugify } from "@lib/utils";
+import { denyUnless } from "@lib/admin-guard";
+import { actorOf } from "@lib/admin-actor";
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const denied = denyUnless(locals, "reports.publish");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   let data: any = {};
@@ -46,7 +50,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
   await db.insert(auditLog).values({
     id: id("aud_"),
-    actor: "admin",
+    actor: actorOf(locals),
     action: "publish_report",
     entityType: "report",
     entityId: reportId,

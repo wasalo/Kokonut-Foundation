@@ -1,5 +1,7 @@
 import type { APIRoute } from "astro";
 import { ok, err } from "@lib/api";
+import { denyUnless } from "@lib/admin-guard";
+import { actorOf } from "@lib/admin-actor";
 
 /** Product events tracked by the public site (PRD §88). */
 export const TRACKED_EVENTS = [
@@ -45,6 +47,8 @@ export const EVENT_LABELS: Record<string, string> = {
 };
 
 export const GET: APIRoute = async ({ locals }) => {
+  const denied = denyUnless(locals, "access.analytics");
+  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   const kv = env.CONFIG as KVNamespace | undefined;
   if (!kv) return err("KV not configured", 503);

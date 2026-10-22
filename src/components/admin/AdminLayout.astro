@@ -1,0 +1,54 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { ROLE_LABELS, ROLE_DESCRIPTIONS, isRole, type Capability } from "@lib/permissions";
+
+interface Props { title: string; description?: string }
+const { title, description } = Astro.props;
+
+const actor = Astro.locals.admin ?? null;
+const role = isRole(actor?.role) ? actor.role : null;
+const capabilities = new Set<string>(actor?.capabilities ?? []);
+
+const links: { href: string; label: string; capability: Capability }[] = [
+  { href: "/admin/projects", label: "Projects", capability: "projects.read" },
+  { href: "/admin/farms", label: "Farms", capability: "farms.read" },
+  { href: "/admin/metrics", label: "Metrics", capability: "metrics.read" },
+  { href: "/admin/measurements", label: "Measurements", capability: "measurements.read" },
+  { href: "/admin/milestones", label: "Milestones", capability: "milestones.read" },
+  { href: "/admin/evidence", label: "Evidence", capability: "evidence.read" },
+  { href: "/admin/partners", label: "Partners", capability: "partners.read" },
+  { href: "/admin/team", label: "Team", capability: "team.read" },
+  { href: "/admin/reports", label: "Reports", capability: "reports.read" },
+  { href: "/admin/resources", label: "Resources", capability: "resources.read" },
+  { href: "/admin/inquiries", label: "Inquiries", capability: "inquiries.read" },
+  { href: "/admin/media", label: "Media", capability: "media.read" },
+  { href: "/admin/redirects", label: "Redirects", capability: "redirects.read" },
+  { href: "/admin/sync", label: "KI Sync", capability: "access.sync" },
+  { href: "/admin/roles", label: "Roles", capability: "access.roles" },
+  { href: "/admin/audit", label: "Audit Log", capability: "access.audit" },
+  { href: "/admin/analytics", label: "Analytics", capability: "access.analytics" },
+];
+
+const visible = links.filter((l) => capabilities.has(l.capability));
+const roleLabel = role ? ROLE_LABELS[role] : "Unassigned";
+const roleDescription = role ? ROLE_DESCRIPTIONS[role] : "No role assigned — read-only access.";
+---
+<BaseLayout title={title} description={description}>
+  <div class="border-b border-border bg-surface-muted">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <a href="/admin" class="font-semibold text-strong text-sm">Foundation Admin</a>
+      <nav class="flex flex-wrap gap-x-3 gap-y-1 text-sm" aria-label="Admin sections">
+        {visible.map((l) => (
+          <a href={l.href} class="text-primary underline">{l.label}</a>
+        ))}
+      </nav>
+      <div class="ml-auto flex items-center gap-2 text-xs">
+        <span class="text-muted">{actor?.email ?? "not signed in"}</span>
+        <span class="px-2 py-0.5 rounded bg-primary-soft text-primary font-semibold" title={roleDescription}>
+          {roleLabel}
+        </span>
+      </div>
+    </div>
+  </div>
+  <slot />
+</BaseLayout>

@@ -1,21 +1,33 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { milestones } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import Can from "@components/admin/Can.astro";
+import StatusSelect from "@components/admin/StatusSelect.astro";
+const denied = adminPageGuard(Astro, "milestones.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(milestones); } catch {}
 ---
-<BaseLayout title="Milestones — Admin" description="Admin milestones.">
+<AdminLayout title="Milestones — Admin" description="Admin milestones.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Milestones (Admin)</h1>
-    <a href="/admin/milestones/new" class="mt-2 inline-block text-sm text-primary">+ New Milestone</a>
+    <Can capability="milestones.create"><a href="/admin/milestones/new" class="mt-2 inline-block text-sm text-primary">+ New Milestone</a></Can>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
-      {list.map((m: any) => <li class="text-sm flex items-center gap-3">{m.title} — {m.status}<DeleteButton endpoint="/api/admin/milestones" id={m.id} /></li>)}
+      {list.map((m: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <span>{m.title} — {m.status}</span>
+          <Can capability="milestones.update"><a href={`/admin/milestones/${m.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <StatusSelect entity="milestone" id={m.id} capability="milestones.publish" />
+          <Can capability="milestones.delete"><DeleteButton endpoint="/api/admin/milestones" id={m.id} capability="milestones.delete" /></Can>
+        </li>
+      ))}
     </ul>
   </section>
-</BaseLayout>
+</AdminLayout>

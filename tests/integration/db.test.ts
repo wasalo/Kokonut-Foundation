@@ -37,6 +37,11 @@ describe("migration chain", () => {
     expect(columns(created.db, "evidence")).toContain("uploaded_at");
     // resources gained the publishing `status` column in 0006
     expect(columns(created.db, "resources")).toContain("status");
+    // admin roles arrived in 0007
+    expect(tables(created.db)).toContain("admin_roles");
+    expect(columns(created.db, "admin_roles")).toEqual(
+      expect.arrayContaining(["id", "email", "role", "granted_by", "granted_at", "active"]),
+    );
   });
 });
 

@@ -1,16 +1,19 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { inquiries } from "@lib/schema";
 import { desc } from "drizzle-orm";
 import { formatDate } from "@lib/utils";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "inquiries.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(inquiries).orderBy(desc(inquiries.createdAt)); } catch {}
 ---
-<BaseLayout title="Inquiries — Admin" description="Admin inquiries.">
+<AdminLayout title="Inquiries — Admin" description="Admin inquiries.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Inquiries</h1>
     <div class="mt-6 space-y-3">
@@ -27,4 +30,4 @@ try { if (db) list = await db.select().from(inquiries).orderBy(desc(inquiries.cr
       ))}
     </div>
   </section>
-</BaseLayout>
+</AdminLayout>

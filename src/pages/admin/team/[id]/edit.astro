@@ -1,0 +1,39 @@
+---
+import AdminLayout from "@components/admin/AdminLayout.astro";
+import EntityForm from "@components/admin/EntityForm.astro";
+import { adminPageGuard } from "@lib/admin-page";
+const denied = adminPageGuard(Astro, "team.update");
+if (denied) return denied;
+
+import { getDb } from "@lib/db";
+import { teamMembers } from "@lib/schema";
+import { eq } from "drizzle-orm";
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+const db = env.DB ? getDb(env) : null;
+const id = Astro.params.id as string;
+let record: Record<string, unknown> = {};
+try { if (db) record = (await db.select().from(teamMembers).where(eq(teamMembers.id, id)).get()) ?? {}; } catch {}
+---
+<AdminLayout title="Edit Team Member — Admin" description="Admin Team Member edit.">
+  <section class="max-w-2xl mx-auto px-4 py-16">
+    <a href="/admin/team" class="text-sm text-primary">← Team Members</a>
+    <h1 class="mt-2 text-3xl font-bold text-strong">Edit Team Member</h1>
+    <p class="mt-2 text-sm text-muted">{String(record.name ?? id)}</p>
+    <EntityForm
+      endpoint="/api/admin/team"
+      id={id}
+      submitLabel="Save changes"
+      record={record}
+      fields={[
+        { name: "name", label: "Name", required: true },
+        { name: "role", label: "Role", required: true },
+        { name: "bio", label: "Bio", type: "textarea" },
+        { name: "photo", label: "Photo URL" },
+        { name: "email", label: "Email" },
+        { name: "linkedin", label: "LinkedIn" },
+        { name: "order", label: "Order", type: "number" },
+      ]}
+    />
+  </section>
+</AdminLayout>

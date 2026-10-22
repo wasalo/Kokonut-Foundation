@@ -1,21 +1,31 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
+import AdminLayout from "@components/admin/AdminLayout.astro";
 import { getDb } from "@lib/db";
 import { redirects } from "@lib/schema";
 import DeleteButton from "@components/admin/DeleteButton.astro";
+import { adminPageGuard } from "@lib/admin-page";
+import Can from "@components/admin/Can.astro";
+const denied = adminPageGuard(Astro, "redirects.read");
+if (denied) return denied;
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
 let list: any[] = [];
 try { if (db) list = await db.select().from(redirects); } catch {}
 ---
-<BaseLayout title="Redirects — Admin" description="Admin redirects.">
+<AdminLayout title="Redirects — Admin" description="Admin redirects.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <h1 class="text-3xl font-bold text-strong">Redirects (Admin)</h1>
-    <a href="/admin/redirects/new" class="mt-2 inline-block text-sm text-primary">+ New Redirect</a>
+    <Can capability="redirects.create"><a href="/admin/redirects/new" class="mt-2 inline-block text-sm text-primary">+ New Redirect</a></Can>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
     <ul class="mt-6 space-y-2">
-      {list.map((r: any) => <li class="text-sm flex items-center gap-3">{r.fromPath} → {r.toPath} ({r.statusCode})<DeleteButton endpoint="/api/admin/redirects" id={r.id} /></li>)}
+      {list.map((r: any) => (
+        <li class="text-sm flex flex-wrap items-center gap-3">
+          <span>{r.fromPath} → {r.toPath} ({r.statusCode})</span>
+          <Can capability="redirects.update"><a href={`/admin/redirects/${r.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
+          <Can capability="redirects.delete"><DeleteButton endpoint="/api/admin/redirects" id={r.id} capability="redirects.delete" /></Can>
+        </li>
+      ))}
     </ul>
   </section>
-</BaseLayout>
+</AdminLayout>
