@@ -15,7 +15,11 @@ Each item is either blocked on external resources/credentials, requires manual r
 - **Admin delete actions**: DELETE endpoints + UI buttons for projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners.
 - **Admin edit forms**: prefilled update forms for projects, metrics and farms, built on a shared `EntityForm` component that posts JSON to the existing PUT endpoints.
 - **Admin roles and permissions**: six roles (Administrator, Manager, Supervisor, Field Worker, Finance, Analyst) with an explicit capability matrix in `src/lib/permissions.ts`. The verified Cloudflare Access identity maps to a role through the `admin_roles` table (migration 0007); the first identity bootstraps as administrator and every unassigned identity falls back to read-only. Capabilities are enforced at the API (`denyUnless`) and at the page (`adminPageGuard`), the admin chrome hides actions the role cannot use, and `audit_log` records the real actor email. Roles are assigned and revoked at `/admin/roles`.
-- **Admin CRUD**: create, edit and delete now exist for every managed entity (projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners). Still to build: bulk actions and media/attestations/funding editors.
+- **Admin CRUD**: create, edit and delete now exist for every managed entity (projects, metrics, farms, evidence, reports, team, resources, milestones, measurements, redirects, partners, attestations, funding).
+- **Admin media library**: `/admin/media` lists the R2 bucket directly, with upload, metadata editing (title, description, alt text, visibility travel with the object as custom metadata) and delete.
+- **Bulk actions**: every list screen has row checkboxes and a bulk bar for publish, archive and delete, checked against the entity's own capability, with one audit entry per affected record.
+- **Admin entity registry**: `src/lib/admin-entities.ts` is the single source of truth for admin entities, their tables, capabilities and status support.
+- **Documentation**: `README.md` is at parity with the codebase (architecture, commands, routes, roles, API, data model, resources, configuration, testing, deployment) and `OPERATIONS.md` is the user and operational guide for visitors, staff and operators.
 
 ## Blocked on external resources / credentials
 - **KI wiring (blocked on the KI refactor)**: Kokonut Intelligence is being re-factored and is **not ready to wire today** — the repository currently carries two branches (`main` and `feat/mobile-offline-acceptance`, the "kernel" stack). The Foundation side is written to be contract-tolerant so the final wiring is configuration-only:
@@ -37,7 +41,7 @@ Each item is either blocked on external resources/credentials, requires manual r
 ## Incremental content work
 - **Full Spanish content**: navigation, footer, skip link, canonical URLs and the body copy of every public page are translated — home, how it works, about, support, contact, impact, transparency and all its modules (governance, treasury, attestations, reports, funding, methodologies, open source), the MRV methodology page, the evidence explorer, and the project/farm/metric detail headings. Still open: the long-form descriptive paragraphs on the project and farm detail pages, which are generated from the database and therefore follow the source record's language.
 - **Product event tracking UI calls**: added to project detail, impact, farms, transparency, treasury, attestations, reports, evidence, resources, partners, about, support, contact, home, data, API docs, graph and search. All 18 tracked events are read back in `/admin/analytics`.
-- **Admin editors still missing**: media, attestations, funding and content blocks are read-only in the admin UI — they have no create/edit/delete forms yet.
+- **Admin editors still missing**: content blocks and the natural-asset / activity / claim / methodology / source catalogues are read-only in the admin UI — they have no create/edit/delete forms yet.
 
 ## Deliberately deferred
 - **Durable Objects** — not introduced; the PRD explicitly advises against it without a concrete need.
