@@ -1,0 +1,16 @@
+---
+/**
+ * Locale catch-all.
+ *
+ * Astro's i18n routing does not generate locale-prefixed variants for
+ * server-rendered dynamic routes, so /es/... would be looked up as a static
+ * file and 404. This route makes the /es/* pattern part of the route manifest
+ * (so the Worker receives the request) and rewrites to the base path.
+ *
+ * The middleware handles the request first and performs the same rewrite while
+ * attaching the active locale; this is the fallback.
+ */
+const target = `/${Astro.params.path ?? ""}`;
+return Astro.rewrite(target);
+---
+<p>Redirecting to <a href={target}>{target}</a>…</p>
