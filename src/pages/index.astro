@@ -7,6 +7,9 @@ import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { projects, metrics } from "@lib/schema";
 import { parseJson } from "@lib/utils";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -52,8 +55,8 @@ const jsonLd = {
       <h1 class="text-4xl md:text-6xl font-bold text-strong leading-tight">Growing Regenerative Farms Through Community Governance</h1>
       <p class="mt-6 text-lg text-muted">Real farms. Public data. Community governance. Regenerative value.</p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <Button href="/projects" variant="primary">Explore Our Work</Button>
-        <Button href="/impact" variant="secondary">View Live Impact</Button>
+        <Button href={path("/projects")} variant="primary">Explore Our Work</Button>
+        <Button href={path("/impact")} variant="secondary">View Live Impact</Button>
         <a href="https://go.kokonut.foundation/giveth" class="px-4 py-2 text-sm text-primary underline" target="_blank" rel="noopener">Support Our Mission</a>
       </div>
     </div>
@@ -93,7 +96,7 @@ const jsonLd = {
   <section class="max-w-7xl mx-auto px-4 py-16">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-strong">How It Works</h2>
-      <a href="/how-it-works" class="text-sm text-primary">Learn more →</a>
+      <a href={path("/how-it-works")} class="text-sm text-primary">Learn more →</a>
     </div>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
       {["Fund", "Grow", "Verify", "Repeat"].map((s, i) => (
@@ -108,7 +111,7 @@ const jsonLd = {
   <section class="max-w-7xl mx-auto px-4 py-16">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-strong">Projects</h2>
-      <a href="/projects" class="text-sm text-primary">View all →</a>
+      <a href={path("/projects")} class="text-sm text-primary">View all →</a>
     </div>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {showProjects.map((p: any) => (

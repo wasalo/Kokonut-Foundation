@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 ---
 <BaseLayout title="Governance — Kokonut Foundation" description="Foundation governance." jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation" }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
@@ -54,9 +57,9 @@ import Card from "@components/primitives/Card.astro";
       <Card>
         <h2 class="font-semibold text-strong">Governance Resources</h2>
         <ul class="mt-2 text-sm text-muted space-y-1">
-          <li><a href="/transparency/treasury" class="text-primary">Treasury</a> — Gnosis chain, shared capital</li>
-          <li><a href="/transparency/attestations" class="text-primary">Attestations</a> — Celo chain via EAS</li>
-          <li><a href="/transparency/reports" class="text-primary">Reports</a></li>
+          <li><a href={path("/transparency/treasury")} class="text-primary">Treasury</a> — Gnosis chain, shared capital</li>
+          <li><a href={path("/transparency/attestations")} class="text-primary">Attestations</a> — Celo chain via EAS</li>
+          <li><a href={path("/transparency/reports")} class="text-primary">Reports</a></li>
         </ul>
       </Card>
     </div>

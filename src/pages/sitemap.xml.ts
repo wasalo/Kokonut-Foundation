@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-const routes = [
+const base = [
   "/", "/how-it-works", "/projects", "/impact", "/impact/methodology",
   "/transparency", "/transparency/governance", "/transparency/treasury",
   "/transparency/attestations", "/transparency/reports", "/transparency/funding",
@@ -8,11 +8,10 @@ const routes = [
   "/partners", "/resources", "/about", "/about/team", "/about/foundation",
   "/support", "/contact", "/explorer", "/explorer/evidence", "/explorer/graph",
   "/farms", "/data", "/api-docs", "/search",
-  "/es", "/es/about", "/es/about/foundation", "/es/about/team", "/es/support",
-  "/es/how-it-works", "/es/contact", "/es/projects", "/es/resources",
-  "/es/partners", "/es/transparency", "/es/transparency/treasury",
-  "/es/transparency/governance", "/es/impact", "/es/farms",
 ];
+
+// Every public route is served in both locales.
+const routes = [...base, ...base.filter((r) => r !== "/").map((r) => `/es${r}`), "/es"];
 
 export const GET: APIRoute = async () => {
   const urls = routes

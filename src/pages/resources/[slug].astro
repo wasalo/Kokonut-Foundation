@@ -6,6 +6,9 @@ import { getDb } from "@lib/db";
 import { resources } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { formatDate } from "@lib/utils";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const slug = Astro.params.slug as string;
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -17,7 +20,7 @@ if (!r) r = { slug, title: slug, summary: "", resourceType: "Resource", publishe
 <BaseLayout title={`${r.title} — Kokonut Foundation`} description={r.summary ?? ""}>
   <section class="max-w-3xl mx-auto px-4 py-16">
     <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/resources", label: "Resources" }, { label: r.title }]} />
-    <a href="/resources" class="text-sm text-primary mt-2 inline-block">← Resources</a>
+    <a href={path("/resources")} class="text-sm text-primary mt-2 inline-block">← Resources</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{r.title}</h1>
     <p class="mt-2 text-xs text-muted">{r.resourceType} · {formatDate(r.publishedAt)}</p>
     <Card class="mt-6">

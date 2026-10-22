@@ -3,6 +3,7 @@ import "../styles/global.css";
 import SeoHead from "@components/seo/SeoHead.astro";
 import SiteNav from "@components/layout/SiteNav.astro";
 import SiteFooter from "@components/layout/SiteFooter.astro";
+import { getTranslator, resolveLocale } from "@lib/i18n";
 
 interface Props {
   title: string;
@@ -11,18 +12,24 @@ interface Props {
   jsonLd?: Record<string, unknown>;
   lang?: string;
 }
-const { title, description = "Kokonut Foundation — Growing Regenerative Farms Through Community Governance", canonical, jsonLd, lang = "en" } = Astro.props;
+const { title, description = "Kokonut Foundation — Growing Regenerative Farms Through Community Governance", canonical, jsonLd } = Astro.props;
 const env = (Astro.locals as any).runtime?.env ?? {};
 const analyticsToken = env.CF_WEB_ANALYTICS_TOKEN;
+const locale = resolveLocale(Astro);
 ---
 <!doctype html>
-<html lang={lang}>
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <SeoHead title={title} description={description} canonical={canonical} jsonLd={jsonLd} />
+    <SeoHead
+      title={title}
+      description={description}
+      canonical={canonical ?? (locale === "en" ? undefined : `https://kokonut.foundation/es${Astro.url.pathname === "/" ? "/" : Astro.url.pathname}`)}
+      jsonLd={jsonLd}
+    />
     <!-- Set the theme before first paint to avoid a flash of the wrong palette. -->
     <script is:inline>
       (function () {
@@ -46,7 +53,7 @@ const analyticsToken = env.CF_WEB_ANALYTICS_TOKEN;
     </script>
   </head>
   <body class="min-h-screen flex flex-col">
-    <a href="#main" class="skip-link">Skip to content</a>
+    <a href="#main" class="skip-link">{getTranslator(locale)("a11y.skip")}</a>
     <SiteNav />
     <main id="main" class="flex-1">
       <slot />

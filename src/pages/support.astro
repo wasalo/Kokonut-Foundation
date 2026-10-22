@@ -1,8 +1,10 @@
 ---
-export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import Button from "@components/primitives/Button.astro";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 const options = ["Donate", "Fund a Project", "Fund Public Infrastructure", "Partner", "Contribute Technology", "Contribute Research", "Join the Community"];
 ---
 <BaseLayout title="Support — Kokonut Foundation" description="Support the Foundation.">
@@ -18,7 +20,7 @@ const options = ["Donate", "Fund a Project", "Fund Public Infrastructure", "Part
     <div class="mt-10 flex flex-wrap gap-3">
       <Button href="https://go.kokonut.foundation/giveth" variant="primary">Donate via Giveth</Button>
       <Button href="https://link.kokonut.network/discord" variant="secondary">Join Discord</Button>
-      <Button href="/contact" variant="ghost">Get in Touch</Button>
+      <Button href={path("/contact")} variant="ghost">Get in Touch</Button>
     </div>
   </section>
 </BaseLayout>

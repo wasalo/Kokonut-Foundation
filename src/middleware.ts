@@ -26,6 +26,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { url, locals } = context;
   const pathname = url.pathname;
 
+  // Locale routing: /es/<path> is rewritten to the base route and the locale is
+  // carried on a request header, so every page is authored once and served in
+  // any locale.
+  if ((pathname === "/es" || pathname.startsWith("/es/")) && (context.request.method === "GET" || context.request.method === "HEAD")) {
+    const stripped = pathname.replace(/^\/es(?=\/|$)/, "") || "/";
+    const rewrittenUrl = new URL(url);
+    rewrittenUrl.pathname = stripped;
+    const headers = new Headers(context.request.headers);
+    headers.set("x-kokonut-locale", "es");
+    headers.set("x-kokonut-rewritten", "1");
+    const rewritten = new Request(rewrittenUrl, { method: context.request.method, headers });
+    return await context.rewrite(rewritten);
+  }
+  locals.locale = "en";
+
   // Admin gate
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     const env = (locals as any).runtime?.env ?? {};
@@ -56,9 +71,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Rate limiting (KV-based, best-effort)
   try {
-    const env = (locals as any).runtime?.env;
-    const kv = env?.CONFIG as KVNamespace | undefined;
-    if (kv && pathname.startsWith("/api/")) {
+    const env = (locals as any).runtime?.env ?? {};
+    const kv = env.CONFIG as KVNamespace | undefined;
+    // A rewritten request re-enters the middleware; do not count it twice.
+    const isRewritten = context.request.headers.get("x-kokonut-rewritten") === "1";
+    if (kv && !isRewritten && pathname.startsWith("/api/")) {
       const ip = context.request.headers.get("cf-connecting-ip") ?? "unknown";
       const bucket = pathname.startsWith("/api/admin") ? "admin" : pathname.startsWith("/api/v1/downloads") ? "download" : pathname.startsWith("/api/v1/inquiries") ? "inquiry" : "api";
       const limits: Record<string, number> = { admin: 30, download: 20, inquiry: 10, api: 120 };

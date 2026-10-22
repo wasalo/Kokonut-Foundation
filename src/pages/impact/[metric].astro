@@ -6,6 +6,9 @@ import { getDb } from "@lib/db";
 import { metrics, measurements, evidence, farms, attestations, methodologies, sources } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { parseJson } from "@lib/utils";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const slug = Astro.params.metric as string;
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -39,7 +42,7 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
 <BaseLayout title={`${metric.name} — Impact`} description={metric.description}>
   <section class="max-w-7xl mx-auto px-4 py-16">
     <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/impact", label: "Impact" }, { label: metric.name }]} />
-    <a href="/impact" class="text-sm text-primary mt-2 inline-block">← Impact</a>
+    <a href={path("/impact")} class="text-sm text-primary mt-2 inline-block">← Impact</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{metric.name}</h1>
     <p class="mt-2 text-muted">{metric.description}</p>
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">

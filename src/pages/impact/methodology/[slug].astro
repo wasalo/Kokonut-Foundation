@@ -5,6 +5,9 @@ import Breadcrumb from "@components/primitives/Breadcrumb.astro";
 import { getDb } from "@lib/db";
 import { methodologies } from "@lib/schema";
 import { eq } from "drizzle-orm";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const slug = Astro.params.slug as string;
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -16,7 +19,7 @@ if (!m) m = { slug, name: slug, description: "", version: "", documentKey: null 
 <BaseLayout title={`${m.name} — Methodology`} description={m.description ?? ""}>
   <section class="max-w-3xl mx-auto px-4 py-16">
     <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/impact", label: "Impact" }, { href: "/impact/methodology", label: "Methodology" }, { label: m.name }]} />
-    <a href="/impact/methodology" class="text-sm text-primary mt-2 inline-block">← Methodology</a>
+    <a href={path("/impact/methodology")} class="text-sm text-primary mt-2 inline-block">← Methodology</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{m.name}</h1>
     {m.version && <p class="mt-2 text-xs text-muted">Version {m.version}</p>}
     <Card class="mt-6">

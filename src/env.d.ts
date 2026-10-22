@@ -26,6 +26,12 @@ interface RuntimeEnv {
 
 declare global {
   interface Env extends RuntimeEnv {}
+
+  namespace App {
+    interface Locals {
+      locale?: string;
+    }
+  }
 }
 
 export {};

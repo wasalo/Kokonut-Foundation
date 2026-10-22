@@ -1,38 +1,56 @@
 ---
 import ThemeToggle from "./ThemeToggle.astro";
+import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
+
+const locale = resolveLocale(Astro);
+const t = getTranslator(locale);
+const path = (p: string) => localePath(locale, p);
+
 const links = [
-  { href: "/", label: "Home" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/projects", label: "Projects" },
-  { href: "/impact", label: "Impact" },
-  { href: "/transparency", label: "Transparency" },
-  { href: "/partners", label: "Partners" },
-  { href: "/resources", label: "Resources" },
-  { href: "/about", label: "About" },
-  { href: "/support", label: "Support" },
+  { href: "/", key: "nav.home" },
+  { href: "/how-it-works", key: "nav.how" },
+  { href: "/projects", key: "nav.projects" },
+  { href: "/impact", key: "nav.impact" },
+  { href: "/transparency", key: "nav.transparency" },
+  { href: "/partners", key: "nav.partners" },
+  { href: "/resources", key: "nav.resources" },
+  { href: "/about", key: "nav.about" },
+  { href: "/support", key: "nav.support" },
 ];
-const isEs = Astro.url.pathname.startsWith("/es");
-const t = (en: string, es: string) => (isEs ? es : en);
 ---
 <header class="border-b border-border bg-surface">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-    <a href={isEs ? "/es" : "/"} class="font-bold text-strong text-lg shrink-0">Kokonut Foundation</a>
+    <a href={path("/")} class="font-bold text-strong text-lg shrink-0">Kokonut Foundation</a>
     <nav aria-label="Primary" class="hidden md:flex gap-1">
       {links.map((l) => (
-        <a href={l.href} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted" aria-current={Astro.url.pathname === l.href ? "page" : undefined}>{l.label}</a>
+        <a
+          href={path(l.href)}
+          class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted"
+          aria-current={Astro.url.pathname === path(l.href) ? "page" : undefined}
+        >
+          {t(l.key)}
+        </a>
       ))}
     </nav>
-    <a href="/contact" class="hidden md:inline-block px-4 py-2 rounded-md bg-primary text-on-primary text-sm font-medium shrink-0">Contact</a>
-    <ThemeToggle />
+    <a
+      href={path("/contact")}
+      class="hidden md:inline-block px-4 py-2 rounded-md bg-primary text-on-primary text-sm font-medium shrink-0"
+    >
+      {t("nav.contact")}
+    </a>
+    <ThemeToggle label={t("theme.toggle")} />
     <details class="md:hidden relative">
-      <summary class="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm" aria-label={t("Menu", "Menú")}>
+      <summary class="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm" aria-label={t("nav.menu")}>
         <span aria-hidden="true">☰</span>
       </summary>
-      <nav aria-label="Primary mobile" class="absolute right-0 mt-2 w-56 rounded-md border border-border bg-surface p-2 shadow-lg flex flex-col">
+      <nav
+        aria-label="Primary mobile"
+        class="absolute right-0 mt-2 w-56 rounded-md border border-border bg-surface p-2 shadow-lg flex flex-col"
+      >
         {links.map((l) => (
-          <a href={l.href} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted" aria-current={Astro.url.pathname === l.href ? "page" : undefined}>{l.label}</a>
+          <a href={path(l.href)} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted">{t(l.key)}</a>
         ))}
-        <a href="/contact" class="px-3 py-2 rounded-md text-sm text-primary">Contact</a>
+        <a href={path("/contact")} class="px-3 py-2 rounded-md text-sm text-primary">{t("nav.contact")}</a>
       </nav>
     </details>
   </div>

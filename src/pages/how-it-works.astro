@@ -1,30 +1,108 @@
 ---
-export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
 import Button from "@components/primitives/Button.astro";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
+
+const steps = [
+  {
+    n: "01",
+    title: "Fund",
+    body: "Capital is directed toward regenerative productive capacity. Governance authorizes shared treasury; a farm applies with a scoped request covering budget, milestones, evidence, and closeout.",
+    detail:
+      "Funding status is always explicit: requested, approved, received, or disbursed. A planned budget is never presented as money already spent.",
+  },
+  {
+    n: "02",
+    title: "Grow",
+    body: "Approved farms implement the Kokonut Framework: syntropic agriculture, training, infrastructure, and public reporting — with local operators retaining day-to-day authority.",
+    detail:
+      "Production is diversified across time horizons: short-cycle vegetables for near-term revenue, medium-cycle fruit, long-cycle trees and agroforestry for perennial structure, and continuous poultry production.",
+  },
+  {
+    n: "03",
+    title: "Verify",
+    body: "Farm activity generates measurable evidence: field observations, ground measurements, remote sensing, harvest records, soil samples, per-plant GPS, and attestations.",
+    detail:
+      "Evidence carries a class — direct observation, measurement, derived indicator, forecast, or attested claim — so a reader always knows what kind of statement is being made.",
+  },
+  {
+    n: "04",
+    title: "Repeat",
+    body: "Regenerative productive systems continue generating ecological, economic, and social value. Trees are replanted, knowledge compounds, and the model extends to the next farm.",
+    detail:
+      "Forecasts are compared against actuals so the next plan is better than the last. A forecast is never overwritten by an outcome — both are kept visible.",
+  },
+];
+
+const evidenceSources = [
+  { name: "Field observations", body: "Crop condition, disease flags, irrigation and water observations, soil texture — always attributable to the person or workflow that produced them." },
+  { name: "Ground measurements", body: "Volumetric water content, electrical conductivity, soil temperature — collected with consistent units, locations, and reporting periods." },
+  { name: "Remote sensing", body: "Landsat, Sentinel, and drone orthomosaics produce vegetation indices such as NDVI, NDRE, ReCI, and MSAVI. These are derived indicators, not direct measures of yield or carbon." },
+  { name: "Harvest records", body: "Actual quantities, dates, and quality grades. Planned production is never mixed with harvest actuals." },
+  { name: "Per-plant GPS", body: "Individual tree and species records connecting location, status, and phenology — provenance for where an intervention exists." },
+  { name: "Attestations", body: "EAS on Celo anchors a reviewed claim to an evidence reference. Provenance is not scientific certification." },
+];
 ---
-<BaseLayout title="How It Works — Kokonut Foundation" description="Fund, Grow, Verify, Repeat.">
+<BaseLayout
+  title="How It Works — Kokonut Foundation"
+  description="Fund, Grow, Verify, Repeat — how regenerative farms create verifiable value."
+>
   <section class="max-w-3xl mx-auto px-4 py-16">
     <h1 class="text-3xl md:text-5xl font-bold text-strong">How It Works</h1>
-    <p class="mt-6 text-lg text-muted">Kokonut Foundation directs resources toward regenerative productive capacity.</p>
-    <div class="mt-10 space-y-8">
-      {[
-        { t: "Fund", d: "Resources are directed toward regenerative productive capacity." },
-        { t: "Grow", d: "Approved farms implement regenerative agriculture, infrastructure, training and management." },
-        { t: "Verify", d: "Farm activity generates measurable evidence — field observations, satellite data, harvest records, soil readings, photographs, attestations." },
-        { t: "Repeat", d: "Regenerative productive systems continue generating ecological, economic and social value." },
-      ].map((s, i) => (
-        <div class="flex gap-4">
-          <div class="shrink-0 w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold">{i + 1}</div>
+    <p class="mt-4 text-lg text-muted">
+      A regenerative value loop: capital funds farms, farms grow living assets, farm events become public data, and the model repeats.
+    </p>
+  </section>
+
+  <section class="max-w-4xl mx-auto px-4 pb-16">
+    <div class="space-y-8">
+      {steps.map((s) => (
+        <div class="grid gap-4 md:grid-cols-[auto_1fr]">
+          <div class="text-4xl font-bold text-primary md:pt-1">{s.n}</div>
           <div>
-            <h2 class="text-xl font-semibold text-strong">{s.t}</h2>
-            <p class="mt-1 text-muted">{s.d}</p>
+            <h2 class="text-xl font-semibold text-strong">{s.title}</h2>
+            <p class="mt-2 text-muted">{s.body}</p>
+            <p class="mt-2 text-sm text-muted border-l-2 border-primary pl-3">{s.detail}</p>
           </div>
         </div>
       ))}
     </div>
-    <div class="mt-12">
-      <Button href="/projects" variant="primary">Explore Projects</Button>
+  </section>
+
+  <section class="bg-surface-muted py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-2xl font-bold text-strong">Where the evidence comes from</h2>
+      <p class="mt-2 text-muted max-w-2xl">
+        No single instrument can describe a whole farm. The evidence stack combines methods, and each one carries its own limits.
+      </p>
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {evidenceSources.map((e) => (
+          <Card>
+            <h3 class="font-semibold text-strong">{e.name}</h3>
+            <p class="mt-2 text-sm text-muted">{e.body}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h2 class="text-2xl font-bold text-strong">Why the boundaries matter</h2>
+    <div class="mt-6 space-y-4 text-muted">
+      <p>
+        A sensor reading, a reviewed database record, an on-chain attestation, and an impact conclusion are four different things. The Foundation keeps them separate so a reader can tell
+        evidence from interpretation.
+      </p>
+      <p>
+        The same discipline applies to money: a target price is not a realized price, a modeled public-goods allocation is not a realized distribution, and a planned job is not a job created.
+      </p>
+    </div>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href={path("/projects")} variant="primary">Explore Projects</Button>
+      <Button href={path("/impact/methodology")} variant="secondary">Read the Methodology</Button>
     </div>
   </section>
 </BaseLayout>

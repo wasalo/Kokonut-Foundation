@@ -4,6 +4,9 @@ import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { partners } from "@lib/schema";
 import { eq } from "drizzle-orm";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const slug = Astro.params.slug as string;
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -14,7 +17,7 @@ if (!p) p = { slug, name: slug, type: "Partner", description: "Partner details."
 ---
 <BaseLayout title={`${p.name} — Kokonut Foundation`} description={p.description}>
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <a href="/partners" class="text-sm text-primary">← Partners</a>
+    <a href={path("/partners")} class="text-sm text-primary">← Partners</a>
     <h1 class="mt-4 text-3xl font-bold text-strong">{p.name}</h1>
     <p class="mt-2 text-muted">{p.type}{p.country ? ` · ${p.country}` : ""}</p>
     <Card class="mt-6">

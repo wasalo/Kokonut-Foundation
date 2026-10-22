@@ -1,11 +1,77 @@
 ---
-export const prerender = true;
 import BaseLayout from "@layouts/BaseLayout.astro";
+import Card from "@components/primitives/Card.astro";
+import Button from "@components/primitives/Button.astro";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 ---
-<BaseLayout title="The Foundation — Kokonut Foundation" description="Foundation details." jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation", "url": "https://kokonut.foundation" }}>
+<BaseLayout
+  title="The Foundation — Kokonut Foundation"
+  description="Foundation vs Kokonut Network, and the reference implementation."
+  jsonLd={{ "@context": "https://schema.org", "@type": "Organization", "name": "Kokonut Foundation", "url": "https://kokonut.foundation" }}
+>
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <h1 class="text-3xl font-bold text-strong">Kokonut Foundation vs Kokonut Network</h1>
-    <p class="mt-4 text-muted">Kokonut Foundation is a nonprofit organization. Kokonut Network is the community governance network. The Foundation deploys the Kokonut Framework; the Network provides community participation and governance.</p>
-    <p class="mt-4 text-muted">They are distinct entities with a collaborative relationship.</p>
+    <h1 class="text-3xl font-bold text-strong">The Foundation and the Network</h1>
+    <p class="mt-4 text-muted">
+      Kokonut Foundation is a nonprofit organization. Kokonut Network is the community governance network. The Foundation deploys the Kokonut Framework; the Network provides community
+      participation and governance. They are distinct entities with a collaborative relationship.
+    </p>
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <h2 class="font-semibold text-strong">Kokonut Foundation</h2>
+        <ul class="mt-3 space-y-2 text-sm text-muted">
+          <li>Stewards regenerative projects and public transparency</li>
+          <li>Sources and authorizes capital against scoped farm requests</li>
+          <li>Maintains impact measurement and evidence publication</li>
+          <li>Reports on outcomes, limitations, and unresolved gaps</li>
+        </ul>
+      </Card>
+      <Card>
+        <h2 class="font-semibold text-strong">Kokonut Network</h2>
+        <ul class="mt-3 space-y-2 text-sm text-muted">
+          <li>Houses the community-governance network</li>
+          <li>Coordinates contribution and Guild participation</li>
+          <li>Supports shared capital governance</li>
+          <li>Keeps operator authority and local judgement intact</li>
+        </ul>
+      </Card>
+    </div>
+  </section>
+
+  <section class="bg-surface-muted py-16">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-2xl font-bold text-strong">Adelphi — the reference implementation</h2>
+      <p class="mt-4 text-muted">
+        Adelphi is the first live reference farm of the Kokonut ecosystem: a women-led, locally operated syntropic farm in Gonzalo, Sabana Grande de Boyá, Monte Plata, Dominican Republic, founded and
+        operated by sisters Yanny and Neury Hernández.
+      </p>
+      <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div><p class="text-3xl font-bold text-primary">15,725 m²</p><p class="text-sm text-muted">Total mapped farm area</p></div>
+        <div><p class="text-3xl font-bold text-primary">13,838 m²</p><p class="text-sm text-muted">Agricultural area</p></div>
+        <div><p class="text-3xl font-bold text-primary">110</p><p class="text-sm text-muted">Free-range laying hens</p></div>
+        <div><p class="text-3xl font-bold text-primary">7</p><p class="text-sm text-muted">Jobs supported</p></div>
+      </div>
+      <p class="mt-6 text-sm text-muted">
+        Adelphi is a reference implementation, not proof that every future farm will reproduce the same economics, ecological outcomes, governance dynamics, or community effects. Its role is to
+        provide a place to test, measure, learn, and improve.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-16">
+    <h2 class="text-2xl font-bold text-strong">What a farm record must contain</h2>
+    <p class="mt-4 text-muted">
+      Every farm record follows the Kokonut Common Data Schema — a 13-field baseline that makes farms comparable without pretending they are identical. It records identity and location, land scope,
+      funding context, production and market assumptions, governance context, public-goods assumptions, the local problem, and the proposed response.
+    </p>
+    <p class="mt-4 text-muted">
+      Completing the baseline makes a record <em>review-ready</em>. It does not make a farm funded, verified, profitable, compliant, or impactful. Those are separate processes with separate
+      evidence.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href={path("/projects")} variant="primary">See the Live Farm</Button>
+      <Button href={path("/transparency")} variant="secondary">Transparency</Button>
+    </div>
   </section>
 </BaseLayout>

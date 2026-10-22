@@ -7,6 +7,9 @@ import { getDb } from "@lib/db";
 import { projects, metrics, milestones, partners, projectPartners, farms, evidence, resources, naturalAssets, activities } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { parseJson, formatDate } from "@lib/utils";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const slug = Astro.params.slug as string;
 const env = (Astro.locals as any).runtime?.env ?? {};
@@ -64,7 +67,7 @@ const sdgs = parseJson<number[]>(project.sdgs, []);
 <BaseLayout title={`${project.name} — Kokonut Foundation`} description={project.summary} jsonLd={{ "@context": "https://schema.org", "@type": "Article", "headline": project.name, "description": project.summary, "breadcrumb": { "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kokonut.foundation/" }, { "@type": "ListItem", "position": 2, "name": "Projects", "item": "https://kokonut.foundation/projects" }, { "@type": "ListItem", "position": 3, "name": project.name }] } }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
     <Breadcrumb items={[{ href: "/", label: "Home" }, { href: "/projects", label: "Projects" }, { label: project.name }]} />
-    <a href="/projects" class="text-sm text-primary mt-2 inline-block">← Projects</a>
+    <a href={path("/projects")} class="text-sm text-primary mt-2 inline-block">← Projects</a>
     <div class="mt-4 flex items-start justify-between flex-wrap gap-4">
       <div>
         <h1 class="text-3xl md:text-5xl font-bold text-strong">{project.name}</h1>

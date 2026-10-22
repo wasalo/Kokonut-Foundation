@@ -1,12 +1,12 @@
 ---
-interface Props { class?: string }
-const { class: cls = "" } = Astro.props;
+interface Props { class?: string; label?: string }
+const { class: cls = "", label = "Toggle dark mode" } = Astro.props;
 ---
 <button
   type="button"
   id="theme-toggle"
   class={`inline-flex items-center justify-center w-9 h-9 rounded-md border border-border hover:bg-surface-muted text-strong ${cls}`}
-  aria-label="Toggle dark mode"
+  aria-label={label}
   aria-live="polite"
 >
   <span class="theme-icon-light" aria-hidden="true">☾</span>

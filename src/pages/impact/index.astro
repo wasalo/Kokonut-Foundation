@@ -5,6 +5,9 @@ import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { metrics } from "@lib/schema";
 import { parseJson } from "@lib/utils";
+import { localePath, resolveLocale } from "@lib/i18n";
+const locale = resolveLocale(Astro);
+const path = (p: string) => localePath(locale, p);
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -44,7 +47,7 @@ const categories = [...new Set(list.map((m: any) => m.category))];
       ))}
     </div>
     <div class="mt-12">
-      <a href="/impact/methodology" class="text-primary">Read methodology →</a>
+      <a href={path("/impact/methodology")} class="text-primary">Read methodology →</a>
     </div>
   </section>
 </BaseLayout>
