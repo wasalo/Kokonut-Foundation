@@ -5,8 +5,20 @@ Three audiences, three parts:
 | Part | Audience | Covers |
 |---|---|---|
 | [Part 1 — Using the site](#part-1--using-the-site) | Visitors, donors, partners, researchers | Finding and using the published information |
-| [Part 2 — Using the admin](#part-2--using-the-admin) | Foundation staff | Roles, daily workflows, publishing states, bulk actions |
+| [Part 2 — Using the admin](#part-2--using-the-admin) | Foundation staff | Roles, daily workflows, publishing states, translations, bulk actions |
 | [Part 3 — Operating the platform](#part-3--operating-the-platform) | Platform operators | Deploy, migrate, rotate secrets, sync KI, troubleshoot |
+
+**Part 1** — finding things · the two languages · light and dark · reading a number ·
+downloads · sending an enquiry
+
+**Part 2** — getting in · the six roles · the daily loop · record lifecycle · creating,
+editing and deleting · bulk actions · editing in another language · the content store ·
+the catalogue editors · the media library · evidence and uploads · reports · roles and
+permissions · analytics
+
+**Part 3** — architecture · daily commands · deployment and the two environments ·
+migrations · secrets · the daily cron · the KI sync · rate limits · security posture ·
+troubleshooting · rollback · where things are
 
 ---
 
@@ -251,7 +263,7 @@ KV. The counters are written by the pages themselves.
 ## Architecture in one paragraph
 
 Astro 5 renders every request on a Cloudflare Worker. The Worker reads and writes D1
-(32 tables), stores files in R2, keeps rate limits, caches and event counters in KV,
+(33 tables), stores files in R2, keeps rate limits, caches and event counters in KV,
 dispatches KI syncs through a Queue, and runs report publishing as a Workflow. A
 middleware layer handles locale rewriting, the admin gate, D1-backed redirects, rate
 limiting and security headers before any route runs.
@@ -261,7 +273,7 @@ limiting and security headers before any route runs.
 ```bash
 # Local development
 npm install
-cp .dev.vars.example .dev.vars
+cp .dev.vars.example .dev.vars              # optional: local secrets
 npm run dev                                  # :4321
 
 # Validation — run these before every push
@@ -283,13 +295,20 @@ npm run deploy                               # build + wrangler deploy
 `npx playwright install chromium` is needed once before the e2e suite. Note that
 Playwright does not support macOS 12 — on that host the e2e suite runs in CI instead.
 
+The admin is reachable locally without a Cloudflare Access identity: a request addressed
+to a loopback host is treated as local. `.dev.vars` is only needed for the Turnstile
+test keys, the Web Analytics token and any KI credentials.
+
 ## Deployment
 
-The deploy pipeline is: **build → migrate → deploy → health check**.
+The deploy pipeline is: **build → migrate → deploy → health check**, run against **both**
+environments.
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and performs all four
-steps. The migration and deploy steps are skipped automatically when
-`CLOUDFLARE_API_TOKEN` is not set, so a fork's CI stays safe.
+CI (`.github/workflows/ci.yml`) runs on every push to `main` and performs every step:
+typecheck, unit, component and integration tests, e2e and axe, build, then D1
+migrations, deploy and a health check for production **and** for preview. The
+migration and deploy steps are skipped automatically when `CLOUDFLARE_API_TOKEN` is not
+set, so a fork's CI stays safe.
 
 Required GitHub Actions secrets:
 
@@ -320,10 +339,16 @@ The two environments share no data. A record written to staging is invisible to
 production, and a change to the database in one does not touch the other. CI deploys
 and health-checks both on every push to `main`.
 
-`ADMIN_DEV_BYPASS` is `false` in **both** deployed environments. The bypass is only
-ever enabled in a developer's local `.dev.vars`. It requires the exact value
-`"true"`, and a request that presents an Access token is always verified — an
-unverifiable token is refused rather than falling back to the bypass.
+`ADMIN_DEV_BYPASS` is `false` in **both** deployed environments. The local bypass
+comes in two ways, and neither can open a deployed admin:
+
+- the explicit flag, which must be exactly `"true"`; or
+- a request addressed to a **loopback host** (`localhost`, `127.0.0.1`), which only a
+  developer's own machine can send — so `astro dev` and `wrangler dev` reach the admin
+  without an Access identity.
+
+A request that presents an Access token is always verified: if the token does not
+check out, the request is refused rather than falling back to the bypass.
 
 ## Migrations
 
@@ -446,8 +471,8 @@ expire on their own — no cleanup job needed.
 | Restricted data | `RESTRICTED_ACCESS_TOKEN` required (as `?access=`) for restricted downloads |
 
 The security headers are applied twice on purpose: the middleware covers server-rendered
-routes, and `src/worker.ts` wraps the static-assets binding so prerendered routes (the
-404 page) get them too.
+routes, and `src/worker.ts` wraps the static-assets binding so any prerendered asset
+still gets them.
 
 ## Troubleshooting
 
@@ -465,6 +490,11 @@ routes, and `src/worker.ts` wraps the static-assets binding so prerendered route
 | KI sync reports `skipped` | No KI credentials configured | Expected until the KI refactor lands; see the KI section |
 | Deploy succeeds but the site 500s | A migration was not applied | `npx wrangler d1 migrations list … --remote` and apply |
 | Static assets 404 after deploy | `dist/.assetsignore` missing | `postbuild.mjs` writes it; check the build log |
+| An admin form renders as a heading and nothing else | The form component threw while rendering | Check the Worker's logs; a component that throws is skipped by Astro rather than failing the page |
+| A Spanish page shows the English body copy | The record has no translation for that locale | Edit the record and fill in the **Translations** panel; a field left blank keeps the default-language copy |
+| `/content` is empty | No content blocks have been published | Create one at `/admin/content`; the homepage lede comes from the `home:lede` key |
+| The homepage lede does not change | The block key is not `home:lede` | The homepage reads exactly `home:lede` |
+| Staging serves production data | The staging hostname was pointed back at the production Worker | `staging.kokonut.foundation` is a custom domain of `kokonut-foundation-preview`; check the worker's routes |
 
 ## Rollback
 
@@ -493,10 +523,13 @@ everything written since the snapshot.
 | Role matrix | `src/lib/permissions.ts` |
 | Role resolution | `src/lib/admin-actor.ts` |
 | Admin entity registry | `src/lib/admin-entities.ts` |
-| Translations | `src/lib/i18n.ts` |
+| Interface translations | `src/lib/i18n.ts` |
+| Record translations (long-form copy) | `src/lib/translations.ts` |
+| Content store | `src/lib/content.ts` |
 | KI client / mapping / ingest | `src/lib/ki-client.ts`, `ki-mapping.ts`, `ki-ingest.ts` |
 | Theme tokens | `src/styles/global.css` |
 | Admin components | `src/components/admin/` |
+| Component-test plugin | `tests/support/astro-component-plugin.ts` |
 
 ## Related documents
 

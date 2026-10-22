@@ -29,6 +29,7 @@ they can read live data, honour the request locale, and enforce access control p
 - [Cloudflare resources](#cloudflare-resources)
 - [Configuration](#configuration)
 - [Migrations and seeding](#migrations-and-seeding)
+- [Localised long-form content](#localised-long-form-content)
 - [Internationalisation](#internationalisation)
 - [Dark mode](#dark-mode)
 - [Accessibility](#accessibility)
@@ -49,10 +50,12 @@ npm run dev                      # http://localhost:4321
 ```
 
 `.dev.vars.example` ships working Turnstile test keys and `ADMIN_DEV_BYPASS=true`, so the
-admin application is reachable locally without a Cloudflare Access account.
+admin application is reachable locally without a Cloudflare Access account. The admin is
+also reachable on `astro dev` without it, because a request addressed to a loopback host
+can only have come from the developer's own machine.
 
-**Requirements:** Node 20+, a Cloudflare account, and `wrangler` authenticated
-(`npx wrangler login`).
+**Requirements:** Node 22+ (CI uses Node 22), a Cloudflare account, and `wrangler`
+authenticated (`npx wrangler login`).
 
 ## Commands
 
@@ -95,12 +98,13 @@ admin application is reachable locally without a Cloudflare Access account.
         └──────┬────────┬────────┬────────┬────┘
                │        │        │        │
               D1       R2       KV     Queues ──► Workflows
-           (32 tables) (media)  (cache,  (KI sync)  (publish-report)
+           (33 tables) (media)  (cache,  (KI sync)  (publish-report)
                                limits,
                                events)
 ```
 
-**Rendering.** `output: "server"` — every request is handled by the Worker.
+**Rendering.** `output: "server"` — every request is handled by the Worker, including the
+404, so a missing page answers in the visitor's language.
 
 **Middleware** (`src/middleware.ts`) runs before routing and handles, in order: locale
 rewriting, the admin authentication + authorisation gate, D1-backed redirects, KV rate
@@ -190,9 +194,11 @@ Also served: `/sitemap.xml`, `/robots.txt`, `/llms.txt`, `/openapi.json`, `/sw.j
 | `/admin/analytics` | Product event analytics |
 | `/admin/sync` | Kokonut Intelligence sync |
 
-**Bulk actions.** Every list screen has row checkboxes and a bulk bar. Publish and
-archive require the entity's publish/update capability; delete requires the delete
-capability. Each affected record gets its own audit entry.
+**Bulk actions.** Every list of editable records has row checkboxes and a bulk bar.
+Publish and archive require the entity's publish/update capability; delete requires the
+delete capability. Each affected record gets its own audit entry. The audit log, the
+sync screen and the media library are not bulk-editable — they are not lists of
+records.
 
 ## Roles and capabilities
 
@@ -280,9 +286,9 @@ All resources live in `wrangler.jsonc`.
 
 | Binding | Resource | Notes |
 |---|---|---|
-| `DB` | D1 `kokonut-foundation-db` | 32 tables; `migrations_dir: migrations` |
+| `DB` | D1 `kokonut-foundation-db` | 33 tables; `migrations_dir: migrations` |
 | `MEDIA` | R2 `kokonut-foundation-media` | Evidence files, generated reports, media library |
-| `CONFIG` | KV namespace `CONFIG` | Rate limits, caches, event counters |
+| `CONFIG` | KV namespace | Rate limits, caches, event counters |
 | `SYNC_QUEUE` | Queue `kokonut-sync-queue` | KI sync producer + consumer (batch 10 / 30 s) |
 | `PUBLISH_REPORT` | Workflow `publish-report` | Durable report publishing |
 | `ASSETS` | Workers Static Assets | `dist/` |
@@ -309,9 +315,9 @@ both environments on every push to `main`.
 | `CONFIG` | binding | KV namespace (rate limits, caches, event counters) |
 | `SYNC_QUEUE` | binding | Queues producer (KI sync) |
 | `PUBLISH_REPORT` | binding | Workflows binding (durable report publishing) |
-| `ENVIRONMENT` | var | `production` \| `preview` \| `development` |
+| `ENVIRONMENT` | var | `production` on the main Worker, `preview` on the staging Worker |
 | `TURNSTILE_SITE_KEY` | var | Public Turnstile site key |
-| `ADMIN_DEV_BYPASS` | var | Local-only admin bypass — `false` in production **and** in preview; only ever `true` on a developer's machine |
+| `ADMIN_DEV_BYPASS` | var | Local-only admin bypass — `false` in production **and** in preview. Local development does not need it: a request addressed to a loopback host is treated as local |
 
 **Secrets** (`wrangler secret put <name>`):
 
@@ -419,11 +425,13 @@ render based on the signed-in role. E2E and axe require a browser:
 4. `npx playwright install --with-deps chromium`
 5. `npm run test:e2e`
 6. `npm run build`
-7. `wrangler d1 migrations apply --remote`
-8. `wrangler deploy`
-9. Health check against the live domain
+7. `wrangler d1 migrations apply --remote` — production
+8. `wrangler d1 migrations apply --remote --env preview` — preview
+9. `wrangler deploy` — production
+10. `wrangler deploy --env preview` — preview
+11. Health check against both live domains
 
-Steps 7–9 are skipped automatically when `CLOUDFLARE_API_TOKEN` is not set.
+Steps 7–11 are skipped automatically when `CLOUDFLARE_API_TOKEN` is not set.
 
 `.github/workflows/lighthouse.yml` runs Lighthouse on a preview build and asserts
 performance/accessibility/best-practices/SEO ≥ 0.95, LCP ≤ 2500 ms, CLS ≤ 0.1, TBT ≤ 200 ms.
@@ -498,12 +506,13 @@ src/
     primitives/   Button, Card, Input, Select, Table, Modal, Tabs, Toast, …
     seo/          SeoHead
   layouts/        BaseLayout
-  lib/            schema, db, api, utils, i18n, permissions, admin-*, ki-*, access, turnstile
+  lib/            schema, db, api, utils, i18n, permissions, admin-*, content, translations, ki-*, access, turnstile
   pages/          Astro routes, /api/v1/*, /api/admin/*
   styles/         global.css (semantic light/dark tokens)
   middleware.ts   locale rewrite, admin gate, redirects, rate limiting, headers
   worker.ts       queue consumer, cron handler, PublishReportWorkflow
-migrations/       Ordered SQL chain (0001 → 0007)
+migrations/       Ordered SQL chain (0001 → 0008)
 scripts/          seed.sql, postbuild.mjs, migrate-wp.mjs
 tests/            unit, integration, e2e
+  support/        the component-test plugin and render helper
 ```

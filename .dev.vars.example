@@ -1,7 +1,9 @@
 # Local development secrets. Copy to `.dev.vars` and fill in real values.
 # `.dev.vars` is gitignored — never commit it.
 
-# Cloudflare Access dev bypass (only for local dev; never enable in production)
+# Cloudflare Access dev bypass. Only needed when the dev server is reached on a
+# non-loopback host — a request addressed to localhost is treated as local
+# automatically. Never enable in production or preview.
 ADMIN_DEV_BYPASS=true
 
 # Turnstile — https://dash.cloudflare.com/?to=/:account/turnstile
