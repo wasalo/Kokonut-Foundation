@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { verifyAccessJwt, fetchTeamCerts } from "@lib/access";
+import { resolveAdminActor } from "@lib/admin-actor";
 
 function b64(obj: unknown) {
   const json = JSON.stringify(obj);
@@ -37,5 +38,42 @@ describe("access jwt verification", () => {
 
   it("fetchTeamCerts is exported", () => {
     expect(typeof fetchTeamCerts).toBe("function");
+  });
+});
+
+describe("admin actor resolution without an Access token", () => {
+  const noToken = () => new Request("https://kokonut.foundation/admin/");
+
+  it("allows the local development bypass", async () => {
+    const actor = await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "true" });
+    expect(actor).not.toBeNull();
+    expect(actor!.email).toBe("dev@kokonut.foundation");
+  });
+
+  it("denies when no bypass is configured", async () => {
+    expect(await resolveAdminActor(noToken(), {})).toBeNull();
+  });
+
+  it("denies in production", async () => {
+    expect(await resolveAdminActor(noToken(), { ENVIRONMENT: "production" })).toBeNull();
+  });
+
+  it("denies a non-production environment that has no explicit bypass", async () => {
+    // A staging environment must never hand out administrator rights just
+    // because it is not production.
+    expect(await resolveAdminActor(noToken(), { ENVIRONMENT: "preview" })).toBeNull();
+    expect(await resolveAdminActor(noToken(), { ENVIRONMENT: "staging" })).toBeNull();
+  });
+
+  it("denies a bypass that is not exactly 'true'", async () => {
+    expect(await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "1" })).toBeNull();
+    expect(await resolveAdminActor(noToken(), { ADMIN_DEV_BYPASS: "yes" })).toBeNull();
+  });
+
+  it("never accepts a request that carries an unverifiable token, even with a bypass", async () => {
+    const request = new Request("https://kokonut.foundation/admin/", {
+      headers: { "cf-access-jwt-assertion": "not.a.jwt" },
+    });
+    expect(await resolveAdminActor(request, { ADMIN_DEV_BYPASS: "true" })).toBeNull();
   });
 });

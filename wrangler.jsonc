@@ -13,8 +13,7 @@
   },
   "routes": [
     { "pattern": "kokonut.foundation", "custom_domain": true },
-    { "pattern": "www.kokonut.foundation", "custom_domain": true },
-    { "pattern": "staging.kokonut.foundation", "custom_domain": true }
+    { "pattern": "www.kokonut.foundation", "custom_domain": true }
   ],
   "d1_databases": [
     {
@@ -47,10 +46,22 @@
   },
   "env": {
     "preview": {
+      // The staging environment runs on its own D1, R2, KV and Queue, on its own
+      // Worker, and owns the staging hostname. It never touches production data.
+      "routes": [
+        { "pattern": "staging.kokonut.foundation", "custom_domain": true }
+      ],
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      },
       "vars": {
         "ENVIRONMENT": "preview",
-        "ADMIN_DEV_BYPASS": "true",
-        "TURNSTILE_SITE_KEY": "0x4AAAAAAFfK8jwK4GUIbfFN"
+        // The development bypass is never enabled outside a developer's
+        // machine — a staging environment must not hand out admin rights.
+        "ADMIN_DEV_BYPASS": "false",
+        // Turnstile's test keys, so staging forms always verify.
+        "TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
       },
       "workflows": [
         { "binding": "PUBLISH_REPORT", "name": "publish-report-preview", "class_name": "PublishReportWorkflow" }

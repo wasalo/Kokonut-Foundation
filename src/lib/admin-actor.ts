@@ -33,14 +33,21 @@ export async function resolveAdminActor(request: Request, env: any): Promise<Adm
 
   let email: string;
 
-  if (token && teamDomain && audience) {
+  if (token) {
+    // A presented token is always verified. If Access is not configured, or the
+    // token does not check out, the request is refused — it never falls back to
+    // the development bypass.
+    if (!teamDomain || !audience) return null;
     const result = await verifyAccessJwt(token, { teamDomain, audience });
     if (!result.valid) return null;
     email = typeof result.claims?.email === "string" ? result.claims.email : "";
     if (!email) return null;
   } else {
-    // Unconfigured Access: only allowed outside production (local preview).
-    if (env?.ENVIRONMENT === "production") return null;
+    // Unconfigured Access: only the explicit local development bypass is
+    // allowed. This must not be keyed off the environment name — a staging
+    // environment that is merely "not production" would otherwise hand full
+    // administrator rights to anyone who asked.
+    if (env?.ADMIN_DEV_BYPASS !== "true") return null;
     email = env?.ADMIN_DEV_EMAIL || "dev@kokonut.foundation";
   }
 

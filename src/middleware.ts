@@ -33,11 +33,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Admin gate: Cloudflare Access identity + Foundation role.
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     const env = (locals as any).runtime?.env ?? {};
+    // resolveAdminActor applies the local development bypass itself; a null
+    // actor means the request is not authorised.
     const actor = await resolveAdminActor(context.request, env);
-    if (!actor) {
-      const bypass = env.ADMIN_DEV_BYPASS === "true";
-      if (!bypass) return new Response("Unauthorized", { status: 401 });
-    }
+    if (!actor) return new Response("Unauthorized", { status: 401 });
     locals.admin = actor;
   }
 

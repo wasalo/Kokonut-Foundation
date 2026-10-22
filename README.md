@@ -287,11 +287,16 @@ All resources live in `wrangler.jsonc`.
 | `PUBLISH_REPORT` | Workflow `publish-report` | Durable report publishing |
 | `ASSETS` | Workers Static Assets | `dist/` |
 
-Custom domains: `kokonut.foundation`, `www.kokonut.foundation`, `staging.kokonut.foundation`.
-A cron trigger runs daily at 02:00 UTC. Observability is enabled with full sampling.
+Custom domains: `kokonut.foundation` and `www.kokonut.foundation` on production,
+`staging.kokonut.foundation` on the preview environment. A cron trigger runs daily at
+02:00 UTC. Observability is enabled with full sampling.
 
-The `preview` environment is a separate set of resources (`*-preview`) with
-`ADMIN_DEV_BYPASS=true` and `ENVIRONMENT=preview`.
+**The preview environment is genuinely separate** (PRD §86 #13). It is a different
+Worker (`kokonut-foundation-preview`) with its own D1, R2, KV and Queue, its own
+hostname, its own Access applications, and `ADMIN_DEV_BYPASS=false` — the
+development bypass is never enabled outside a developer's machine. A record written
+to staging is invisible to production, and the CI pipeline deploys and health-checks
+both environments on every push to `main`.
 
 ## Configuration
 
@@ -306,7 +311,7 @@ The `preview` environment is a separate set of resources (`*-preview`) with
 | `PUBLISH_REPORT` | binding | Workflows binding (durable report publishing) |
 | `ENVIRONMENT` | var | `production` \| `preview` \| `development` |
 | `TURNSTILE_SITE_KEY` | var | Public Turnstile site key |
-| `ADMIN_DEV_BYPASS` | var | Local-only admin bypass — never `true` in production |
+| `ADMIN_DEV_BYPASS` | var | Local-only admin bypass — `false` in production **and** in preview; only ever `true` on a developer's machine |
 
 **Secrets** (`wrangler secret put <name>`):
 
@@ -376,7 +381,7 @@ WCAG 2.1 AA is enforced, not aspirational:
 
 | Suite | Count | Command |
 |---|---|---|
-| Unit | 61 | `npm test` |
+| Unit | 67 | `npm test` |
 | Integration | 51 | `npm test` |
 | E2E (Playwright) | 23 | `npm run test:e2e` |
 | — of which axe | 13 | 12 public pages in both locales + a dark-theme pass |

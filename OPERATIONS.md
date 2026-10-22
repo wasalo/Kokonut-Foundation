@@ -245,7 +245,7 @@ npm run dev                                  # :4321
 
 # Validation — run these before every push
 npm run typecheck
-npm test                                     # 112 unit + integration tests
+npm test                                     # 118 unit + integration tests
 npm run build
 npm run test:e2e                             # 23 Playwright tests (needs chromium)
 
@@ -288,12 +288,21 @@ curl -s https://kokonut.foundation/api/health | jq
 and `503` with `{"status":"degraded"}` when any of them is not. It is the first thing to
 check after a deploy.
 
-### Custom domains
+### Custom domains and the two environments
 
-`kokonut.foundation`, `www.kokonut.foundation` and `staging.kokonut.foundation` are
-Cloudflare custom domains on the Worker, configured in `wrangler.jsonc`. The
-`staging` host is a separate Worker environment with its own D1, R2 and KV resources
-and `ADMIN_DEV_BYPASS=true`.
+| Host | Worker | Data | Admin |
+|---|---|---|---|
+| `kokonut.foundation`, `www.kokonut.foundation` | `kokonut-foundation` | Production D1 / R2 / KV | Cloudflare Access (`kokonut.foundation/admin*`, `kokonut.foundation/api/admin*`) |
+| `staging.kokonut.foundation` | `kokonut-foundation-preview` | Its own `*-preview` D1 / R2 / KV | Cloudflare Access (`staging.kokonut.foundation/admin*`, `staging.kokonut.foundation/api/admin*`) |
+
+The two environments share no data. A record written to staging is invisible to
+production, and a change to the database in one does not touch the other. CI deploys
+and health-checks both on every push to `main`.
+
+`ADMIN_DEV_BYPASS` is `false` in **both** deployed environments. The bypass is only
+ever enabled in a developer's local `.dev.vars`. It requires the exact value
+`"true"`, and a request that presents an Access token is always verified — an
+unverifiable token is refused rather than falling back to the bypass.
 
 ## Migrations
 
@@ -340,8 +349,8 @@ npx wrangler secret put ACCESS_AUD
 Secrets are **not** in `wrangler.jsonc` and never in the repository. `wrangler.jsonc`
 holds only non-sensitive vars (`ENVIRONMENT`, `TURNSTILE_SITE_KEY`, `ADMIN_DEV_BYPASS`).
 
-> `ADMIN_DEV_BYPASS` must be `false` in production. It is `true` only in the `preview`
-> environment, and the local `.dev.vars.example` sets it for local development.
+> `ADMIN_DEV_BYPASS` must be `false` in production **and** in the preview
+> environment. It is only ever `true` in a local `.dev.vars`.
 
 ## The daily cron
 

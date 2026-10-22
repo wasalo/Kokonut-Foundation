@@ -29,10 +29,16 @@ jobs:
       - run: npm run build
       - name: Apply D1 migrations (production)
         if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
-        run: npx wrangler d1 migrations apply kokonut-foundation-db --remote
+        run: npx wrangler d1 migrations apply DB --remote
+      - name: Apply D1 migrations (preview)
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
+        run: npx wrangler d1 migrations apply DB --env preview --remote
       - name: Deploy (production)
         if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         run: npx wrangler deploy
+      - name: Deploy (preview)
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
+        run: npx wrangler deploy --env preview
       - name: Health check (production)
         if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         run: |
@@ -43,3 +49,13 @@ jobs:
             sleep 5
           done
           echo "health check failed"; exit 1
+      - name: Health check (preview)
+        if: github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
+        run: |
+          for i in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://staging.kokonut.foundation/api/health || true)
+            echo "preview health check attempt $i: $code"
+            if [ "$code" = "200" ]; then echo "healthy"; exit 0; fi
+            sleep 5
+          done
+          echo "preview health check failed"; exit 1
