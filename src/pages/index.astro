@@ -9,6 +9,7 @@ import { projects, metrics } from "@lib/schema";
 import { parseJson } from "@lib/utils";
 import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
 import { getContentBlock } from "@lib/content";
+import { localizeRecord } from "@lib/translations";
 const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
@@ -24,6 +25,7 @@ try {
     featuredProjects = await db.select().from(projects).limit(3);
     proofMetrics = await db.select().from(metrics).limit(6);
     ledeBlock = await getContentBlock(db, "home:lede");
+    ledeBlock = await localizeRecord(db, "content_block", ledeBlock, locale, ["title", "body"]);
   }
 } catch {
   // fallback empty

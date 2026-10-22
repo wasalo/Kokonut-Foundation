@@ -100,8 +100,7 @@ admin application is reachable locally without a Cloudflare Access account.
                                events)
 ```
 
-**Rendering.** `output: "server"` — every request is handled by the Worker. The only
-prerendered page is `404.astro` (Workers Static Assets needs it as a fallback file).
+**Rendering.** `output: "server"` — every request is handled by the Worker.
 
 **Middleware** (`src/middleware.ts`) runs before routing and handles, in order: locale
 rewriting, the admin authentication + authorisation gate, D1-backed redirects, KV rate
@@ -143,6 +142,7 @@ Every route below is also served under `/es/…` (see [Internationalisation](#in
 | `/explorer/graph` | Evidence graph |
 | `/data` | Data hub and dataset catalogue |
 | `/api-docs` | Public API documentation |
+| `/content`, `/content/[key]` | The addressable content store — published baselines and editable copy |
 | `/contact` | Contact and partnership enquiries |
 | `/support` | Ways to support the Foundation |
 | `/search` | Search |
@@ -255,7 +255,7 @@ Restricted-visibility downloads require the `RESTRICTED_ACCESS_TOKEN` value as a
 
 ## Data model
 
-32 tables created by the ordered migration chain. The core content tables:
+33 tables created by the ordered migration chain. The core content tables:
 
 `projects` · `farms` · `metrics` · `measurements` · `milestones` · `evidence` ·
 `attestations` · `partners` · `project_partners` · `team_members` · `reports` ·
@@ -263,7 +263,7 @@ Restricted-visibility downloads require the `RESTRICTED_ACCESS_TOKEN` value as a
 `audit_log` · `sync_jobs` · `admin_roles` · `wallets` · `treasury_entries` ·
 `treasury_transactions` · `historical_metric_snapshots` · `natural_assets` ·
 `activities` · `claims` · `methodologies` · `sources` · `evidence_links` ·
-`attestation_chain_refs` · `api_keys` · `report_templates`
+`attestation_chain_refs` · `api_keys` · `report_templates` · `record_translations`
 
 The Drizzle model lives in `src/lib/schema.ts`; the applied SQL in `migrations/`.
 
@@ -347,6 +347,22 @@ npm run db:seed:remote      # load scripts/seed.sql (Adelphi baseline + referenc
 asserts no drift against the Drizzle model, so a migration that only works in production
 fails in CI.
 
+## Localised long-form content
+
+Page chrome is translated in `src/lib/i18n.ts`. The **body copy of a record** — a
+project's summary and description, a farm's description, a team member's bio — comes
+from the database, so it needs somewhere to hold a second language.
+
+`record_translations` holds translated fields keyed by the record they belong to:
+`(entity_type, entity_id, locale) → { field: value }`. The base record keeps the
+default-language copy; a translation only overrides the fields it provides, and a
+blank field falls back to the default. The detail pages merge the translation over
+the record at request time, so the same URL serves the visitor's language.
+
+The admin editor writes them: every entity with translatable fields shows a
+**Translations** panel next to the default-language fields, one block per locale.
+The fields a record can translate are declared once in `src/lib/admin-entities.ts`.
+
 ## Internationalisation
 
 Two locales: **English** (default, unprefixed) and **Spanish** (`/es/…`).
@@ -381,13 +397,17 @@ WCAG 2.1 AA is enforced, not aspirational:
 
 | Suite | Count | Command |
 |---|---|---|
-| Unit | 67 | `npm test` |
-| Integration | 51 | `npm test` |
+| Unit | 109 | `npm test` |
+| — of which component-render | 32 | `npm test` |
+| Integration | 65 | `npm test` |
 | E2E (Playwright) | 23 | `npm run test:e2e` |
 | — of which axe | 13 | 12 public pages in both locales + a dark-theme pass |
 
 Integration tests run the **real** migration chain and the **real** Drizzle model against
-sql.js — not mocks. E2E and axe require a browser: `npx playwright install chromium`.
+sql.js — not mocks. The component tests render Astro components through the container
+API and assert on the markup, including the admin components that change what they
+render based on the signed-in role. E2E and axe require a browser:
+`npx playwright install chromium`.
 
 ## CI/CD
 

@@ -159,6 +159,27 @@ Each affected record gets its own entry in the audit log, so the trail names eve
 record rather than one opaque "bulk" line. Bulk publish and archive only appear if your
 role can publish that entity.
 
+## Editing in another language
+
+Every record with long-form copy — a project's summary, a farm's description, a team
+member's bio, a content block's body — can carry a **translated copy**.
+
+On the edit screen, the **Translations** panel sits below the default-language fields,
+one block per locale. Fill in the Spanish fields and save; leave a field blank to keep
+the default-language wording. The public page then serves that language to Spanish
+visitors, and the default-language copy to everyone else.
+
+A record that has no translation simply shows its default copy — there is no blank
+page and no missing-field marker.
+
+## The content store
+
+`/admin/content` manages the addressable content blocks, and `/content` publishes them.
+A block is addressed by key (`home:lede`, `baseline:adelphi`) and its body is either
+plain text or a JSON document. A JSON body is rendered as a readable field list; a text
+body as paragraphs. The homepage lede is served from the `home:lede` block, so it can be
+edited without a deploy.
+
 ## The catalogue editors
 
 Six reference-data screens share one mechanism: `/admin/content` (content blocks),
@@ -245,7 +266,7 @@ npm run dev                                  # :4321
 
 # Validation — run these before every push
 npm run typecheck
-npm test                                     # 118 unit + integration tests
+npm test                                     # 174 unit, component and integration tests
 npm run build
 npm run test:e2e                             # 23 Playwright tests (needs chromium)
 
