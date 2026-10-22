@@ -19,6 +19,7 @@ Each item is either blocked on external resources/credentials, requires manual r
 - **Admin media library**: `/admin/media` lists the R2 bucket directly, with upload, metadata editing (title, description, alt text, visibility travel with the object as custom metadata) and delete.
 - **Bulk actions**: every list screen has row checkboxes and a bulk bar for publish, archive and delete, checked against the entity's own capability, with one audit entry per affected record.
 - **Admin entity registry**: `src/lib/admin-entities.ts` is the single source of truth for admin entities, their tables, capabilities and status support.
+- **CI deploy path**: live. A scoped Cloudflare API token (`kokonut-foundation-ci`, account-scoped Workers Scripts / D1 / KV / Queues / R2 write plus Workers Routes write, zone-scoped Zone Settings read) is stored as the `CLOUDFLARE_API_TOKEN` GitHub Actions secret, so every push to `main` runs typecheck, unit, integration, e2e, axe, build, D1 migrations, deploy and a production health check. Revoke the token in the Cloudflare dashboard and clear the GitHub secret to disable it.
 - **Documentation**: `README.md` is at parity with the codebase (architecture, commands, routes, roles, API, data model, resources, configuration, testing, deployment) and `OPERATIONS.md` is the user and operational guide for visitors, staff and operators.
 
 ## Blocked on external resources / credentials
@@ -36,7 +37,6 @@ Each item is either blocked on external resources/credentials, requires manual r
 ## Requires manual review / tooling
 - **a11y audit to WCAG 2.2 AA**: automated checks pass at 1.00 (Lighthouse + axe) with no serious/critical violations. Still needs a manual screen-reader pass and a check of the map/chart interactions specifically.
 - **Component tests**: unit (56) + integration (15) + e2e (10) + axe suites exist; there are no Astro component-render tests.
-- **CI deploy path**: the migration / deploy / health-check steps are skipped until `CLOUDFLARE_API_TOKEN` is set in GitHub Actions secrets; they have never executed against Cloudflare.
 
 ## Incremental content work
 - **Full Spanish content**: navigation, footer, skip link, canonical URLs and the body copy of every public page are translated — home, how it works, about, support, contact, impact, transparency and all its modules (governance, treasury, attestations, reports, funding, methodologies, open source), the MRV methodology page, the evidence explorer, and the project/farm/metric detail headings. Still open: the long-form descriptive paragraphs on the project and farm detail pages, which are generated from the database and therefore follow the source record's language.
