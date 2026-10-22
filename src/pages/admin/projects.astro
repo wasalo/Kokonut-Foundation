@@ -26,7 +26,7 @@ try { if (db) list = await db.select().from(projects); } catch {}
           <input type="checkbox" data-bulk-entity="projects" value={p.id} aria-label="Select record" />
           <span>{p.name} — <span class="px-2 py-0.5 rounded text-xs bg-surface-muted">{p.status}</span></span>
           <Can capability="projects.update"><a href={`/admin/projects/${p.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
-          <StatusSelect entity="project" id={p.id} capability="projects.publish" />
+          <StatusSelect entity="project" id={p.id} capability="projects.update" publishCapability="projects.publish" />
           <Can capability="projects.delete"><DeleteButton endpoint="/api/admin/projects" id={p.id} capability="projects.delete" /></Can>
         </li>
       ))}

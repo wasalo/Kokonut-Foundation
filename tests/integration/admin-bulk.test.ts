@@ -3,7 +3,7 @@ import { createTestDb, applySeed } from "./helpers";
 import { projects, metrics, auditLog, teamMembers } from "../../src/lib/schema";
 import { eq } from "drizzle-orm";
 import { runBulk, bulkCapability, BULK_ACTIONS } from "../../src/lib/admin-bulk";
-import { findEntity, ADMIN_ENTITIES } from "../../src/lib/admin-entities";
+import { findEntity, ADMIN_ENTITIES, statusCapability } from "../../src/lib/admin-entities";
 
 let orm: any;
 
@@ -36,6 +36,44 @@ describe("admin entity registry", () => {
       expect(typeof label).toBe("string");
       expect(label.length).toBeGreaterThan(0);
     }
+  });
+
+  it("resolves every status dropdown in the admin UI to a status-bearing entity", async () => {
+    // The status dropdowns post an `entity` value; each must map to a registry
+    // entry that actually has a status column, or the transition is a no-op.
+    const pages = await import("node:fs/promises");
+    const dir = new URL("../../src/pages/admin/", import.meta.url);
+    const files = await pages.readdir(dir);
+    const used = new Set<string>();
+    for (const file of files) {
+      if (!file.endsWith(".astro")) continue;
+      const source = await pages.readFile(new URL(file, dir), "utf8");
+      for (const m of source.matchAll(/StatusSelect entity="([^"]+)"/g)) used.add(m[1]);
+    }
+    expect(used.size).toBeGreaterThan(0);
+    for (const entityType of used) {
+      const entity = ADMIN_ENTITIES.find((e) => e.entityType === entityType);
+      expect(entity, `status dropdown for '${entityType}' has no registry entry`).toBeDefined();
+      expect(entity!.hasStatus, `'${entityType}' has no status column`).toBe(true);
+    }
+  });
+});
+
+describe("status transition capabilities", () => {
+  it("requires publish for publishing and verifying", () => {
+    expect(statusCapability("project", "published")).toBe("projects.publish");
+    expect(statusCapability("project", "verified")).toBe("projects.publish");
+  });
+
+  it("requires only update for the review workflow", () => {
+    expect(statusCapability("project", "submitted")).toBe("projects.update");
+    expect(statusCapability("project", "draft")).toBe("projects.update");
+    expect(statusCapability("evidence", "submitted")).toBe("evidence.update");
+  });
+
+  it("returns null for an unknown entity or one without a status", () => {
+    expect(statusCapability("unicorn", "published")).toBeNull();
+    expect(statusCapability("team_member", "published")).toBeNull();
   });
 });
 

@@ -26,7 +26,7 @@ try { if (db) list = await db.select().from(milestones); } catch {}
           <input type="checkbox" data-bulk-entity="milestones" value={m.id} aria-label="Select record" />
           <span>{m.title} — {m.status}</span>
           <Can capability="milestones.update"><a href={`/admin/milestones/${m.id}/edit`} class="text-xs text-primary underline">Edit</a></Can>
-          <StatusSelect entity="milestone" id={m.id} capability="milestones.publish" />
+          <StatusSelect entity="milestone" id={m.id} capability="milestones.update" publishCapability="milestones.publish" />
           <Can capability="milestones.delete"><DeleteButton endpoint="/api/admin/milestones" id={m.id} capability="milestones.delete" /></Can>
         </li>
       ))}

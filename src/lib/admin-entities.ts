@@ -129,3 +129,18 @@ export const ADMIN_ENTITIES: AdminEntity[] = [
 export function findEntity(key: string): AdminEntity | undefined {
   return ADMIN_ENTITIES.find((e) => e.key === key);
 }
+
+/** Statuses that require the publish capability; the rest need only update. */
+export const PUBLISH_STATES = ["published", "verified"];
+
+/**
+ * The capability a status transition requires, for the entity being changed.
+ * Returns null when the entity is unknown or has no status column.
+ */
+export function statusCapability(entityType: string, status: string): string | null {
+  const entity = ADMIN_ENTITIES.find((e) => e.entityType === entityType);
+  if (!entity || !entity.hasStatus) return null;
+  return PUBLISH_STATES.includes(status)
+    ? `${entity.permissionEntity}.publish`
+    : `${entity.permissionEntity}.update`;
+}

@@ -1,13 +1,27 @@
 ---
 import { can, type Capability } from "@lib/permissions";
 
-interface Props { entity: string; id: string; capability?: Capability }
-const { entity, id, capability } = Astro.props;
-const allowed = capability ? can(Astro.locals.admin?.role, capability) : true;
-const states = ["draft", "submitted", "verified", "published", "rejected", "archived"];
+interface Props {
+  entity: string;
+  id: string;
+  /** Capability required to move a record through the review workflow. */
+  capability?: Capability;
+  /** Capability required to publish or verify a record. */
+  publishCapability?: Capability;
+}
+const { entity, id, capability, publishCapability } = Astro.props;
+const role = Astro.locals.admin?.role;
+const canUpdate = capability ? can(role, capability) : false;
+const canPublish = publishCapability ? can(role, publishCapability) : canUpdate;
+
+// A role that can only submit sees the review states; a role that can publish
+// also sees "verified" and "published".
+const states = canPublish
+  ? ["draft", "submitted", "verified", "published", "rejected", "archived"]
+  : ["draft", "submitted", "rejected", "archived"];
 ---
 {
-  allowed && (
+  canUpdate && (
     <select data-status-sel data-entity={entity} data-id={id} class="status-sel text-xs border border-border rounded px-1 bg-surface">
       <option value="">change…</option>
       {states.map((s) => <option value={s}>{s}</option>)}
@@ -22,11 +36,15 @@ const states = ["draft", "submitted", "verified", "published", "rejected", "arch
     sel.addEventListener("change", async () => {
       const value = (sel as HTMLSelectElement).value;
       if (!value) return;
-      await fetch("/api/admin/status", {
+      const res = await fetch("/api/admin/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ entityType: sel.getAttribute("data-entity"), entityId: sel.getAttribute("data-id"), status: value }),
       });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        if (j.error) window.alert(j.error);
+      }
       location.reload();
     });
   });

@@ -1,17 +1,16 @@
 import type { APIRoute } from "astro";
 import { getDb } from "@lib/db";
-import { reports, evidence, metrics, auditLog } from "@lib/schema";
+import { auditLog } from "@lib/schema";
 import { eq } from "drizzle-orm";
 import { ok, err } from "@lib/api";
 import { id, nowIso } from "@lib/utils";
 import { denyUnless } from "@lib/admin-guard";
 import { actorOf } from "@lib/admin-actor";
+import { ADMIN_ENTITIES, statusCapability } from "@lib/admin-entities";
 
 const ALLOWED = ["draft", "submitted", "verified", "published", "rejected", "archived"];
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  const denied = denyUnless(locals, "content.publish");
-  if (denied) return denied;
   const env = (locals as any).runtime?.env ?? {};
   if (!env.DB) return err("DB not configured", 503);
   let data: any = {};
@@ -21,10 +20,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
   const { entityType, entityId, status } = data;
   if (!entityType || !entityId || !status) return err("entityType, entityId, status required", 400);
   if (!ALLOWED.includes(status)) return err("invalid status", 400);
+
+  // `entityType` is the singular audit type, e.g. "project" or "metric".
+  const entity = ADMIN_ENTITIES.find((e) => e.entityType === entityType);
+  if (!entity) return err(`unknown entityType '${entityType}'`, 400);
+  if (!entity.hasStatus) return err(`${entity.plural} have no status field`, 400);
+
+  // Publishing and verifying are publish-capability actions; moving a record
+  // through the review workflow only needs update.
+  const required = statusCapability(entityType, status);
+  if (!required) return err(`unknown entityType '${entityType}'`, 400);
+  const denied = denyUnless(locals, required as any);
+  if (denied) return denied;
+
   const db = getDb(env);
-  const table = entityType === "report" ? reports : entityType === "evidence" ? evidence : entityType === "metric" ? metrics : null;
-  if (!table) return err("unknown entityType", 400);
-  await db.update(table).set({ status } as any).where(eq((table as any).id, entityId));
-  await db.insert(auditLog).values({ id: id("aud_"), actor: actorOf(locals), action: "status_transition", entityType, entityId, after: JSON.stringify({ status }), timestamp: nowIso() });
+  await db.update(entity.table).set({ status } as any).where(eq(entity.table.id, entityId));
+  await db.insert(auditLog).values({
+    id: id("aud_"), actor: actorOf(locals), action: "status_transition",
+    entityType, entityId, after: JSON.stringify({ status }), timestamp: nowIso(),
+  });
   return ok({ entityType, entityId, status });
 };
