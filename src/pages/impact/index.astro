@@ -5,7 +5,9 @@ import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { metrics } from "@lib/schema";
 import { parseJson } from "@lib/utils";
-import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -32,8 +34,8 @@ const categories = [...new Set(list.map((m: any) => m.category))];
 <BaseLayout title="Impact — Kokonut Foundation" description="Measured impact." jsonLd={{ "@context": "https://schema.org", "@type": "Dataset", "name": "Kokonut Foundation Impact Metrics", "description": "Measured impact metrics for Kokonut Foundation projects." }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
     <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"impact_view"})}).catch(()=>{});</script>
-    <h1 class="text-3xl md:text-5xl font-bold text-strong">Impact</h1>
-    <p class="mt-4 text-muted">From "here is what we say happened" to "here is the measurement, methodology, source and evidence."</p>
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("impact.title")}</h1>
+    <p class="mt-4 text-muted">{t("impact.lede")}</p>
     <div class="mt-10 space-y-10">
       {categories.map((cat) => (
         <div>

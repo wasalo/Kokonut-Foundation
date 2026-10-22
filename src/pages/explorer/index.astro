@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const items = [
   { href: "/projects", title: "Projects", desc: "Browse and filter projects." },
   { href: "/farms", title: "Farms", desc: "Regenerative farms and geospatial view." },
@@ -14,7 +16,7 @@ const items = [
 ---
 <BaseLayout title="Explorer — Kokonut Foundation" description="Data explorer.">
   <section class="max-w-7xl mx-auto px-4 py-16">
-    <h1 class="text-3xl md:text-5xl font-bold text-strong">Explorer</h1>
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("explorer.title")}</h1>
     <p class="mt-4 text-muted">Explore Foundation data, impact, evidence, and transparency.</p>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {items.map((i) => (

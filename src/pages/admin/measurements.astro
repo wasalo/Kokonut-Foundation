@@ -13,8 +13,26 @@ try { if (db) list = await db.select().from(measurements); } catch {}
     <h1 class="text-3xl font-bold text-strong">Measurements (Admin)</h1>
     <a href="/admin/measurements/new" class="mt-2 inline-block text-sm text-primary">+ New Measurement</a>
     <p class="mt-2 text-muted text-sm">{list.length} records.</p>
-    <ul class="mt-6 space-y-2">
+    <ul class="mt-6 space-y-2" data-delete-endpoint="/api/admin/measurements">
       {list.map((m: any) => <li class="text-sm">{m.metricId}: {m.value} ({m.observedAt})</li>)}
     </ul>
+
+    <script>
+      const list = document.querySelector("[data-delete-endpoint]");
+      if (list) {
+        const endpoint = list.getAttribute("data-delete-endpoint");
+        list.querySelectorAll(".status-sel").forEach((sel) => {
+          const btn = document.createElement("button");
+          btn.textContent = "Delete";
+          btn.className = "text-xs text-critical underline";
+          btn.addEventListener("click", async () => {
+            if (!confirm("Delete this record? This cannot be undone.")) return;
+            const res = await fetch(`${endpoint}?id=${encodeURIComponent(sel.dataset.id ?? "")}`, { method: "DELETE" });
+            if (res.ok) location.reload();
+          });
+          sel.parentElement?.appendChild(btn);
+        });
+      }
+    </script>
   </section>
 </BaseLayout>

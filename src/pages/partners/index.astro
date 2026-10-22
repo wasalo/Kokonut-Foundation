@@ -3,7 +3,9 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { partners } from "@lib/schema";
-import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -20,8 +22,8 @@ if (!list.length) {
 <BaseLayout title="Partners — Kokonut Foundation" description="Foundation partners." jsonLd={{ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Partners" }}>
   <section class="max-w-7xl mx-auto px-4 py-16">
   <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"partners_view"})}).catch(()=>{});</script>
-    <h1 class="text-3xl md:text-5xl font-bold text-strong">Partners</h1>
-    <p class="mt-4 text-muted">Organizations collaborating with the Foundation.</p>
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("partners.title")}</h1>
+    <p class="mt-4 text-muted">{t("partners.lede")}</p>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {[
         { t: "Nonprofits & NGOs", d: "Implementation partners delivering training, community infrastructure, and field support on the ground." },

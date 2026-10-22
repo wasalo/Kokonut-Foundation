@@ -3,6 +3,8 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import { getDb } from "@lib/db";
 import { farms, projects } from "@lib/schema";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 
 const env = (Astro.locals as any).runtime?.env ?? {};
 const db = env.DB ? getDb(env) : null;
@@ -15,8 +17,8 @@ if (!list.length) {
 <BaseLayout title="Farms — Kokonut Foundation" description="Regenerative farms.">
   <section class="max-w-7xl mx-auto px-4 py-16">
     <script type="module">fetch("/api/v1/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"farms_view"})}).catch(()=>{});</script>
-    <h1 class="text-3xl md:text-5xl font-bold text-strong">Farms</h1>
-    <p class="mt-4 text-muted">Regenerative farms implementing the Kokonut Framework.</p>
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("farms.title")}</h1>
+    <p class="mt-4 text-muted">{t("farms.lede")}</p>
     <h2 class="sr-only">Farms</h2>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
       {list.map((f: any) => (

@@ -2,7 +2,9 @@
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Card from "@components/primitives/Card.astro";
 import Button from "@components/primitives/Button.astro";
-import { localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, localePath, resolveLocale } from "@lib/i18n";
+import { getTranslator, resolveLocale } from "@lib/i18n";
+const t = getTranslator(resolveLocale(Astro));
 const locale = resolveLocale(Astro);
 const path = (p: string) => localePath(locale, p);
 
@@ -51,9 +53,9 @@ const evidenceSources = [
   description="Fund, Grow, Verify, Repeat — how regenerative farms create verifiable value."
 >
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <h1 class="text-3xl md:text-5xl font-bold text-strong">How It Works</h1>
+    <h1 class="text-3xl md:text-5xl font-bold text-strong">{t("how.title")}</h1>
     <p class="mt-4 text-lg text-muted">
-      A regenerative value loop: capital funds farms, farms grow living assets, farm events become public data, and the model repeats.
+      {t("how.lede")}
     </p>
   </section>
 
@@ -74,7 +76,7 @@ const evidenceSources = [
 
   <section class="bg-surface-muted py-16">
     <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-2xl font-bold text-strong">Where the evidence comes from</h2>
+      <h2 class="text-2xl font-bold text-strong">{t("how.evidence")}</h2>
       <p class="mt-2 text-muted max-w-2xl">
         No single instrument can describe a whole farm. The evidence stack combines methods, and each one carries its own limits.
       </p>
@@ -90,7 +92,7 @@ const evidenceSources = [
   </section>
 
   <section class="max-w-3xl mx-auto px-4 py-16">
-    <h2 class="text-2xl font-bold text-strong">Why the boundaries matter</h2>
+    <h2 class="text-2xl font-bold text-strong">{t("how.boundaries")}</h2>
     <div class="mt-6 space-y-4 text-muted">
       <p>
         A sensor reading, a reviewed database record, an on-chain attestation, and an impact conclusion are four different things. The Foundation keeps them separate so a reader can tell
