@@ -1,6 +1,6 @@
 ---
 interface Props { message: string; tone?: "info" | "success" | "error"; }
 const { message, tone = "info" } = Astro.props;
-const tones = { info: "bg-strong text-white", success: "bg-primary text-white", error: "bg-red-600 text-white" };
+const tones = { info: "bg-strong text-surface", success: "bg-primary text-on-primary", error: "bg-critical text-on-critical" };
 ---
 <div class={`fixed bottom-4 right-4 rounded-md px-4 py-2 text-sm shadow-lg ${tones[tone]}`}>{message}</div>

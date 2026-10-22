@@ -63,6 +63,9 @@ CI runs: [39552883394](https://github.com/wasalo/Kokonut-Foundation/actions/runs
 
 ---
 
+## Closed
+- **WordPress migration (PRD §68)**: the legacy site was a single page with minimal content, so there is no historical URL inventory beyond the root. The redirect map in `scripts/seed.sql` plus the live Worker custom domain covers the whole surface. The WP instance has been decommissioned; there is no rollback path. The archive step (backing up WP files/DB/media) is the only remaining artifact and must be captured from the VPS backup before that host is decommissioned.
+
 ## Blocked on external resources / credentials
 - **KI wiring (blocked on the KI refactor)**: Kokonut Intelligence is being re-factored and is **not ready to wire today** — the repository currently carries two branches (`main` and `feat/mobile-offline-acceptance`, the "kernel" stack). The Foundation side is now written to be contract-tolerant so the final wiring is configuration-only:
   - `src/lib/ki-client.ts` — auto-detects the API path style (`/items/{collection}` Directus surface vs `/api/{collection}` kernel surface) via `KI_PATH_STYLE`, Bearer auth via `KI_API_KEY` or `KI_API_EMAIL`/`KI_API_PASSWORD`.

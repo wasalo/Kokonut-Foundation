@@ -23,6 +23,18 @@ const analyticsToken = env.CF_WEB_ANALYTICS_TOKEN;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <SeoHead title={title} description={description} canonical={canonical} jsonLd={jsonLd} />
+    <!-- Set the theme before first paint to avoid a flash of the wrong palette. -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem("kokonut-theme");
+          var theme = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
     <!-- Cloudflare Web Analytics -->
     {analyticsToken && (
       <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: analyticsToken })}></script>

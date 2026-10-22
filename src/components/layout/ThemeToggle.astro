@@ -1,0 +1,33 @@
+---
+interface Props { class?: string }
+const { class: cls = "" } = Astro.props;
+---
+<button
+  type="button"
+  id="theme-toggle"
+  class={`inline-flex items-center justify-center w-9 h-9 rounded-md border border-border hover:bg-surface-muted text-strong ${cls}`}
+  aria-label="Toggle dark mode"
+  aria-live="polite"
+>
+  <span class="theme-icon-light" aria-hidden="true">☾</span>
+  <span class="theme-icon-dark" aria-hidden="true">☀</span>
+</button>
+
+<style>
+  /* Sun in light mode, moon in dark mode */
+  .theme-icon-dark { display: none; }
+  :global([data-theme="dark"]) .theme-icon-light { display: none; }
+  :global([data-theme="dark"]) .theme-icon-dark { display: inline; }
+</style>
+
+<script>
+  const btn = document.getElementById("theme-toggle");
+  btn?.addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem("kokonut-theme", next);
+    } catch {}
+  });
+</script>

@@ -45,7 +45,7 @@ const types = [...new Set(list.map((r: any) => r.resourceType).filter(Boolean))]
           {types.map((t) => <option value={t} selected={resourceType === t}>{t}</option>)}
         </select>
       </div>
-      <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white text-sm">Filter</button>
+      <button type="submit" class="px-4 py-2 rounded-md bg-primary text-on-primary text-sm">Filter</button>
     </form>
     <h2 class="sr-only">Resources</h2>
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">

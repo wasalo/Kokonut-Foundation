@@ -94,11 +94,23 @@ const histJson = JSON.stringify(history.map((h: any) => ({ date: h.observedAt, v
       Chart.register(...registerables);
       const ctx = document.getElementById("chart");
       if (!ctx) return;
+      const css = getComputedStyle(document.documentElement);
+      const accent = css.getPropertyValue("--primary").trim() || "#009F4D";
+      const grid = css.getPropertyValue("--border").trim() || "#E2E8E5";
+      const label = css.getPropertyValue("--muted").trim() || "#5B6B63";
       new Chart(ctx, {
         type: "line",
         data: {
           labels: data.map((d) => d.date),
-          datasets: [{ label: "Value", data: data.map((d) => d.value), borderColor: "#009F4D" }],
+          datasets: [{ label: "Value", data: data.map((d) => d.value), borderColor: accent, backgroundColor: accent + "22", tension: 0.3, fill: true }],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: label } } },
+          scales: {
+            x: { ticks: { color: label }, grid: { color: grid } },
+            y: { ticks: { color: label }, grid: { color: grid } },
+          },
         },
       });
     })();

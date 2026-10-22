@@ -1,7 +1,7 @@
 ---
 interface Props { tone?: "info" | "success" | "warn" | "error"; }
 const { tone = "info" } = Astro.props;
-const tones = { info: "bg-surface-muted text-strong", success: "bg-primary/10 text-primary", warn: "bg-secondary/20 text-strong", error: "bg-red-100 text-red-700" };
+const tones = { info: "bg-surface-muted text-strong", success: "bg-primary/10 text-primary", warn: "bg-secondary/20 text-on-secondary", error: "bg-critical/15 text-critical" };
 ---
 <div class={`rounded-md p-3 text-sm ${tones[tone]}`}>
   <slot />

@@ -4,7 +4,7 @@ const { tone = "default" } = Astro.props;
 const tones = {
   default: "bg-surface-muted text-strong",
   success: "bg-primary/10 text-primary",
-  warn: "bg-secondary/20 text-strong",
+  warn: "bg-secondary/20 text-on-secondary",
 };
 ---
 <span class={`inline-block px-2 py-0.5 rounded text-xs font-medium ${tones[tone]}`}>
