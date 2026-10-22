@@ -12,7 +12,6 @@ const currentPath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : `${A
 const otherLocale = locale === "es" ? "en" : "es";
 const otherLabel = otherLocale === "es" ? "Español" : "English";
 const otherPath = otherLocale === "es" ? `/es${currentPath === "/" ? "/" : currentPath}` : currentPath;
-const otherLanguageName = otherLocale === "es" ? "Spanish" : "English";
 
 const links = [
   { href: "/", key: "nav.home" },
@@ -52,10 +51,9 @@ const links = [
       hreflang={otherLocale}
       lang={otherLocale}
       class="px-2 py-2 rounded-md text-sm hover:bg-surface-muted shrink-0"
-      aria-label={`${t("nav.language")}: ${otherLanguageName}`}
-      title={`${t("nav.language")}: ${otherLanguageName}`}
+      title={`${t("nav.language")}: ${otherLabel}`}
     >
-      {otherLabel}
+      <span class="sr-only">{t("nav.language")}: </span>{otherLabel}
     </a>
     <details class="md:hidden relative">
       <summary class="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm" aria-label={t("nav.menu")}>
@@ -69,7 +67,7 @@ const links = [
           <a href={path(l.href)} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted">{t(l.key)}</a>
         ))}
         <a href={otherPath} hreflang={otherLocale} lang={otherLocale} class="px-3 py-2 rounded-md text-sm hover:bg-surface-muted">
-          {otherLabel}
+          <span class="sr-only">{t("nav.language")}: </span>{otherLabel}
         </a>
         <a href={path("/contact")} class="px-3 py-2 rounded-md text-sm text-primary">{t("nav.contact")}</a>
       </nav>
